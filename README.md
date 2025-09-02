@@ -141,5 +141,3 @@ RepoMed IA é um sistema médico completo que visa modernizar e digitalizar proc
 ---
 
 **Desenvolvido com ❤️ para revolucionar a área médica**
-
-🚀 **Generated with [Claude Code](https://claude.ai/code)**
