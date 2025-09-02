@@ -1,0 +1,339 @@
+# REPOMED IA - CONSTRUÇÃO DO MVP MÉDICO
+
+## CONTEXTO
+Você vai construir o RepoMed IA, uma plataforma de gestão de documentos médicos com IA, reutilizando 70% do código do PaperFlow Studio (https://github.com/RaulNascimentoSantos/PaperFlow-Studio).
+
+## FASE 1: SETUP E CLONAGEM
+
+### 1.1 Clone e Adapte o PaperFlow
+
+```bash
+# Clone o repositório base
+git clone https://github.com/RaulNascimentoSantos/PaperFlow-Studio repomed-ia
+cd repomed-ia
+
+# Remova o remote original e crie novo
+git remote remove origin
+git remote add origin [novo-repo-repomed]
+
+# Renomeie o projeto
+find . -type f -name "*.json" -o -name "*.ts" -o -name "*.tsx" | xargs sed -i 's/paperflow/repomed/g'
+find . -type f -name "*.json" -o -name "*.ts" -o -name "*.tsx" | xargs sed -i 's/PaperFlow/RepoMed/g'
+1.2 Estrutura de Diretórios Alvo
+repomed-ia/
+├── apps/
+│   ├── repomed-api/        # Backend Fastify (ex-paperflow-api)
+│   └── repomed-web/        # Frontend React (ex-paperflow-web)
+├── packages/
+│   ├── ui/                 # Design system médico
+│   ├── schemas/            # DTOs compartilhados
+│   ├── sdk/                # Cliente TypeScript
+│   └── prompts/            # Biblioteca de prompts médicos
+├── infra/
+│   ├── docker-compose.yml
+│   └── db/migrations/
+└── docs/
+FASE 2: ADAPTAÇÕES CORE
+2.1 Renomeie Módulos do PaperFlow
+Mapeamento de módulos PaperFlow → RepoMed:
+
+documents → clinical-docs (documentos médicos)
+pii → phi (Protected Health Information)
+bates → clinical-ids (identificadores médicos)
+custody → clinical-audit (trilha de auditoria médica)
+webhooks → clinical-webhooks (eventos médicos)
+
+2.2 Novo Schema de Banco (PostgreSQL)
+sql-- migrations/001_medical_core.sql
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgvector";
+
+-- Tabela de especialidades médicas
+CREATE TABLE specialties (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    code VARCHAR(10) UNIQUE NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Tabela de templates médicos
+CREATE TABLE medical_templates (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    specialty_id UUID REFERENCES specialties(id),
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    body_template TEXT NOT NULL, -- Markdown com placeholders
+    fields_schema JSONB NOT NULL, -- Schema dos campos dinâmicos
+    version INTEGER DEFAULT 1,
+    is_active BOOLEAN DEFAULT true,
+    curator_id UUID, -- Médico que revisou
+    reviewed_at TIMESTAMPTZ,
+    tags TEXT[],
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Tabela de documentos gerados
+CREATE TABLE clinical_documents (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    template_id UUID REFERENCES medical_templates(id),
+    patient_data JSONB, -- Dados do paciente (criptografados)
+    practitioner_data JSONB, -- Dados do médico
+    filled_fields JSONB, -- Campos preenchidos
+    pdf_url TEXT,
+    hash_sha256 VARCHAR(64) NOT NULL,
+    signature_data JSONB, -- Dados da assinatura ICP-Brasil
+    signed_at TIMESTAMPTZ,
+    qr_code TEXT,
+    share_token VARCHAR(64) UNIQUE,
+    share_expires_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Tabela de auditoria médica
+CREATE TABLE clinical_audit (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    document_id UUID REFERENCES clinical_documents(id),
+    actor_id UUID,
+    action VARCHAR(50) NOT NULL,
+    details JSONB,
+    ip_address INET,
+    user_agent TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Índices para busca
+CREATE INDEX idx_templates_specialty ON medical_templates(specialty_id);
+CREATE INDEX idx_templates_tags ON medical_templates USING GIN(tags);
+CREATE INDEX idx_documents_created ON clinical_documents(created_at DESC);
+CREATE INDEX idx_audit_document ON clinical_audit(document_id, created_at DESC);
+2.3 Environment Variables (.env)
+envNODE_ENV=development
+PORT=3002
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/repomed
+REDIS_URL=redis://localhost:6379
+
+# S3/MinIO
+S3_ENDPOINT=http://localhost:9000
+S3_BUCKET=repomed-documents
+S3_ACCESS_KEY=minioadmin
+S3_SECRET_KEY=minioadmin
+
+# Segurança
+JWT_SECRET=repomed-secret-change-in-production
+ENCRYPTION_KEY=32-char-key-for-phi-encryption!!
+
+# IA (opcional para V1)
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+
+# Assinatura Digital
+ICP_PROVIDER=mock # mock|certisign|serasa
+ICP_SANDBOX=true
+FASE 3: IMPLEMENTAÇÃO V1 (MVP LOCAL)
+3.1 Backend API (apps/repomed-api)
+3.1.1 Templates Médicos CRUD
+typescript// src/modules/templates/templates.controller.ts
+import { FastifyPluginAsync } from 'fastify';
+import { z } from 'zod';
+
+const TemplateSchema = z.object({
+  title: z.string().min(3).max(255),
+  specialty: z.enum(['clinica_geral', 'pediatria', 'ginecologia', 'ortopedia', 'dermatologia']),
+  bodyTemplate: z.string().min(10),
+  fields: z.array(z.object({
+    id: z.string(),
+    label: z.string(),
+    type: z.enum(['text', 'number', 'date', 'select', 'textarea']),
+    required: z.boolean().default(false),
+    options: z.array(z.string()).optional(),
+    validation: z.any().optional()
+  }))
+});
+
+// Implementar CRUD completo com versionamento
+3.1.2 Geração de Documentos
+typescript// src/modules/clinical-docs/generator.service.ts
+export class DocumentGenerator {
+  async generate(templateId: string, data: any) {
+    // 1. Buscar template
+    // 2. Validar campos contra schema
+    // 3. Preencher template com dados
+    // 4. Gerar PDF com puppeteer/pdfkit
+    // 5. Calcular hash SHA256
+    // 6. Gerar QR Code com dados de verificação
+    // 7. Upload para S3/MinIO
+    // 8. Registrar auditoria
+    return { documentId, pdfUrl, hash, qrCode };
+  }
+}
+3.1.3 Assinatura Mock (V1)
+typescript// src/modules/signature/providers/mock.provider.ts
+export class MockSignatureProvider {
+  async sign(documentHash: string, metadata: any) {
+    // Simular assinatura ICP-Brasil
+    return {
+      signedAt: new Date(),
+      certificate: 'MOCK-CERT-' + Date.now(),
+      signatureHash: crypto.createHash('sha256')
+        .update(documentHash + JSON.stringify(metadata))
+        .digest('hex'),
+      provider: 'mock',
+      isValid: true
+    };
+  }
+}
+3.2 Frontend Web (apps/repomed-web)
+3.2.1 Componentes Médicos
+tsx// src/components/clinical/PrescriptionBuilder.tsx
+export const PrescriptionBuilder: React.FC = () => {
+  // Formulário inteligente para prescrições
+  // Autocomplete de medicamentos
+  // Cálculo automático de posologia
+  // Alertas de interação medicamentosa
+};
+
+// src/components/clinical/AtestadoWizard.tsx
+export const AtestadoWizard: React.FC = () => {
+  // Wizard de 3 passos para atestados
+  // 1. Dados do paciente
+  // 2. CID-10 e período
+  // 3. Observações e assinatura
+};
+3.2.2 Fluxo One-Click Doc
+tsx// src/pages/NewDocument.tsx
+export const NewDocument: React.FC = () => {
+  // 1. Busca rápida de templates (/)
+  // 2. Seleção com preview
+  // 3. Preenchimento assistido
+  // 4. Preview do PDF
+  // 5. Assinatura e compartilhamento
+};
+3.3 Seeds de Templates Iniciais
+typescript// infra/seeds/medical-templates.ts
+const templates = [
+  {
+    title: "Receita Simples",
+    specialty: "clinica_geral",
+    bodyTemplate: `
+# RECEITUÁRIO MÉDICO
+
+**Paciente:** {{patient_name}}
+**Data:** {{date}}
+
+## Prescrição:
+{{medications}}
+
+## Orientações:
+{{instructions}}
+
+**Dr(a). {{doctor_name}}**
+**CRM: {{crm}}**
+    `,
+    fields: [
+      { id: "patient_name", label: "Nome do Paciente", type: "text", required: true },
+      { id: "medications", label: "Medicamentos", type: "textarea", required: true },
+      { id: "instructions", label: "Orientações", type: "textarea" }
+    ]
+  },
+  // ... mais 14 templates
+];
+FASE 4: TESTES E VALIDAÇÃO
+4.1 Testes E2E Críticos
+typescript// tests/e2e/medical-flow.spec.ts
+describe('Fluxo Médico Completo', () => {
+  it('deve criar, assinar e compartilhar documento em < 90s', async () => {
+    // 1. Selecionar template de atestado
+    // 2. Preencher dados do paciente
+    // 3. Gerar PDF
+    // 4. Assinar (mock)
+    // 5. Obter link de compartilhamento
+    // 6. Verificar QR Code
+    // 7. Validar hash
+  });
+});
+4.2 Segurança PHI
+typescript// tests/security/phi-protection.spec.ts
+describe('Proteção de PHI', () => {
+  it('deve criptografar dados sensíveis', async () => {
+    // Verificar criptografia em repouso
+    // Validar logs sem PHI exposto
+    // Testar data masking
+  });
+});
+FASE 5: DOCKER E DEPLOY LOCAL
+5.1 Docker Compose
+yaml# docker-compose.yml
+version: '3.8'
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: repomed
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./infra/db/migrations:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
+volumes:
+  postgres_data:
+  minio_data:
+COMANDOS DE EXECUÇÃO
+bash# 1. Setup inicial
+pnpm install
+docker-compose up -d
+
+# 2. Migrations
+pnpm -w db:migrate
+
+# 3. Seeds
+pnpm -w db:seed
+
+# 4. Desenvolvimento
+pnpm -w dev
+
+# 5. Testes
+pnpm -w test
+pnpm -w test:e2e
+
+# 6. Build
+pnpm -w build
+CRITÉRIOS DE SUCESSO V1
+
+ 15 templates médicos funcionais
+ Geração de PDF em < 3s
+ Assinatura mock funcional
+ QR Code verificável
+ Hash SHA256 consistente
+ Compartilhamento com expiração
+ Audit trail completo
+ UI responsiva e acessível
+ Testes E2E passando
+ Documentação básica
+
+IMPORTANTE: Mantenha o foco em REUTILIZAR o máximo possível do PaperFlow, adaptando apenas o necessário para o contexto médico. Use as estruturas de segurança, observabilidade e API já existentes.

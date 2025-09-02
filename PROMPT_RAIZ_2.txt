@@ -1,0 +1,441 @@
+# REPOMED IA - PROMPT_RAIZ 2 (DEVELOPMENT ROADMAP)
+## CONTEXTO DE EXECUÇÃO V1 → V2 → V3
+
+### STATUS ATUAL (V1 COMPLETADO ✅)
+Após a execução bem-sucedida do PROMPT_RAIZ inicial, o RepoMed IA V1 MVP Local está estruturalmente pronto com:
+
+✅ **Arquitetura Base Implementada:**
+- Monorepo PNPM com apps/repomed-api e apps/repomed-web
+- PostgreSQL 16 + pgvector, Redis, MinIO via Docker Compose
+- Schemas médicos completos com 10 especialidades
+- 15 templates médicos iniciais curados
+- Sistema de migração e seeds automatizado
+
+✅ **Backend API Médico Adaptado:**
+- Fastify + TypeScript com rotas médicas (/v1/medical-templates, /v1/clinical-docs, etc.)
+- Assinatura mock preparada para ICP-Brasil
+- Auditoria clínica com export JSONL/CSV
+- Segurança médica (PHI encryption, rate limiting)
+- Observabilidade com métricas Prometheus
+
+✅ **Biblioteca de Prompts IA (V2 Ready):**
+- prescription.basic.txt - Receitas inteligentes
+- atestado.basic.txt - Atestados automáticos  
+- laudo.imagem.txt - Laudos estruturados
+- Prompt library preparada para expansão
+
+✅ **Infraestrutura Completa:**
+- Docker Compose médico (postgres + pgvector + redis + minio)
+- Script de setup automatizado (./infra/ops/setup.sh)
+- Environment médico (.env.example com variáveis PHI)
+- README abrangente com foco médico
+
+---
+
+## FASE 2: V1 → V1.5 (REFINAMENTO E VALIDAÇÃO)
+
+### OBJETIVO: Tornar V1 100% funcional para validação médica local
+
+### 2.1 COMPLETAR IMPLEMENTAÇÃO BACKEND
+```bash
+# PRIORIDADE ALTA - Implementar controladores faltantes
+
+# 1. Medical Templates Controller
+apps/repomed-api/src/routes/medical-templates.ts
+- GET /v1/medical-templates (filtros por especialidade)  
+- POST /v1/medical-templates (CRUD completo)
+- PUT /v1/medical-templates/:id (versionamento)
+- GET /v1/medical-templates/:id/preview (preview MD → HTML)
+
+# 2. Clinical Docs Controller  
+apps/repomed-api/src/routes/clinical-docs.ts
+- POST /v1/clinical-docs (gerar PDF + hash + QR)
+- GET /v1/clinical-docs/:id (buscar documento)  
+- POST /v1/clinical-docs/:id/sign (assinatura mock)
+- POST /v1/clinical-docs/:id/share (link com expiração)
+- DELETE /v1/clinical-docs/:id (soft delete)
+
+# 3. Signature Controller (Mock V1)
+apps/repomed-api/src/routes/signature.ts  
+- POST /v1/signature/sign (provider=mock com delay 2s)
+- GET /v1/signature/verify/:docId (verificar hash + metadata)
+- Simular certificado A1 mock com metadados médicos
+
+# 4. Clinical Audit Controller
+apps/repomed-api/src/routes/clinical-audit.ts
+- GET /v1/clinical-audit/:docId (trilha completa)
+- GET /v1/clinical-audit/export?format=jsonl|csv&period=30d
+- POST eventos automáticos (created, signed, shared, viewed)
+
+# 5. Services Core  
+apps/repomed-api/src/services/
+- pdf-generator.service.ts (MD → PDF + QR Code)
+- hash.service.ts (SHA256 before/after signature)  
+- qr-code.service.ts (URL verification)
+- share.service.ts (temporary links)
+- audit.service.ts (event logging)
+```
+
+### 2.2 FRONTEND MÉDICO FUNCIONAL
+```bash
+# IMPLEMENTAR COMPONENTES CLÍNICOS CORE
+
+# 1. Dashboard Médico  
+apps/repomed-web/src/pages/Dashboard.tsx
+- Métricas: docs/dia, templates mais usados, assinaturas pendentes
+- Shortcuts: "/" busca, "Ctrl+N" novo doc, "Ctrl+T" templates
+- Lista de documentos recentes com status (draft, signed, shared)
+
+# 2. Template Studio
+apps/repomed-web/src/pages/Templates.tsx  
+- Grid de templates por especialidade com filtros
+- Preview MD em tempo real
+- CRUD com versionamento visual
+- Import/Export de templates
+
+# 3. New Document (One-Click Doc)
+apps/repomed-web/src/pages/NewDocument.tsx
+- Busca rápida de templates (/) 
+- Formulário dinâmico baseado em fields_schema
+- Preview PDF em tempo real
+- Fluxo: selecionar → preencher → assinar → compartilhar
+
+# 4. Document Viewer  
+apps/repomed-web/src/pages/DocumentViewer.tsx
+- PDF.js viewer com QR Code destacado
+- Verificação de hash em tempo real
+- Histórico de auditoria lateral
+- Share panel com links temporários
+
+# 5. Componentes Médicos Específicos
+apps/repomed-web/src/components/clinical/
+- PrescriptionBuilder.tsx (receitas com autocomplete medicamentos)
+- AtestadoWizard.tsx (3 passos: dados, CID-10, período)  
+- LaudoComposer.tsx (achados estruturados)
+- SignaturePanel.tsx (mock signature com progress)
+- ShareSheet.tsx (links com expiração + QR)
+```
+
+### 2.3 VALIDAÇÃO E TESTES  
+```bash
+# SETUP DE TESTES MÉDICOS
+tests/medical/
+├── templates.spec.ts         # CRUD templates
+├── clinical-docs.spec.ts     # Geração E2E  
+├── signature-mock.spec.ts    # Mock signature flow
+├── audit-trail.spec.ts       # Completude auditoria
+└── medical-flow.e2e.ts       # Fluxo completo médico
+
+# CRITÉRIOS DE ACEITE V1.5:
+- ✅ Criar documento médico em < 90s
+- ✅ PDF gerado com hash + QR verificável  
+- ✅ Assinatura mock funcionando (delay 2s)
+- ✅ Link compartilhamento com expiração
+- ✅ Trilha auditoria completa exportável
+- ✅ UI responsiva com atalhos médicos  
+
+# COMANDO VALIDAÇÃO:
+pnpm test:medical && pnpm test:e2e:medical
+```
+
+---
+
+## FASE 3: V1.5 → V2 (IA + BUSCA + WORKSPACES)
+
+### OBJETIVO: Adicionar inteligência e organização ao sistema médico
+
+### 3.1 GENERATOR SERVICE (IA MÉDICA)
+```typescript
+// apps/repomed-api/src/services/generator.service.ts
+export class MedicalGeneratorService {
+  
+  // Input: template + contexto clínico  
+  // Output: campos preenchidos + cautions + confidence
+  async generateFields(request: {
+    templateId: string;
+    patient: { age: number, weight?: number, allergies?: string[] };
+    context: { symptoms: string, diagnosis?: string, cid10?: string };
+    history?: string;
+  }): Promise<{
+    fieldsGenerated: Record<string, any>;
+    cautions: string[];  // Red flags médicos
+    confidence: 'high' | 'medium' | 'low';
+    requiresReview: boolean;
+  }>;
+  
+  // Usar prompts da packages/prompts/
+  // Validação cruzada: medicamentos vs alergias  
+  // Dosagem por peso (pediátrica)
+  // Alertas de contraindicação
+}
+
+// Rotas V2:
+POST /v1/generator/complete
+{
+  "templateId": "uuid",
+  "patient": { "age": 45, "allergies": ["penicilina"] },
+  "context": { "symptoms": "dor torácica, dispneia", "cid10": "I20.9" }
+}
+
+Response:
+{
+  "fields": { "medications": "AAS 100mg...", "instructions": "..." },
+  "cautions": ["Verificar função renal antes prescrever AAS"],
+  "confidence": "medium",
+  "requiresReview": true
+}
+```
+
+### 3.2 SEARCH VETORIAL (pgvector)
+```sql
+-- Migration: pgvector para templates e docs
+CREATE TABLE vectors (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    entity_type VARCHAR(20) NOT NULL, -- 'template' | 'document'  
+    entity_id UUID NOT NULL,
+    embedding vector(1536), -- OpenAI embeddings
+    content_text TEXT,
+    metadata JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_vectors_embedding ON vectors 
+USING ivfflat (embedding vector_cosine_ops);
+```
+
+```typescript
+// apps/repomed-api/src/services/search.service.ts
+export class VectorSearchService {
+  
+  // Busca semântica em templates
+  async searchTemplates(query: string, filters?: {
+    specialty?: string;
+    tags?: string[];  
+  }): Promise<{
+    templates: Array<{ template: MedicalTemplate, similarity: number }>;
+    totalFound: number;
+  }>;
+  
+  // Busca em documentos (compliance)
+  async searchDocuments(query: string, filters?: {
+    practitioner?: string;
+    dateRange?: [Date, Date];
+  }): Promise<DocumentSearchResult[]>;
+}
+
+// Rotas V2:
+GET /v1/search?q=receita hipertensão&type=template&specialty=CARD
+GET /v1/search?q=paciente João Silva&type=document&period=30d
+```
+
+### 3.3 WORKSPACES MÉDICOS
+```sql  
+-- Migration: workspaces + membership
+CREATE TABLE workspaces (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    type VARCHAR(20) DEFAULT 'clinic', -- clinic | hospital | solo
+    settings JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE workspace_members (
+    workspace_id UUID REFERENCES workspaces(id),
+    user_id UUID,  -- practitioner_id  
+    role VARCHAR(20) NOT NULL, -- owner | doctor | resident | secretary
+    permissions JSONB,
+    joined_at TIMESTAMPTZ DEFAULT NOW(),
+    PRIMARY KEY (workspace_id, user_id)
+);
+```
+
+```typescript
+// Rotas Workspaces V2:
+POST /v1/workspaces              // Criar clínica/consultório
+GET /v1/workspaces/:id           // Dados workspace  
+POST /v1/workspaces/:id/invite   // Convidar médico/assistente
+PUT /v1/workspaces/:id/settings  // Configurar (templates padrão, etc.)
+
+// Middleware: request.context.workspace injected
+// Isolamento: templates e docs por workspace_id
+```
+
+---
+
+## FASE 4: V2 → V3 (MULTI-TENANT + ICP REAL + MARKETPLACE)
+
+### OBJETIVO: Plataforma enterprise com assinatura real
+
+### 4.1 MULTI-TENANCY COMPLETO
+```sql
+-- Migration: tenant_id em todas tabelas
+ALTER TABLE medical_templates ADD COLUMN tenant_id UUID;
+ALTER TABLE clinical_documents ADD COLUMN tenant_id UUID;  
+ALTER TABLE clinical_audit ADD COLUMN tenant_id UUID;
+
+-- Índices compostos tenant + queries
+CREATE INDEX idx_templates_tenant ON medical_templates(tenant_id, specialty_id);
+CREATE INDEX idx_documents_tenant ON clinical_documents(tenant_id, created_at DESC);
+
+-- Row Level Security  
+ALTER TABLE medical_templates ENABLE ROW LEVEL SECURITY;
+CREATE POLICY tenant_templates ON medical_templates 
+  FOR ALL USING (tenant_id = current_setting('app.current_tenant_id')::UUID);
+```
+
+### 4.2 ASSINATURA ICP-BRASIL REAL
+```typescript
+// apps/repomed-api/src/signature/providers/icp-brasil.provider.ts
+export class ICPBrasilProvider implements SignatureProvider {
+  
+  // Conectar com Certisign, Serasa, Valid, etc.
+  async sign(documentBuffer: Buffer, certificate: {
+    type: 'A1' | 'A3';
+    pkcs12?: Buffer;  // A1
+    pin?: string;     // A3  
+    serialNumber?: string;
+  }): Promise<{
+    signedDocument: Buffer;
+    certificate: ICPCertificate;
+    timestamp: Date;
+    signatureHash: string;
+  }>;
+  
+  // Verificação OCSP/CRL
+  async verify(signedDocument: Buffer): Promise<{
+    isValid: boolean;
+    certificate: ICPCertificate;
+    signedAt: Date;
+    revokedAt?: Date;
+  }>;
+}
+
+// Rotas V3:
+POST /v1/signature/providers/icp/connect  // Upload certificado
+POST /v1/signature/sign                   // Assinar real  
+GET /v1/signature/verify/:docId           // Verificar OCSP/CRL
+```
+
+### 4.3 MARKETPLACE DE TEMPLATES  
+```sql
+-- Migration: marketplace com curation
+CREATE TABLE template_marketplace (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    template_id UUID REFERENCES medical_templates(id),
+    author_id UUID, -- practitioner author
+    curator_id UUID, -- who approved
+    status VARCHAR(20) DEFAULT 'pending', -- pending | approved | rejected
+    version VARCHAR(10),
+    downloads_count INTEGER DEFAULT 0,
+    rating DECIMAL(2,1), -- 1.0 to 5.0
+    published_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+```typescript  
+// Rotas Marketplace V3:
+GET /v1/marketplace/templates?q=pediatria&specialty=PEDI&sort=popular
+POST /v1/marketplace/templates/:id/install    // Instalar em workspace
+POST /v1/marketplace/templates/submit         // Submit para review
+POST /v1/marketplace/templates/:id/review     // Curador aprovar/rejeitar
+```
+
+### 4.4 FHIR/RNDS INTEGRATION
+```typescript
+// apps/repomed-api/src/fhir/  
+// Endpoints básicos FHIR R4:
+GET /v1/fhir/Patient/:id
+POST /v1/fhir/Patient  
+GET /v1/fhir/Practitioner/:id
+POST /v1/fhir/Practitioner
+GET /v1/fhir/DocumentReference/:id  
+POST /v1/fhir/DocumentReference
+
+// Export RepoMed → RNDS
+POST /v1/fhir/export/rnds { documentIds: string[] }
+```
+
+---
+
+## COMANDOS DE EXECUÇÃO POR FASE
+
+### EXECUTAR V1.5 (Completar MVP):
+```bash
+cd repomed-ia
+
+# 1. Implementar controllers faltantes
+claude code "Implementar /apps/repomed-api/src/routes/medical-templates.ts com CRUD completo baseado nos schemas"
+claude code "Implementar /apps/repomed-api/src/routes/clinical-docs.ts com geração PDF + hash + QR"
+claude code "Implementar /apps/repomed-api/src/routes/signature.ts provider mock com delay 2s"
+
+# 2. Completar frontend médico  
+claude code "Implementar /apps/repomed-web/src/pages/Dashboard.tsx com métricas médicas"
+claude code "Implementar /apps/repomed-web/src/pages/NewDocument.tsx fluxo One-Click Doc"  
+claude code "Implementar /apps/repomed-web/src/components/clinical/PrescriptionBuilder.tsx"
+
+# 3. Validação E2E
+claude code "Criar testes E2E /tests/medical/ fluxo completo médico em < 90s"
+pnpm test:medical && echo "V1.5 VALIDADO ✅"
+```
+
+### EXECUTAR V2 (IA + Busca):  
+```bash
+# 1. IA Generator
+claude code "Implementar /apps/repomed-api/src/services/generator.service.ts usando prompts médicos"
+claude code "Criar rota POST /v1/generator/complete com validação clínica"
+
+# 2. Vector Search
+claude code "Implementar /apps/repomed-api/src/services/search.service.ts com pgvector"  
+claude code "Migração pgvector + embeddings automáticos para templates"
+
+# 3. Workspaces  
+claude code "Implementar /apps/repomed-api/src/routes/workspaces.ts multi-usuário médico"
+claude code "Middleware request.context com workspace isolation"
+
+pnpm test && echo "V2 IMPLEMENTADO ✅"
+```
+
+### EXECUTAR V3 (Enterprise):
+```bash  
+# 1. Multi-tenancy
+claude code "Migrar schema para tenant_id + Row Level Security"
+claude code "Implementar /apps/repomed-api/src/middleware/tenancy.ts"  
+
+# 2. ICP Real
+claude code "Implementar /apps/repomed-api/src/signature/providers/icp-brasil.provider.ts"
+claude code "Integração Certisign/Serasa SDK para A1/A3"
+
+# 3. FHIR  
+claude code "Implementar /apps/repomed-api/src/fhir/ endpoints FHIR R4 básicos"
+claude code "Export automático RepoMed → RNDS"
+
+pnpm test:enterprise && echo "V3 ENTERPRISE READY ✅"
+```
+
+---
+
+## RESUMO EXECUTIVO
+
+**V1.5** (4-6 semanas): Completar MVP para validação médica local
+- Foco: funcionalidade core + UI médica + validação E2E
+- Meta: médica consegue usar 100% local sem bloqueios
+
+**V2** (6-8 semanas): IA + organização + busca  
+- Foco: produtividade médica com IA + workspaces
+- Meta: reduzir tempo documento de 90s → 60s com IA
+
+**V3** (8-12 semanas): Enterprise + assinatura real + marketplace
+- Foco: monetização SaaS + compliance total + escalabilidade  
+- Meta: plataforma multi-tenant pronta para mercado
+
+**Próxima Ação Imediata:**
+```bash
+cd repomed-ia
+./infra/ops/setup.sh  
+pnpm dev
+# Testar http://localhost:3002/docs
+# Implementar controllers faltantes V1.5
+```
+
+🏥 **RepoMed IA está estruturalmente pronto. Foco agora: completar implementação V1.5 para validação médica real.**

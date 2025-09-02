@@ -1,0 +1,1039 @@
+# RepoMed IA - Implementação UI Estilo Memed
+
+## Instruções para Claude Coder
+
+Implementar redesign completo do frontend RepoMed IA baseado na interface do Memed, mantendo a estrutura atual mas modernizando completamente o visual.
+
+## 1. Tema Global e Variáveis CSS
+
+### Arquivo: `repomed-web/src/styles/global.css`
+```css
+:root {
+  /* Cores principais baseadas no Memed */
+  --primary: #6366f1;
+  --primary-hover: #5558e3;
+  --primary-light: #eef2ff;
+  
+  /* Backgrounds */
+  --bg-main: #fafbfc;
+  --bg-white: #ffffff;
+  --bg-card: #ffffff;
+  --bg-input: #f8f9fa;
+  --bg-hover: #f3f4f6;
+  
+  /* Textos */
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --text-label: #374151;
+  
+  /* Bordas */
+  --border-light: #e5e7eb;
+  --border-medium: #d1d5db;
+  --border-input: #e5e7eb;
+  --border-focus: #6366f1;
+  
+  /* Status */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #3b82f6;
+  
+  /* Sombras */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06);
+  
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+  
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+```
+
+## 2. Componente Header Redesenhado
+
+### Arquivo: `repomed-web/src/components/Header.jsx`
+```jsx
+import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import './Header.css';
+
+export default function Header() {
+  const location = useLocation();
+  const [isAssinaturaDigital, setIsAssinaturaDigital] = useState(false);
+
+  const navItems = [
+    { path: '/patients', label: 'Pacientes' },
+    { path: '/schedules', label: 'Conteúdos' },
+    { path: '/catalog', label: 'Catálogo' },
+    { path: '/help', label: 'Ajuda' }
+  ];
+
+  return (
+    <header className="header">
+      <div className="header-container">
+        <div className="header-left">
+          <Link to="/" className="logo">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <rect width="32" height="32" rx="8" fill="#6366f1"/>
+              <path d="M16 8L20 12L16 16L12 12L16 8Z" fill="white"/>
+              <path d="M16 16L20 20L16 24L12 20L16 16Z" fill="white" opacity="0.8"/>
+            </svg>
+            <span>repomed</span>
+          </Link>
+          
+          <nav className="main-nav">
+            {navItems.map(item => (
+              <Link 
+                key={item.path}
+                to={item.path} 
+                className={`nav-link ${location.pathname === item.path ? 'active' : ''}`}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+
+        <div className="header-right">
+          <div className="toggle-container">
+            <label className="toggle">
+              <span className="toggle-label">Assinatura Digital</span>
+              <input 
+                type="checkbox" 
+                checked={isAssinaturaDigital}
+                onChange={(e) => setIsAssinaturaDigital(e.target.checked)}
+              />
+              <span className="toggle-slider"></span>
+            </label>
+          </div>
+          
+          <button className="btn-primary">
+            Criar novo
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M3 8H13M8 3V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </button>
+          
+          <div className="user-menu">
+            <button className="user-button">CM</button>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
+```
+
+### Arquivo: `repomed-web/src/components/Header.css`
+```css
+.header {
+  background: var(--bg-white);
+  border-bottom: 1px solid var(--border-light);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 48px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--primary);
+  transition: opacity 0.2s;
+}
+
+.logo:hover {
+  opacity: 0.8;
+}
+
+.main-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.nav-link {
+  padding: 8px 16px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  transition: all 0.2s;
+}
+
+.nav-link:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.nav-link.active {
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.toggle-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.toggle input {
+  display: none;
+}
+
+.toggle-slider {
+  width: 44px;
+  height: 24px;
+  background: var(--border-medium);
+  border-radius: var(--radius-full);
+  position: relative;
+  transition: background 0.3s;
+}
+
+.toggle-slider::after {
+  content: '';
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.3s;
+}
+
+.toggle input:checked + .toggle-slider {
+  background: var(--primary);
+}
+
+.toggle input:checked + .toggle-slider::after {
+  transform: translateX(20px);
+}
+
+.btn-primary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.user-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg-hover);
+  border: 2px solid var(--border-light);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.user-button:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+```
+
+## 3. Página de Pacientes Redesenhada
+
+### Arquivo: `repomed-web/src/pages/PatientsPage.jsx`
+```jsx
+import { useState } from 'react';
+import './PatientsPage.css';
+
+export default function PatientsPage() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [patients] = useState([
+    { id: 1, initials: 'SF', name: 'Sílvia Freitas Mendes', cpf: 'CPF não informado', age: 'Não informado', birthDate: '05/08/1988', lastVisit: '08/08/2025' },
+    { id: 2, initials: 'NM', name: 'Natalia Moura Cadeira...', cpf: 'CPF não informado', age: '37 anos', birthDate: '05/08/1988', lastVisit: '07/08/2025' },
+    { id: 3, initials: 'RN', name: 'Raul Nascimento dos Sa...', cpf: 'CPF não informado', age: '32 anos', birthDate: '08/06/1993', lastVisit: '26/07/2025' },
+    { id: 4, initials: 'KC', name: 'Kelly Cristina Costa', cpf: 'CPF não informado', age: 'Não informado', birthDate: 'Não informado', lastVisit: '05/06/2025' },
+    { id: 5, initials: 'HC', name: 'Hélio Cardoso de Miran...', cpf: 'CPF não informado', age: 'Não informado', birthDate: 'Não informado', lastVisit: '30/05/2025' }
+  ]);
+
+  const getInitialsColor = (initials) => {
+    const colors = {
+      'SF': '#8b5cf6',
+      'NM': '#ec4899', 
+      'RN': '#06b6d4',
+      'KC': '#f59e0b',
+      'HC': '#10b981'
+    };
+    return colors[initials] || '#6366f1';
+  };
+
+  return (
+    <div className="patients-page">
+      <div className="page-container">
+        <div className="page-header">
+          <h1 className="page-title">Lista de Pacientes</h1>
+          <button className="btn-create-patient">
+            Criar paciente
+          </button>
+        </div>
+
+        <div className="search-container">
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Pesquise um paciente por nome ou CPF"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        <div className="patients-table">
+          <div className="table-header">
+            <div className="th-name">
+              NOME<br/>
+              <span className="th-sub">CPF</span>
+            </div>
+            <div className="th-age">
+              IDADE<br/>
+              <span className="th-sub">DATA DE NASCIMENTO</span>
+            </div>
+            <div className="th-visit">ÚLTIMA PRESCRIÇÃO ↑</div>
+            <div className="th-action"></div>
+          </div>
+
+          {patients.map(patient => (
+            <div key={patient.id} className="table-row">
+              <div className="td-name">
+                <div className="patient-avatar" style={{ background: getInitialsColor(patient.initials) }}>
+                  {patient.initials}
+                </div>
+                <div>
+                  <div className="patient-name">{patient.name}</div>
+                  <div className="patient-cpf">{patient.cpf}</div>
+                </div>
+              </div>
+              <div className="td-age">
+                <div className="patient-age">{patient.age}</div>
+                <div className="patient-birth">{patient.birthDate}</div>
+              </div>
+              <div className="td-visit">{patient.lastVisit}</div>
+              <div className="td-action">
+                <button className="btn-prescribe">Criar prescrição</button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="pagination">
+          <div className="pagination-info">
+            Exibindo <select className="select-limit"><option>5</option></select> de 13 pacientes
+          </div>
+          <div className="pagination-controls">
+            <button className="pagination-btn" disabled>←</button>
+            <button className="pagination-btn">Anterior</button>
+            <button className="pagination-number active">1</button>
+            <button className="pagination-number">2</button>
+            <button className="pagination-number">3</button>
+            <button className="pagination-btn">Próximo</button>
+            <button className="pagination-btn">→</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+### Arquivo: `repomed-web/src/pages/PatientsPage.css`
+```css
+.patients-page {
+  min-height: calc(100vh - 64px);
+  background: var(--bg-main);
+}
+
+.page-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.btn-create-patient {
+  padding: 10px 20px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-create-patient:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.search-container {
+  margin-bottom: 24px;
+}
+
+.search-input {
+  width: 100%;
+  max-width: 500px;
+  padding: 12px 16px;
+  background: var(--bg-white);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  transition: all 0.2s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.patients-table {
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+}
+
+.table-header {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1fr 180px;
+  padding: 16px 24px;
+  background: var(--bg-main);
+  border-bottom: 1px solid var(--border-light);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.th-sub {
+  font-weight: 400;
+  font-size: 10px;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1fr 180px;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-light);
+  transition: background 0.2s;
+}
+
+.table-row:hover {
+  background: var(--bg-hover);
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.td-name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.patient-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.patient-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.patient-cpf {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.td-age {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.patient-age {
+  font-size: 15px;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.patient-birth {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.td-visit {
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.td-action {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.btn-prescribe {
+  padding: 8px 16px;
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-prescribe:hover {
+  background: var(--primary);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.select-limit {
+  padding: 4px 8px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  background: white;
+  font-size: 14px;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.pagination-btn {
+  padding: 8px 12px;
+  background: white;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-number {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pagination-number:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.pagination-number.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+```
+
+## 4. Página de Criação de Prescrição
+
+### Arquivo: `repomed-web/src/pages/CreatePrescriptionPage.jsx`
+```jsx
+import { useState } from 'react';
+import './CreatePrescriptionPage.css';
+
+export default function CreatePrescriptionPage() {
+  const [patient, setPatient] = useState('');
+  const [medications, setMedications] = useState([]);
+  const [showMedicationSearch, setShowMedicationSearch] = useState(false);
+  const [medicationSearch, setMedicationSearch] = useState('');
+  const [isDigitalSignature, setIsDigitalSignature] = useState(true);
+
+  const handleAddMedication = () => {
+    setShowMedicationSearch(true);
+  };
+
+  return (
+    <div className="prescription-page">
+      <div className="page-container">
+        <div className="prescription-header">
+          <h1 className="page-title">Criar prescrição</h1>
+          <p className="page-subtitle">Prescrição de medicamentos, pedido de exames e outros.</p>
+        </div>
+
+        <div className="prescription-form">
+          <div className="form-section">
+            <label className="form-label">
+              Nome do paciente
+              <span className="label-link">Mais dados →</span>
+            </label>
+            <input
+              type="text"
+              className="form-input"
+              placeholder="Busque por nome ou CPF"
+              value={patient}
+              onChange={(e) => setPatient(e.target.value)}
+            />
+          </div>
+
+          <div className="form-section">
+            <label className="form-label">Adicionar item</label>
+            <div className="search-medication">
+              <input
+                type="text"
+                className="form-input medication-input"
+                placeholder="Busque por fármacos, exames, dermocosméticos, composições, etc."
+                value={medicationSearch}
+                onChange={(e) => setMedicationSearch(e.target.value)}
+                onFocus={() => setShowMedicationSearch(true)}
+              />
+              <div className="medication-actions">
+                <button className="btn-action">
+                  <span className="action-icon">📋</span>
+                  Adicionar modelo
+                </button>
+                <button className="btn-action">
+                  <span className="action-icon">🔍</span>
+                  Adicionar CID
+                </button>
+                <button className="btn-action">
+                  <span className="action-icon">📝</span>
+                  Adicionar observação
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="form-section">
+            <div className="prescriptions-history">
+              <h3 className="section-title">Últimas prescrições</h3>
+              <div className="timeline">
+                {['08/08/2025', '07/08/2025', '26/07/2025', '29/06/2025', '29/06/2025', '05/06/2025', '30/0'].map((date, index) => (
+                  <div key={index} className="timeline-item">
+                    <div className="timeline-date">{date}</div>
+                    <div className="timeline-dot"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="prescription-sidebar">
+          <div className="sidebar-card">
+            <div className="sidebar-header">
+              <span className="sidebar-icon">📅</span>
+              <span>Data do documento</span>
+              <span className="sidebar-date">01/09/2025</span>
+            </div>
+          </div>
+
+          <div className="sidebar-card">
+            <div className="sidebar-header">
+              <span className="sidebar-icon">⚠️</span>
+              <span>Alertas</span>
+            </div>
+          </div>
+
+          <div className="sidebar-card">
+            <div className="sidebar-header">
+              <span className="sidebar-icon">📋</span>
+              <span>Modelos (protocolos)</span>
+            </div>
+          </div>
+
+          <div className="sidebar-card">
+            <div className="sidebar-header">
+              <span className="sidebar-icon">👥</span>
+              <span>Personalizar receituário</span>
+            </div>
+          </div>
+
+          <div className="sidebar-toggle">
+            <label className="toggle">
+              <span>Assinatura digital</span>
+              <input
+                type="checkbox"
+                checked={isDigitalSignature}
+                onChange={(e) => setIsDigitalSignature(e.target.checked)}
+              />
+              <span className="toggle-slider"></span>
+            </label>
+            <p className="toggle-description">
+              Assine suas receitas pelo Memed e envie apenas a via digital ao paciente, sem precisar imprimir.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+### Arquivo: `repomed-web/src/pages/CreatePrescriptionPage.css`
+```css
+.prescription-page {
+  min-height: calc(100vh - 64px);
+  background: var(--bg-main);
+}
+
+.prescription-header {
+  padding: 32px 0;
+  border-bottom: 1px solid var(--border-light);
+  margin-bottom: 32px;
+}
+
+.page-subtitle {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.prescription-form {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 32px;
+}
+
+.form-section {
+  background: white;
+  padding: 24px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+}
+
+.form-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-label);
+  margin-bottom: 12px;
+}
+
+.label-link {
+  color: var(--primary);
+  cursor: pointer;
+  font-weight: 400;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  transition: all 0.2s;
+}
+
+.form-input:focus {
+  outline: none;
+  background: white;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.medication-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.btn-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: white;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-action:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+.prescriptions-history {
+  padding: 24px;
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+.timeline {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.timeline-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 60px;
+}
+
+.timeline-date {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.timeline-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--border-medium);
+  border-radius: 50%;
+}
+
+.prescription-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sidebar-card {
+  background: white;
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.sidebar-icon {
+  font-size: 18px;
+}
+
+.sidebar-date {
+  margin-left: auto;
+  font-weight: 500;
+}
+
+.sidebar-toggle {
+  background: white;
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.toggle-description {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 12px;
+  line-height: 1.5;
+}
+```
+
+## 5. Ajustes no App.jsx para as novas rotas
+
+### Arquivo: `repomed-web/src/App.jsx`
+```jsx
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Header from './components/Header';
+import PatientsPage from './pages/PatientsPage';
+import CreatePrescriptionPage from './pages/CreatePrescriptionPage';
+// ... outras importações
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Header />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/patients" element={<PatientsPage />} />
+        <Route path="/prescription/create" element={<CreatePrescriptionPage />} />
+        {/* ... outras rotas existentes */}
+      </Routes>
+    </BrowserRouter>
+  );
+}
+```
+
+## 6. Instalação de dependências necessárias
+
+```bash
+# No terminal, dentro de repomed-web:
+npm install
+```
+
+## Critérios de Aceite
+
+- [ ] Header com logo estilizado e navegação moderna
+- [ ] Toggle de Assinatura Digital funcional
+- [ ] Página de Pacientes com tabela estilizada
+- [ ] Avatares coloridos com iniciais
+- [ ] Botões de "Criar prescrição" em cada linha
+- [ ] Página de Criação de Prescrição com layout duas colunas
+- [ ] Sidebar com cards informativos
+- [ ] Campo de busca de medicamentos
+- [ ] Timeline de prescrições anteriores
+- [ ] Paginação estilizada
+- [ ] Responsividade em telas menores
+- [ ] Transições e hover effects suaves
+- [ ] Cores e espaçamentos consistentes com o Memed

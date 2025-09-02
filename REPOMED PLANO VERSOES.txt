@@ -1,0 +1,409 @@
+REPOMED IA — MASTER EXECUTION PLAN (V1 + V2 + V3)
+Data: 31/08/2025 — Fuso: America/Sao_Paulo
+Autores: Raul (Engenheiro/PM), Médica (Product Advisor), Claude Coder (Executor), ChatGPT (Arquiteto)
+Formato: Documento TXT operacional para colar nos prompts do Claude Coder e gerar TODO o código local-first, reaproveitando o PaperFlow.
+
+====================================================================
+0) VISÃO RÁPIDA (Elevator Pitch)
+====================================================================
+Problema: Médicos gastam tempo com documentos repetitivos (atestados, receitas, laudos, termos) e assumem risco por falta de padronização e assinatura válida.
+Solução: RepoMed IA — repositório “medical-grade” de templates clínicos + geração assistida por IA + assinatura ICP‑Brasil + trilha de auditoria + busca clínica.
+Público: Médico solo, clínica popular, consultórios pequenos/médios. Primeiro Brasil.
+Tese: Ganho de tempo real (“one‑click doc”) + segurança e conformidade (LGPD/CFM/ICP).
+Abordagem: LOCAL-FIRST para validação rápida com médica; depois evolui para SaaS multi-tenant.
+
+====================================================================
+1) PRINCÍPIOS GUIA
+====================================================================
+• Tempo do médico é ouro → fluxos em 1–2 cliques, defaults clínicos, atalhos de teclado.
+• Segurança sem atrito → ICP nativo, links com expiração, QR/Hash, HMAC em webhooks.
+• Qualidade > quantidade → biblioteca curada e versionada com processo editorial.
+• Engenharia pragmática → reaproveitar 70% do PaperFlow (monorepo, endpoints, observabilidade, segurança).
+
+====================================================================
+2) REUSO DO PAPERFLOW → REPOMED (MAPA DE CLONAGEM/RENOMEAÇÃO)
+====================================================================
+Clonar e renomear pacotes/componentes:
+  A) API Gateway (Fastify + TS) → repomed-api
+  B) Web (React + Vite + Tailwind + shadcn) → repomed-web
+  C) Observabilidade (Prometheus /metrics, logs pino) → manter
+  D) Segurança (API keys, rate limit, CORS/Helmet, HMAC webhooks) → manter
+  E) Infra (Docker Compose: Postgres16 + pgvector, Redis, MinIO) → manter
+  F) Módulos “documents / pii / bates / custody / webhooks” → adaptar para domínio médico:
+     • documents → clinical-docs
+     • pii       → phi (PHI clínica, novas regex e dicionários)
+     • bates     → clinical-ids (carimbo clínico: CRM + data/hora + hash + QR)
+     • custody   → clinical-audit (trilha forense)
+     • webhooks  → clinical-webhooks (doc.generated, doc.signed, doc.shared)
+  G) Demo local e SSE → manter
+
+Namespaces/Rotas (alvos):
+  paperflow-* → repomed-*
+  /v1/documents → /v1/clinical-docs
+  /v1/pii       → /v1/phi
+  /v1/bates     → /v1/clinical-ids
+  /v1/custody   → /v1/clinical-audit
+  /v1/webhooks  → /v1/clinical-webhooks
+  (Novos) /v1/medical-templates, /v1/signature, /v1/search, /v1/workspaces
+
+====================================================================
+3) ARQUITETURA E STACK (COMUM ÀS VERSÕES)
+====================================================================
+Stack base:
+  • Backend: Node 20, Fastify, TypeScript estrito, Zod (DTO), OpenAPI (Swagger), pnpm, vitest/jest.
+  • Frontend: React 18, Vite, Tailwind, shadcn/ui, Framer Motion, react-hook-form, zod/resolvers.
+  • Infra local: Docker Compose — PostgreSQL 16 (com pgvector), Redis, MinIO (S3). Proxy opcional (Caddy/Nginx).
+  • Observabilidade: /metrics (Prometheus), logs JSON (pino), traceId.
+  • Segurança: helmet, CORS estrito, rate limit por chave, API Keys/PAT, HMAC em webhooks. JWT opcional para sessões web.
+  • Build/Repo: PNPM workspaces + Turborepo; eslint/prettier/husky; commitlint (opcional).
+
+Monorepo (proposta):
+  /apps
+    repomed-api
+    repomed-web
+  /packages
+    ui         (design system, tokens OKLCH medical)
+    schemas    (DTOs zod compartilhados)
+    sdk        (client TS da API)
+    prompts    (prompt‑library clínica)
+  /infra
+    docker-compose.yml
+    db/migrations  (SQL)
+    ops/scripts    (Makefile, seeds, dev-utils)
+  /docs (arquitetura, compliance, playbooks)
+
+Serviços do backend:
+  auth (keys, users) | workspaces (V2 básico, V3 avançado/tenant)
+  medical-templates | generator (IA) | clinical-docs (PDF/QR/Hash/Share)
+  signature (ICP)   | clinical-audit | search (pgvector) | webhooks | admin
+
+Ambiente (.env exemplo):
+  NODE_ENV=development
+  PORT=3002
+  DATABASE_URL=postgres://postgres:postgres@localhost:5432/repomed
+  REDIS_URL=redis://localhost:6379
+  S3_ENDPOINT=http://localhost:9000
+  S3_BUCKET=repomed-local
+  S3_ACCESS_KEY=admin
+  S3_SECRET_KEY=admin123
+  JWT_SECRET=change-me
+  OPENAI_API_KEY=replace-if-needed
+  ICP_PROVIDER=mock
+  ENABLE_PGVECTOR=true
+
+Docker Compose (blocos):
+  - postgres:16 com extensão pgvector + healthcheck
+  - redis:latest + healthcheck
+  - minio:latest + script init bucket
+  - (opcional) caddy/nginx reverse proxy
+  - redes e volumes nomeados
+
+====================================================================
+4) V1 — FOUNDATIONAL MVP (LOCAL-FIRST, SINGLE USER)
+====================================================================
+Objetivo: validar UX com médica e comprovar fluxo E2E local sem dependências externas críticas.
+
+4.1 Escopo V1
+  [1] 15 templates clínicos iniciais (Clínica, Pediatria, GO, Dermato, Ortopedia).
+  [2] Template Studio: CRUD básico (título, especialidade, body_md, fields).
+  [3] Geração de documento com preenchimento manual guiado + PDF.
+  [4] Assinatura mock (provider=mock) com metadados para futura troca por ICP real.
+  [5] QR/Hash do documento + link de compartilhamento com expiração.
+  [6] Clinical Audit básico (quem, quando, o quê) + export JSONL/CSV.
+  [7] Observabilidade e segurança baseline (rate limit, keys, HMAC webhooks).
+  [8] UI clean: One‑Click Doc (buscar→selecionar→preencher→assinar→exportar/compartilhar).
+
+4.2 Modelo de Dados (conceitual V1)
+  patients(id, name, dob, doc_idents[], created_at)
+  practitioners(id, crm, name, email, signature_cert_ref, created_at)
+  templates(id, specialty, title, version, body_md, fields_json, curator_id, reviewed_at, tags[])
+  documents(id, patient_id, practitioner_id, template_id, fields_json, pdf_url,
+            hash_before, hash_after, signed_at, signature_provider, audit_id, qr_code, share_expires_at)
+  audits(id, document_id, actor_id, operation, ts, meta_json)
+
+4.3 Endpoints (V1 mínimo)
+  GET  /v1/health | GET /v1/metrics | GET /docs
+  Templates: POST/GET/PUT/DEL /v1/medical-templates
+  Docs: POST /v1/clinical-docs | GET /v1/clinical-docs/:id | DEL /v1/clinical-docs/:id
+        POST /v1/clinical-docs/:id/sign (provider=mock)
+        POST /v1/clinical-docs/:id/share {expiresIn}
+  Audit:  GET /v1/clinical-audit/:docId/export?format=jsonl|csv
+  Webhooks (HMAC): POST /v1/clinical-webhooks/test
+
+4.4 Schemas (Zod/DTO V1)
+  TemplateCreate: { title, specialty, body_md, fields: Array<{id,label,type,required,options?}> }
+  DocumentCreate: { templateId, fields: Record<string, any>, patient?: {name,dob,docId?}, practitioner?: {crm,name} }
+  SignatureRequest: { provider: 'mock' }
+  ShareRequest: { expiresIn: number }
+
+4.5 UI/UX (V1)
+  • Tema OKLCH “medical blue/green” acessível, tipografia legível, foco em formulário.
+  • Componentes: TemplateCard, NewDocument form, PDFPreview, SignaturePanel, ShareSheet.
+  • Atalhos: “/” para busca, “Enter” para avançar/gerar, ESC para cancelar.
+  • Empty states e onboarding curto (3 passos).
+
+4.6 Setup Local (V1)
+  1) Clonar PaperFlow, renomear para repomed, ajustar package.json.
+  2) docker-compose up -d (postgres, redis, minio).
+  3) pnpm i; pnpm -w dev (api 3002, web 5173).
+  4) Rodar migrations (0001…0005) e seeds (5–10 templates básicos).
+  5) Validar: /health, /metrics, /docs; criar 1 doc fim‑a‑fim.
+
+4.7 Testes/Qualidade (V1)
+  • Unit: schemas, services (pdf/hash/qr), assinatura mock.
+  • E2E: criar doc → assinar → exportar → link/QR → abrir e validar hash.
+  • Segurança: rate limit e HMAC em /clinical-webhooks/test.
+  • Critérios de aceite: criação < 90s; latência p95 < 500ms em CRUD; logs/audit coerentes.
+
+====================================================================
+5) V2 — MVP++ (BETA FECHADO, LOCAL-FIRST)
+====================================================================
+Objetivo: ganho de velocidade (IA), organização (workspaces) e busca clínica.
+
+5.1 Escopo V2 (delta sobre V1)
+  [+] 30–50 templates curados (ampliar especialidades e coberturas comuns).
+  [+] Generator (IA) para autopreencher campos a partir de sinais clínicos + CID‑10.
+  [+] Search (pgvector) para templates e docs por linguagem natural.
+  [+] Workspaces (médico, assistente) e “Minhas Pastas” (por paciente/atendimento).
+  [+] Audit export avançado (filtros por período/ator).
+  [+] Observabilidade de negócio (docs/dia, assinaturas, erros IA) e painéis simples.
+  [+] Segurança: chaves por workspace; HMAC nos webhooks; CORS estrito.
+
+5.2 Endpoints (V2 adicionais)
+  AUTH/WS:
+    POST /v1/auth/keys | GET/DEL /v1/auth/keys
+    POST /v1/workspaces | GET /v1/workspaces/:id | POST /v1/workspaces/:id/members
+  Generator (IA):
+    POST /v1/generator/complete {templateId, patient, context} → {fields_suggested, cautions, references?}
+  Search (vetorial):
+    GET  /v1/search?q=…&type=template|doc&specialty=…
+
+5.3 Prompt-Library (packages/prompts)
+  prescription.basic.txt — entrada: sintomas, diagnóstico (CID‑10), posologia, alertas/red flags.
+  atestado.basic.txt — entrada: CID‑10, período de afastamento, instruções ao paciente/empresa.
+  laudo.imagem.txt — entrada: achados, impressão diagnóstica, recomendações.
+  consent.term.txt — entrada: procedimento, riscos comuns, alternativas.
+  discharge.summary.txt — entrada: evolução, prescrição de alta, sinais de alarme.
+
+5.4 UI/UX (V2)
+  • Componentes clínicos: PrescriptionBuilder, AtestadoWizard, LaudoComposer, ConsentStudio, SignaturePanel, ShareSheet.
+  • Fluxo One‑Click Doc: buscar → escolher → autopreencher → editar → assinar → exportar/compartilhar.
+  • Onboarding com “playgrounds” e exemplos de preenchimento.
+
+5.5 Observabilidade/Segurança (V2)
+  • Métricas: req/sec, p95, tokens IA, docs/dia, docs assinados, falhas IA.
+  • Logs com traceId/user/workspace; webhooks com HMAC.
+  • LGPD: consentimento explícito no compartilhamento; retenção configurável para ambiente de teste (ex.: 90 dias).
+
+5.6 Setup/Tests (V2)
+  • Migrations extras: vectors, workspaces, membership.
+  • Testes: generator.spec, search.spec, workspaces.spec, webhooks.hmac.spec.
+  • Aceite: “criar doc em < 60s” com autopreenchimento razoável; recall de busca ≥ 0,8 em queries de teste.
+
+====================================================================
+6) V3 — ENTERPRISE-READY (SAAS MULTI‑TENANT)
+====================================================================
+Objetivo: escalar com isolamento, faturamento, assinatura real e integrações clínicas.
+
+6.1 Escopo V3 (delta sobre V2)
+  [+] Multi-tenant real (tenant_id em todas entidades; storage segregado).
+  [+] Billing & quotas (Free/Pro/Business/Enterprise; limites/mês; hooks de faturamento).
+  [+] Assinatura ICP‑Brasil real (A1/A3) via provider plugável; verificação OCSP/CRL.
+  [+] Marketplace de Templates (curados e autorais) com fluxo editorial e versionamento.
+  [+] Papéis avançados: médico, residente, preceptor, secretária, auditor, admin da clínica.
+  [+] SSO (OIDC/SAML), MFA (TOTP/U2F), RBAC detalhado por escopos.
+  [+] RNDS/FHIR básico (Patient, Practitioner, DocumentReference) — export/import.
+  [+] BYO‑LLM (chaves do cliente) e cache vetorial.
+  [+] Painéis: produtividade/uso por tenant; export CSV/JSON; alertas de quota e p95.
+
+6.2 Dados/Infra (V3)
+  • Tabelas com tenant_id e índices compostos.
+  • Prefixos de bucket S3 por tenant; chaves KMS segregadas (se aplicável).
+  • quotas/usage_counters com reset mensal e grace period.
+  • billing_provider webhooks com HMAC + idempotência.
+
+6.3 Endpoints (V3 adicionais)
+  MULTI‑TENANT/BILLING:
+    POST /v1/tenants | GET/PATCH /v1/tenants/:id
+    GET  /v1/usage (quota/consumo)
+    POST /v1/billing/subscribe | POST /v1/billing/portal
+    POST /v1/billing/webhook
+  SIGNATURE (real):
+    POST /v1/signature/providers/:name/connect
+    POST /v1/signature/sign {docId, certRef|pkcs12, pin?}
+    GET  /v1/signature/verify/:docId
+  MARKETPLACE:
+    POST /v1/marketplace/templates (submit)
+    GET  /v1/marketplace/templates?q=&specialty=
+    POST /v1/marketplace/templates/:id/review
+    POST /v1/marketplace/templates/:id/publish
+  FHIR/RNDS:
+    GET  /v1/fhir/DocumentReference/:id | POST /v1/fhir/DocumentReference
+    GET  /v1/fhir/Patient/:id | POST /v1/fhir/Patient
+    GET  /v1/fhir/Practitioner/:id | POST /v1/fhir/Practitioner
+
+6.4 Segurança/Compliance (V3)
+  • LGPD: DPIA, DPO, políticas de retenção e anonimização; Data Subject Requests.
+  • CFM/ANVISA: versionamento de templates, assinatura, hash, carimbo do tempo (opcional).
+  • SSO/MFA; RBAC granular; logs de acesso por paciente/documento.
+
+6.5 UI/UX (V3)
+  • Admin Console (tenant): planos, quotas, convites, SSO, logs, integrações, webhooks.
+  • Marketplace tab: badges (“curado”, “mais usado”, “novo”), preview diffs e changelog.
+  • Dashboards: produtividade, uso por plano, erros por etapa; export.
+
+6.6 Observabilidade/FinOps (V3)
+  • Métricas por tenant/plano; custos estimados (tokens, storage, assinatura).
+  • Alertas: p95 > alvo; erros > threshold; quota 80/90/100%.
+  • Auditoria exportável (JSONL assinado) por período/tenant.
+
+====================================================================
+7) ESQUELETO DE REPO (ARQUIVOS/PASTAS) — PARA O CLAUDE GERAR
+====================================================================
+/apps/repomed-api/src
+  index.ts
+  routes.ts
+  plugins/{swagger.ts,metrics.ts,sse.ts}
+  config/{env.ts,security.ts}
+  core/{db.ts,storage.ts,cache.ts,logger.ts,events.ts}
+  middleware/{error.handler.ts,request.context.ts,hmac.verify.ts}
+  auth/{keys.controller.ts,keys.service.ts,rbac.ts}
+  workspaces/{workspaces.controller.ts,workspaces.service.ts}
+  templates/{templates.controller.ts,templates.service.ts,templates.repo.ts,templates.model.ts}
+  generator/{generator.controller.ts,generator.service.ts,prompts/*.txt}
+  clinical-docs/{docs.controller.ts,docs.service.ts,pdf.ts,share.ts}
+  signature/{signature.controller.ts,signature.service.ts,providers/{mock.ts,providerX.sandbox.ts,providerX.real.ts}}
+  clinical-audit/{audit.controller.ts,audit.service.ts}
+  search/{search.controller.ts,search.service.ts}
+  fhir/{patient.controller.ts,documentReference.controller.ts,practitioner.controller.ts}  # V3
+  billing/{billing.controller.ts,billing.service.ts}                                      # V3
+  webhooks/{webhooks.controller.ts}
+
+/apps/repomed-web/src
+  main.tsx, app/routes.tsx
+  styles/{tailwind.css,theme.css}
+  lib/{api.ts,forms.ts}
+  components/ui/* (shadcn)
+  components/clinical/{PrescriptionBuilder.tsx,AtestadoWizard.tsx,LaudoComposer.tsx,ConsentStudio.tsx,SignaturePanel.tsx,ShareSheet.tsx,TemplateCard.tsx,PatientPicker.tsx}
+  pages/{Dashboard.tsx,Templates.tsx,NewDocument.tsx,Documents.tsx,AuditTrail.tsx}
+  pages/Admin/{Tenants.tsx,Billing.tsx,Marketplace.tsx,Integrations.tsx}                  # V3
+  providers/Toaster.tsx
+  hooks/{useShortcuts.ts,useSearch.ts}
+  store/* (zustand ou redux toolkit)
+
+/packages
+  ui/*              # tokens OKLCH + componentes compartilháveis
+  schemas/*         # zod DTOs
+  sdk/*             # cliente TS da API
+  prompts/*         # prompt‑library clínica
+
+/infra
+  docker-compose.yml
+  db/migrations/{0001_init_core.sql,0002_pgvector.sql,0003_templates.sql,0004_documents.sql,0005_audit.sql,0006_workspaces.sql,0007_vectors.sql,0100_tenants.sql,0101_billing.sql,0102_rbac_adv.sql}
+  ops/{Makefile,seeds.ts,dev.sh}
+
+/tests
+  api/{templates.spec.ts,generator.spec.ts,docs.spec.ts,signature.mock.spec.ts,webhooks.hmac.spec.ts}
+  e2e/{create-sign-share.spec.ts}
+  security/{rate-limit.spec.ts}
+
+/docs
+  ARCHITECTURE.md, COMPLIANCE.md, PLAYBOOKS.md
+
+====================================================================
+8) PLAYBOOKS (PROMPTS CIRÚRGICOS PARA O CLAUDE CODER)
+====================================================================
+8.1 SETUP MONOREPO
+“Crie um monorepo PNPM/Turborepo com apps repomed-api (Fastify/TS) e repomed-web (React/Vite/Tailwind/shadcn).
+ Adicione docker-compose (Postgres16 + pgvector, Redis, MinIO) e healthchecks.
+ Configure /apps, /packages, /infra, /docs. Valide .env com Zod. Exponha /docs (Swagger) e /metrics (Prometheus).
+ Gere migrations 0001…0005 para V1 e 0006…0007 para V2. Configure lint/prettier/husky.”
+
+8.2 MÉDICAL TEMPLATES (CRUD + VERSIONAMENTO)
+“Implemente service ‘medical-templates’ (controller/service/repo/model). Rotas:
+ POST/GET/PUT/DEL /v1/medical-templates e POST /v1/medical-templates/:id/publish.
+ Zod: TemplateCreate/Update/Version. Seeds de 10 templates. Testes templates.spec.ts.”
+
+8.3 CLINICAL DOCS (PDF, HASH, QR, SHARE)
+“Implemente clinical-docs com geração de PDF (body_md + fields), hash_before/after, QR (URL de verificação),
+ upload em MinIO e criação de link com expiração. Rotas: POST /v1/clinical-docs, GET/DEL /:id, POST /:id/share.
+ Teste E2E criando doc, assinando mock e abrindo o link.”
+
+8.4 ASSINATURA (MOCK → REAL)
+“Defina interface SignatureProvider (sign(buffer,meta)→result). Implemente provider mock (V1/V2) e providerX.sandbox.
+ Exponha POST /v1/clinical-docs/:id/sign (provider=mock). Para V3, construa provider real (A1/A3) e /v1/signature/verify/:docId
+ com verificação OCSP/CRL.”
+
+8.5 GENERATOR (IA) E PROMPT-LIB (V2)
+“Crie serviço generator com provider de IA plugável. Entrada: templateId, patient, context. Saída: fields_suggested, cautions.
+ Use /packages/prompts com arquivos: prescription.basic.txt, atestado.basic.txt, laudo.imagem.txt, consent.term.txt, discharge.summary.txt.
+ Testes unitários com mocks do provider.”
+
+8.6 SEARCH (PGVECTOR) (V2)
+“Implemente embeddings para templates e docs. Armazene em ‘vectors’. Rota GET /v1/search com filtros. Teste recall/latência.”
+
+8.7 WORKSPACES + RBAC (V2→V3)
+“Crie /v1/workspaces e membership; roles: médico/assistente (V2) e residente/preceptor/auditor/admin (V3).
+ Middleware request.context injeta workspace e user.”
+
+8.8 WEBHOOKS (HMAC)
+“Emitter de eventos doc.generated/doc.signed/doc.shared. Assinar payload com HMAC por workspace. Rota /v1/clinical-webhooks/test.
+ Rejeitar assinaturas inválidas.”
+
+8.9 UI/UX (WEB)
+“No repomed-web, implemente fluxo One‑Click Doc com PrescriptionBuilder, AtestadoWizard etc.
+ Use react-hook-form + zod, estados vazios guiados, atalhos (‘/’ buscar, ‘Enter’ gerar), toasts, breadcrumbs.
+ Tema OKLCH medical com alto contraste e acessibilidade.”
+
+8.10 MULTI‑TENANT, BILLING, MARKETPLACE, FHIR (V3)
+“Adapte schemas para tenant_id, quotas e usage_counters. Conecte billing provider (webhook idempotente).
+ Construa Admin Console, SSO OIDC/SAML, MFA, RBAC avançado. Implemente marketplace de templates com review/publish.
+ Exponha endpoints FHIR (Patient, Practitioner, DocumentReference). Testes E2E de criação/assinatura/export.”
+
+====================================================================
+9) ROTEIRO DE VALIDAÇÃO COM A MÉDICA (LOCAL)
+====================================================================
+Sessão V1 (60–90 min): criar 5 docs (um por especialidade), assinar mock, exportar/abrir link/QR. Ajustes de texto e campos.
+Sessão V2 (60 min): IA preenchendo campos, busca por linguagem natural, fluxo com assistente, revisão do audit trail.
+Sessão V3 (60–90 min): multi‑tenant, quotas, marketplace (instalar 2 templates curados), assinatura real (se disponível).
+
+Critérios de sucesso mínimos:
+  • Doc padrão em < 60s (V2) / < 90s (V1)
+  • Hash/QR verificáveis; trilha coerente
+  • IA sugere campos com acurácia razoável e sem alucinação perigosa (mostrar cautions)
+  • p95 < 500ms nas rotas CRUD/GET; erros < 1%
+
+====================================================================
+10) RISCOS & PLANOS B
+====================================================================
+• ICP real: custo/integração → manter mock no V1/V2 e ativar provider real apenas na V3 (clientes pagantes).
+• Custos de IA: cache de prompts/resultados; RAG leve; BYO‑LLM; limites por plano.
+• Interoperabilidade: iniciar com 3 recursos FHIR; expandir sob demanda.
+• Receitas controladas: postergar; focar atestados/laudos/relatórios/termos no início.
+
+====================================================================
+11) CHECKLISTS DE GO/NO‑GO
+====================================================================
+V1
+ [ ] 15 templates revisados
+ [ ] Geração PDF/QR/Hash + assinatura mock
+ [ ] Share com expiração
+ [ ] Audit básico + export
+ [ ] Segurança/observabilidade baseline
+
+V2
+ [ ] 30–50 templates curados
+ [ ] Generator (IA) + prompt‑library
+ [ ] Search (pgvector)
+ [ ] Workspaces (médico/assistente)
+ [ ] Métricas de negócio + HMAC webhooks
+
+V3
+ [ ] Tenancy/quotas/billing
+ [ ] Assinatura real (A1/A3) + verificação
+ [ ] Marketplace (review/publish)
+ [ ] SSO/MFA/RBAC avançado
+ [ ] FHIR básico
+ [ ] Dashboards e export por tenant
+
+FIM — “Build fast, validate faster”. Vamos decolar. 🚀
