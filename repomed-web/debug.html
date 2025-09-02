@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug RepoMed</title>
+</head>
+<body>
+    <div id="status"></div>
+    <script>
+        const status = document.getElementById('status');
+        
+        // Teste 1: Verificar se o servidor está respondendo
+        fetch('http://localhost:3006/')
+            .then(res => res.text())
+            .then(html => {
+                status.innerHTML += '<p>✅ Servidor Vite respondendo na porta 3006</p>';
+                
+                // Teste 2: Verificar se o React está carregando
+                return fetch('http://localhost:3006/src/main.jsx');
+            })
+            .then(res => res.text())
+            .then(js => {
+                status.innerHTML += '<p>✅ Arquivo main.jsx carregado</p>';
+                
+                // Teste 3: Verificar API
+                return fetch('http://localhost:8081/health');
+            })
+            .then(res => res.json())
+            .then(data => {
+                status.innerHTML += '<p>✅ API Backend respondendo</p>';
+                
+                // Criar links funcionais
+                status.innerHTML += `
+                    <h2>Aplicação está funcionando! Acesse:</h2>
+                    <ul>
+                        <li><a href="http://localhost:3006/" target="_blank">Homepage (porta 3006)</a></li>
+                        <li><a href="http://localhost:3010/" target="_blank">Homepage (porta 3010)</a></li>
+                        <li><a href="http://localhost:3006/index-test.html" target="_blank">Teste React Standalone</a></li>
+                        <li><a href="http://localhost:3006/test.html" target="_blank">Teste HTML</a></li>
+                    </ul>
+                    <p><strong>IMPORTANTE:</strong> Abra o Console do Browser (F12) para ver erros JavaScript!</p>
+                `;
+            })
+            .catch(err => {
+                status.innerHTML += '<p>❌ Erro: ' + err.message + '</p>';
+            });
+    </script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RepoMed Test</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .button {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+        .button:hover {
+            background: #4338ca;
+            transform: translateY(-2px);
+        }
+        .success {
+            color: #10b981;
+            font-weight: bold;
+        }
+        .error {
+            color: #ef4444;
+            font-weight: bold;
+        }
+        h1 {
+            color: white;
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [count, setCount] = useState(0);
+            const [apiStatus, setApiStatus] = useState('checking');
+            const [error, setError] = useState(null);
+
+            useEffect(() => {
+                // Testar conexão com API
+                fetch('http://localhost:8081/health')
+                    .then(res => res.json())
+                    .then(data => {
+                        setApiStatus(data.status === 'healthy' ? 'healthy' : 'unhealthy');
+                    })
+                    .catch(err => {
+                        setApiStatus('error');
+                        setError(err.message);
+                    });
+            }, []);
+
+            return (
+                <div className="container">
+                    <h1>🏥 RepoMed IA</h1>
+                    
+                    <div className="card">
+                        <h2 className="success">✅ React está funcionando!</h2>
+                        <p>Esta página prova que o React está carregando e funcionando corretamente.</p>
+                        
+                        <div style={{marginTop: '20px'}}>
+                            <h3>Teste de Interatividade:</h3>
+                            <p>Contador: <strong>{count}</strong></p>
+                            <button className="button" onClick={() => setCount(count + 1)}>
+                                Incrementar +1
+                            </button>
+                            <button className="button" onClick={() => setCount(0)}>
+                                Resetar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="card">
+                        <h3>Status da API Backend:</h3>
+                        {apiStatus === 'checking' && <p>⏳ Verificando conexão...</p>}
+                        {apiStatus === 'healthy' && <p className="success">✅ API está funcionando!</p>}
+                        {apiStatus === 'unhealthy' && <p className="error">⚠️ API com problemas</p>}
+                        {apiStatus === 'error' && <p className="error">❌ Erro ao conectar: {error}</p>}
+                    </div>
+
+                    <div className="card">
+                        <h3>Links Rápidos:</h3>
+                        <a href="http://localhost:3010/">
+                            <button className="button">Homepage Vite</button>
+                        </a>
+                        <a href="http://localhost:3010/workspace">
+                            <button className="button">Medical Workspace</button>
+                        </a>
+                        <a href="http://localhost:3010/test-simple">
+                            <button className="button">Teste Simples</button>
+                        </a>
+                    </div>
+
+                    <div className="card">
+                        <h3>Informações do Sistema:</h3>
+                        <ul>
+                            <li>React Version: {React.version}</li>
+                            <li>Timestamp: {new Date().toLocaleString()}</li>
+                            <li>User Agent: {navigator.userAgent}</li>
+                        </ul>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

@@ -1,0 +1,451 @@
+========================================
+REPOMED IA - TROUBLESHOOTING GUIDE
+========================================
+
+PROBLEMAS COMUNS E SOLUÇÕES:
+============================
+
+1. PROBLEMAS DE CONEXÃO API
+----------------------------
+
+ERRO: "Connection refused" ou "Network Error"
+┌─────────────────────────────────────────┐
+│ SINTOMAS:                               │
+│ • Frontend não consegue conectar na API │
+│ • Erro ECONNREFUSED no console          │
+│ • Loading infinito nos componentes      │
+│                                         │
+│ DIAGNÓSTICO:                            │
+│ 1. Verificar se backend está rodando    │
+│    curl http://localhost:8081/health    │
+│                                         │
+│ 2. Verificar porta configurada          │
+│    cat .env | grep VITE_API_URL         │
+│                                         │
+│ 3. Verificar CORS                       │
+│    Browser DevTools → Network Tab       │
+│                                         │
+│ SOLUÇÕES:                               │
+│ • Iniciar backend: npm run dev          │
+│ • Corrigir URL no .env do frontend      │
+│ • Configurar CORS no backend            │
+│ • Verificar firewall/antivírus          │
+└─────────────────────────────────────────┘
+
+ERRO: "Request timeout"
+┌─────────────────────────────────────────┐
+│ SINTOMAS:                               │
+│ • Requisições demoram muito             │
+│ • Timeout após 10 segundos              │
+│ • API responde eventualmente            │
+│                                         │
+│ DIAGNÓSTICO:                            │
+│ • Verificar logs do backend             │
+│ • Monitorar uso de CPU/memória          │
+│ • Testar queries do banco diretamente   │
+│                                         │
+│ SOLUÇÕES:                               │
+│ • Aumentar timeout no axios             │
+│ • Otimizar queries do banco             │
+│ • Adicionar índices nas tabelas         │
+│ • Aumentar recursos do servidor         │
+└─────────────────────────────────────────┘
+
+2. PROBLEMAS DE BANCO DE DADOS
+-------------------------------
+
+ERRO: "Database connection failed"
+┌─────────────────────────────────────────┐
+│ SINTOMAS:                               │
+│ • Health check mostra DB disconnected   │
+│ • Erro de conexão ao iniciar backend    │
+│ • "ENOTFOUND" ou "ECONNREFUSED"         │
+│                                         │
+│ DIAGNÓSTICO:                            │
+│ 1. Verificar se PostgreSQL está rodando │
+│    sudo systemctl status postgresql     │
+│    # ou no Windows: services.msc        │
+│                                         │
+│ 2. Testar conexão manual                │
+│    psql -h localhost -U repomed_user -d repomed_ia│
+│                                         │
+│ 3. Verificar variáveis de ambiente      │
+│    echo $DATABASE_URL                   │
+│                                         │
+│ SOLUÇÕES:                               │
+│ • Iniciar PostgreSQL                    │
+│ • Corrigir credenciais no .env          │
+│ • Criar usuário/database se necessário  │
+│ • Verificar permissões do usuário       │
+│ • Resetar senha do usuário              │
+└─────────────────────────────────────────┘
+
+ERRO: "SSL connection required"
+┌─────────────────────────────────────────┐
+│ SINTOMAS:                               │
+│ • Erro SSL em produção                  │
+│ • Conexão recusada em cloud databases   │
+│                                         │
+│ SOLUÇÕES:                               │
+│ • Adicionar ?sslmode=require na URL     │
+│ • Configurar certificados SSL           │
+│ • Para desenvolvimento: ?sslmode=disable│
+└─────────────────────────────────────────┘
+
+3. PROBLEMAS DE AUTENTICAÇÃO
+-----------------------------
+
+ERRO: "Invalid token" ou "401 Unauthorized"
+┌─────────────────────────────────────────┐
+│ SINTOMAS:                               │
+│ • Logout automático                     │
+│ • Erro 401 em requisições              │
+│ • Token JWT expirado                    │
+│                                         │
+│ DIAGNÓSTICO:                            │
+│ • Verificar localStorage no browser     │
+│ • Decodificar JWT em jwt.io             │
+│ • Verificar SECRET no backend           │
+│                                         │
+│ SOLUÇÕES:                               │
+│ • Limpar localStorage                   │
+│ • Fazer login novamente                 │
+│ • Verificar JWT_SECRET no .env          │
+│ • Aumentar tempo de expiração do token │
+└─────────────────────────────────────────┘
+
+4. PROBLEMAS DE GERAÇÃO PDF
+----------------------------
+
+ERRO: "Puppeteer failed to launch"
+┌─────────────────────────────────────────┐
+│ SINTOMAS:                               │
+│ • Erro ao gerar PDF                     │
+│ • "No usable sandbox!" em Linux         │
+│ • "ChromiumError: Executable not found" │
+│                                         │
+│ SOLUÇÕES LINUX:                         │
+│ sudo apt-get install chromium-browser   │
+│ export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser│
+│                                         │
+│ SOLUÇÕES DOCKER:                        │
+│ # Adicionar ao Dockerfile               │
+│ RUN apk add --no-cache chromium         │
+│ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser│
+│                                         │
+│ SOLUÇÕES WINDOWS:                       │
+│ # Instalar Chrome/Chromium manualmente  │
+│ # Configurar path no .env               │
+└─────────────────────────────────────────┘
+
+ERRO: "Permission denied" ao salvar PDF
+┌─────────────────────────────────────────┐
+│ SINTOMAS:                               │
+│ • Erro de permissão ao salvar arquivo   │
+│ • "EACCES: permission denied"           │
+│                                         │
+│ SOLUÇÕES:                               │
+│ mkdir -p temp/pdfs                      │
+│ chmod 755 temp/pdfs                     │
+│ chown -R $USER:$USER temp/              │
+│                                         │
+│ # Em produção (Docker)                  │
+│ RUN chown -R nodejs:nodejs /app/temp    │
+└─────────────────────────────────────────┘
+
+5. PROBLEMAS DE PERFORMANCE
+---------------------------
+
+PROBLEMA: "Aplicação lenta"
+┌─────────────────────────────────────────┐
+│ SINTOMAS:                               │
+│ • Interface demorada para responder     │
+│ • API com alta latência                 │
+│ • Banco de dados lento                  │
+│                                         │
+│ DIAGNÓSTICO:                            │
+│ 1. Verificar métricas                   │
+│    curl http://localhost:8081/metrics   │
+│                                         │
+│ 2. Monitorar recursos                   │
+│    htop (Linux) ou Task Manager (Win)   │
+│                                         │
+│ 3. Analisar queries lentas              │
+│    SELECT * FROM pg_stat_statements;    │
+│                                         │
+│ SOLUÇÕES:                               │
+│ • Adicionar índices no banco            │
+│ • Implementar cache (Redis)             │
+│ • Otimizar queries SQL                  │
+│ • Aumentar recursos do servidor         │
+│ • Implementar paginação                 │
+└─────────────────────────────────────────┘
+
+PROBLEMA: "Alto uso de memória"
+┌─────────────────────────────────────────┐
+│ SINTOMAS:                               │
+│ • Node.js consumindo muita RAM          │
+│ • OOM (Out of Memory) errors            │
+│ • Sistema fica lento                    │
+│                                         │
+│ SOLUÇÕES:                               │
+│ # Aumentar limite de memória Node.js    │
+│ NODE_OPTIONS="--max-old-space-size=2048"│
+│                                         │
+│ # Monitorar vazamentos                  │
+│ npm install -g clinic                   │
+│ clinic doctor -- npm start             │
+│                                         │
+│ # Garbage collection mais agressivo     │
+│ NODE_OPTIONS="--gc-interval=100"        │
+└─────────────────────────────────────────┘
+
+6. PROBLEMAS DE BUILD/DEPLOY
+-----------------------------
+
+ERRO: "Build failed" no frontend
+┌─────────────────────────────────────────┐
+│ SINTOMAS:                               │
+│ • npm run build falha                   │
+│ • Erros de TypeScript                   │
+│ • Imports não encontrados               │
+│                                         │
+│ SOLUÇÕES:                               │
+│ # Limpar cache e reinstalar             │
+│ rm -rf node_modules package-lock.json   │
+│ npm install                             │
+│                                         │
+│ # Verificar imports                     │
+│ npm run type-check                      │
+│                                         │
+│ # Build com mais detalhes               │
+│ npm run build -- --verbose             │
+└─────────────────────────────────────────┘
+
+ERRO: "Docker build failed"
+┌─────────────────────────────────────────┐
+│ SINTOMAS:                               │
+│ • Erro durante docker build             │
+│ • "No space left on device"             │
+│ • Dependências não encontradas          │
+│                                         │
+│ SOLUÇÕES:                               │
+│ # Limpar imagens não utilizadas         │
+│ docker system prune -a                  │
+│                                         │
+│ # Build sem cache                       │
+│ docker-compose build --no-cache         │
+│                                         │
+│ # Verificar espaço em disco             │
+│ df -h                                   │
+└─────────────────────────────────────────┘
+
+7. PROBLEMAS DE TEMPLATES
+-------------------------
+
+ERRO: "Template não encontrado"
+┌─────────────────────────────────────────┐
+│ SINTOMAS:                               │
+│ • Lista de templates vazia              │
+│ • Erro 404 ao buscar template           │
+│ • Templates não carregam na interface   │
+│                                         │
+│ DIAGNÓSTICO:                            │
+│ curl http://localhost:8081/api/templates │
+│                                         │
+│ SOLUÇÕES:                               │
+│ • Verificar arquivos de template        │
+│ • Verificar permissões de leitura       │
+│ • Reiniciar servidor backend            │
+│ • Verificar logs de erro                │
+└─────────────────────────────────────────┘
+
+ERRO: "Template validation failed"
+┌─────────────────────────────────────────┐
+│ SINTOMAS:                               │
+│ • Erro ao processar template            │
+│ • Campos obrigatórios não validados     │
+│ • Formulário não é gerado               │
+│                                         │
+│ SOLUÇÕES:                               │
+│ • Verificar estrutura JSON do template  │
+│ • Validar schema dos campos             │
+│ • Verificar tipos de campo suportados   │
+│ • Testar template isoladamente          │
+└─────────────────────────────────────────┘
+
+8. FERRAMENTAS DE DEBUG
+-----------------------
+
+BACKEND DEBUG:
+```bash
+# Logs detalhados
+LOG_LEVEL=debug npm run dev
+
+# Debug com Node Inspector
+node --inspect src/server.js
+
+# Memory profiling
+node --inspect --heap-prof src/server.js
+
+# CPU profiling
+node --prof src/server.js
+```
+
+FRONTEND DEBUG:
+```bash
+# Build com sourcemaps
+npm run build -- --sourcemap
+
+# Análise do bundle
+npm run analyze
+
+# Debug do React Query
+# Adicionar ReactQueryDevtools
+```
+
+BANCO DE DADOS DEBUG:
+```sql
+-- Verificar conexões ativas
+SELECT * FROM pg_stat_activity WHERE state = 'active';
+
+-- Queries mais lentas
+SELECT query, mean_time, total_time 
+FROM pg_stat_statements 
+ORDER BY mean_time DESC 
+LIMIT 10;
+
+-- Tamanho das tabelas
+SELECT 
+  schemaname,
+  tablename,
+  pg_size_pretty(pg_total_relation_size(tablename::regclass)) AS size
+FROM pg_tables 
+WHERE schemaname = 'public'
+ORDER BY pg_total_relation_size(tablename::regclass) DESC;
+
+-- Índices não utilizados
+SELECT * FROM pg_stat_user_indexes WHERE idx_scan = 0;
+```
+
+9. COMANDOS ÚTEIS PARA DIAGNÓSTICO
+-----------------------------------
+
+VERIFICAÇÃO DE SISTEMA:
+```bash
+# Portas em uso
+netstat -tuln | grep LISTEN
+
+# Processos Node.js
+ps aux | grep node
+
+# Uso de recursos
+htop
+df -h
+free -m
+
+# Logs do sistema
+tail -f /var/log/syslog
+journalctl -f -u nginx
+```
+
+DOCKER TROUBLESHOOTING:
+```bash
+# Status dos containers
+docker-compose ps
+
+# Logs de um serviço específico
+docker-compose logs -f backend
+
+# Executar comando dentro do container
+docker-compose exec backend bash
+
+# Verificar recursos dos containers
+docker stats
+
+# Inspecionar container
+docker inspect container_name
+```
+
+NETWORK TROUBLESHOOTING:
+```bash
+# Testar conectividade
+curl -I http://localhost:8081/health
+wget --spider http://localhost:3009
+
+# DNS resolution
+nslookup seudominio.com
+dig seudominio.com
+
+# Firewall status
+sudo ufw status
+iptables -L
+```
+
+10. SCRIPTS DE DIAGNÓSTICO AUTOMÁTICO
+-------------------------------------
+
+health-check.sh:
+```bash
+#!/bin/bash
+
+echo "🔍 RepoMed IA Health Check"
+echo "=========================="
+
+# Verificar se serviços estão rodando
+if curl -f http://localhost:8081/health >/dev/null 2>&1; then
+    echo "✅ Backend: OK"
+else
+    echo "❌ Backend: FALHA"
+fi
+
+if curl -f http://localhost:3009 >/dev/null 2>&1; then
+    echo "✅ Frontend: OK"
+else
+    echo "❌ Frontend: FALHA"
+fi
+
+# Verificar banco de dados
+if pg_isready -h localhost -p 5432 >/dev/null 2>&1; then
+    echo "✅ Database: OK"
+else
+    echo "❌ Database: FALHA"
+fi
+
+# Verificar espaço em disco
+DISK_USAGE=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+if [ $DISK_USAGE -lt 80 ]; then
+    echo "✅ Disk Space: OK ($DISK_USAGE%)"
+else
+    echo "⚠️ Disk Space: WARNING ($DISK_USAGE%)"
+fi
+
+# Verificar memória
+MEM_USAGE=$(free | grep Mem | awk '{print ($3/$2) * 100.0}' | cut -d'.' -f1)
+if [ $MEM_USAGE -lt 80 ]; then
+    echo "✅ Memory: OK ($MEM_USAGE%)"
+else
+    echo "⚠️ Memory: WARNING ($MEM_USAGE%)"
+fi
+
+echo "=========================="
+echo "Health check completed"
+```
+
+CONTATO PARA SUPORTE:
+=====================
+
+Em caso de problemas não resolvidos por este guia:
+
+1. Verificar logs detalhados
+2. Reunir informações do sistema
+3. Documentar passos para reproduzir
+4. Criar issue no repositório do projeto
+
+INFORMAÇÕES ÚTEIS PARA SUPORTE:
+• Versão do Node.js: node --version
+• Versão do npm: npm --version  
+• Sistema operacional: uname -a (Linux/Mac) ou ver (Windows)
+• Logs relevantes
+• Screenshots de erros
+• Configuração do ambiente (.env mascarado)

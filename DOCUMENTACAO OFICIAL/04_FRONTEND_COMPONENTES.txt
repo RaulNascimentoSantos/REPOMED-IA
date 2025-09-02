@@ -1,0 +1,318 @@
+========================================
+REPOMED IA - COMPONENTES FRONTEND
+========================================
+
+TECNOLOGIAS UTILIZADAS:
+-----------------------
+• React 18 (Hooks, Functional Components)
+• React Router DOM 6 (Navegação)
+• React Query (Estado/Cache)
+• React Hook Form (Formulários)
+• TailwindCSS (Styling)
+• Lucide React (Ícones)
+• Vite (Build tool)
+
+ESTRUTURA DE COMPONENTES:
+========================
+
+1. COMPONENTE RAIZ
+------------------
+
+App.jsx
+┌─────────────────────────────────────────┐
+│ FUNÇÃO: Componente raiz da aplicação    │
+│ RESPONSABILIDADES:                      │
+│ • Configuração de rotas                 │
+│ • Provider do React Query               │
+│ • BrowserRouter                         │
+│ • Estrutura geral da aplicação          │
+└─────────────────────────────────────────┘
+
+Rotas configuradas:
+- / → HomePage
+- /documents → DocumentsPage
+- /documents/create → CreateDocumentPage
+- /documents/:id → DocumentDetailPage
+- /share/:token → SharePage
+- /verify/:hash → VerifyPage
+- /test → TestPage
+
+2. LAYOUT E NAVEGAÇÃO
+--------------------
+
+Layout.jsx
+┌─────────────────────────────────────────┐
+│ FUNÇÃO: Layout principal da aplicação   │
+│ RESPONSABILIDADES:                      │
+│ • Header com navegação                  │
+│ • Menu responsivo (mobile/desktop)      │
+│ • Footer informativo                    │
+│ • Estrutura HTML básica                 │
+└─────────────────────────────────────────┘
+
+Recursos implementados:
+- Navegação responsiva
+- Menu hamburger para mobile
+- Indicador de página ativa
+- Logo e branding
+- Links para todas as seções
+
+Estado gerenciado:
+- isMenuOpen: boolean (controla menu mobile)
+
+Props recebidas:
+- children: ReactNode (conteúdo das páginas)
+
+3. PÁGINAS PRINCIPAIS
+--------------------
+
+HomePage.jsx
+┌─────────────────────────────────────────┐
+│ FUNÇÃO: Dashboard inicial do sistema    │
+│ RESPONSABILIDADES:                      │
+│ • Métricas do sistema em tempo real     │
+│ • Status de saúde dos serviços          │
+│ • Links para ações principais           │
+│ • Preview dos templates disponíveis     │
+└─────────────────────────────────────────┘
+
+Queries utilizadas:
+- health: Status dos serviços (refetch 30s)
+- metrics: Métricas do sistema (refetch 60s)  
+- templates: Lista de templates disponíveis
+
+Componentes renderizados:
+- Cards de métricas (templates, documentos, latência, uptime)
+- Indicador de status do sistema
+- Botões de ação rápida
+- Grid de templates disponíveis
+
+DocumentsPage.jsx
+┌─────────────────────────────────────────┐
+│ FUNÇÃO: Listagem de documentos criados  │
+│ RESPONSABILIDADES:                      │
+│ • Lista todos os documentos do usuário  │
+│ • Filtros por status                    │
+│ • Ações rápidas (visualizar, download)  │
+│ • Estatísticas dos documentos           │
+└─────────────────────────────────────────┘
+
+Estado atual: Mock data
+Funcionalidades:
+- Tabela responsiva de documentos
+- Cards de estatísticas
+- Status badges (rascunho, assinado, erro)
+- Formatação de datas
+- Ações por documento (ver, download, compartilhar)
+
+CreateDocumentPage.jsx
+┌─────────────────────────────────────────┐
+│ FUNÇÃO: Criação de novos documentos     │
+│ RESPONSABILIDADES:                      │
+│ • Seleção de template médico            │
+│ • Formulário dinâmico baseado no template│
+│ • Validação de campos obrigatórios      │
+│ • Envio dos dados para a API            │
+└─────────────────────────────────────────┘
+
+Componentes utilizados:
+- TemplateSelector: Seleção de templates
+- ArrayField: Campos de array (medicamentos, exames)
+- React Hook Form: Gerenciamento do formulário
+
+Fluxo de dados:
+1. Usuário seleciona template
+2. Formulário é gerado dinamicamente
+3. Validação no frontend
+4. Envio para API via mutation
+5. Redirecionamento para visualização
+
+4. COMPONENTES ESPECIALIZADOS
+----------------------------
+
+TemplateSelector.jsx
+┌─────────────────────────────────────────┐
+│ FUNÇÃO: Seleção de templates médicos    │
+│ RESPONSABILIDADES:                      │
+│ • Carregamento de templates via API     │
+│ • Interface de seleção intuitiva        │
+│ • Estados de loading/erro/sucesso       │
+│ • Retry automático em caso de erro      │
+└─────────────────────────────────────────┘
+
+Estados de UI:
+- Loading: Spinner + mensagem
+- Error: Mensagem de erro + botão retry
+- Empty: Nenhum template encontrado
+- Success: Lista de templates selecionáveis
+
+Props:
+- onSelect: (template) => void
+- selectedTemplate: Template | null
+
+Query configurada:
+- queryKey: ['templates']
+- retry: 3 tentativas
+- retryDelay: Backoff exponencial
+
+ArrayField.jsx
+┌─────────────────────────────────────────┐
+│ FUNÇÃO: Campos de array dinâmicos       │
+│ RESPONSABILIDADES:                      │
+│ • Gerenciamento de arrays de dados      │
+│ • Componentes especializados por tipo   │
+│ • Adicionar/remover itens dinamicamente │
+│ • Validação de campos obrigatórios      │
+└─────────────────────────────────────────┘
+
+Tipos especializados:
+- medications: Nome + Dosagem + Frequência
+- exams: Nome + Urgência (rotina/urgente/prioritário)
+- generic: Campo de texto simples
+
+Props:
+- field: objeto com configuração do campo
+- register: função do React Hook Form
+- setValue: função para atualizar valores
+- watch: função para observar mudanças
+- errors: objeto com erros de validação
+
+5. PÁGINAS FUTURAS/PLANEJADAS
+-----------------------------
+
+DocumentDetailPage.jsx
+┌─────────────────────────────────────────┐
+│ FUNÇÃO: Visualização de documento       │
+│ STATUS: Em desenvolvimento               │
+│ RESPONSABILIDADES:                      │
+│ • Visualização completa do documento    │
+│ • Download PDF                          │
+│ • Compartilhamento                      │
+│ • Assinatura digital                    │
+└─────────────────────────────────────────┘
+
+SharePage.jsx
+┌─────────────────────────────────────────┐
+│ FUNÇÃO: Compartilhamento de documentos  │
+│ STATUS: Planejado                       │
+│ RESPONSABILIDADES:                      │
+│ • Visualização pública via token        │
+│ • Verificação de autenticidade          │
+│ • Download controlado                   │
+└─────────────────────────────────────────┘
+
+TestPage.jsx
+┌─────────────────────────────────────────┐
+│ FUNÇÃO: Página de testes da API         │
+│ STATUS: Implementado                    │
+│ RESPONSABILIDADES:                      │
+│ • Testes manuais da API                 │
+│ • Debug de problemas                    │
+│ • Validação de endpoints                │
+└─────────────────────────────────────────┘
+
+6. SISTEMA DE ESTILOS
+--------------------
+
+TailwindCSS Classes Customizadas:
+┌─────────────────────────────────────────┐
+│ .btn-primary                            │
+│ • bg-medical-blue text-white            │
+│ • px-4 py-2 rounded-md font-medium      │
+│ • hover:bg-blue-700 transition-colors   │
+│                                         │
+│ .btn-secondary                          │
+│ • bg-gray-100 text-gray-700             │
+│ • px-4 py-2 rounded-md font-medium      │
+│ • hover:bg-gray-200 transition-colors   │
+│                                         │
+│ .card                                   │
+│ • bg-white rounded-lg shadow-sm         │
+│ • border border-gray-200 p-6           │
+│                                         │
+│ .form-input                             │
+│ • w-full px-3 py-2 border border-gray-300│
+│ • rounded-md focus:outline-none         │
+│ • focus:ring-2 focus:ring-medical-blue  │
+│                                         │
+│ .form-label                             │
+│ • block text-sm font-medium text-gray-700│
+│ • mb-2                                  │
+└─────────────────────────────────────────┘
+
+Cores customizadas (tailwind.config.js):
+- medical-blue: #1e40af
+- medical-green: #059669
+- medical-red: #dc2626
+- medical-gray: #6b7280
+
+7. GERENCIAMENTO DE ESTADO
+-------------------------
+
+React Query (TanStack Query):
+┌─────────────────────────────────────────┐
+│ CONFIGURAÇÃO GLOBAL:                    │
+│ • retry: 3 tentativas                   │
+│ • staleTime: 5 minutos                  │
+│ • Refetch automático em foco            │
+│                                         │
+│ QUERIES PRINCIPAIS:                     │
+│ • ['health'] - Status do sistema        │
+│ • ['metrics'] - Métricas performance    │
+│ • ['templates'] - Templates disponíveis │
+│ • ['documents'] - Lista de documentos   │
+│                                         │
+│ MUTATIONS:                              │
+│ • createDocument - Criar documento      │
+│ • signDocument - Assinar documento      │
+└─────────────────────────────────────────┘
+
+React Hook Form:
+- Validação de formulários
+- Performance otimizada
+- Integração com componentes customizados
+- Suporte a arrays dinâmicos
+
+8. NAVEGAÇÃO E ROTEAMENTO
+------------------------
+
+React Router DOM v6:
+┌─────────────────────────────────────────┐
+│ CONFIGURAÇÃO:                           │
+│ • BrowserRouter como provider           │
+│ • Rotas aninhadas                       │
+│ • Parâmetros dinâmicos (:id, :token)    │
+│ • useNavigate para navegação programática│
+│ • useLocation para rota ativa           │
+└─────────────────────────────────────────┘
+
+9. RESPONSIVIDADE
+----------------
+
+Breakpoints TailwindCSS:
+- sm: 640px+  (Tablets)
+- md: 768px+  (Desktop pequeno)
+- lg: 1024px+ (Desktop médio)
+- xl: 1280px+ (Desktop grande)
+
+Padrões responsivos:
+- Menu hamburger em telas pequenas
+- Grid adaptativo (1 col mobile → 3 cols desktop)
+- Typography scale responsiva
+- Spacing adaptativo
+
+10. PERFORMANCE E OTIMIZAÇÃO
+---------------------------
+
+Técnicas implementadas:
+✅ Code splitting automático (Vite)
+✅ Tree shaking
+✅ Hot Module Replacement (HMR)
+✅ React Query cache
+✅ Lazy loading de rotas (futuro)
+✅ Otimização de images (futuro)
+
+Bundle analysis:
+- Vite Bundle Analyzer
+- Lighthouse scores
+- Core Web Vitals

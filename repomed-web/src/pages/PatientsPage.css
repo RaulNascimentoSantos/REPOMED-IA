@@ -1,0 +1,268 @@
+.patients-page {
+  min-height: calc(100vh - 64px);
+  background: var(--bg-main);
+}
+
+.page-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.btn-create-patient {
+  padding: 10px 20px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-create-patient:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.search-container {
+  margin-bottom: 24px;
+}
+
+.search-input {
+  width: 100%;
+  max-width: 500px;
+  padding: 12px 16px;
+  background: var(--bg-white);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  transition: all 0.2s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.patients-table {
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+}
+
+.table-header {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1fr 180px;
+  padding: 16px 24px;
+  background: var(--bg-main);
+  border-bottom: 1px solid var(--border-light);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.th-sub {
+  font-weight: 400;
+  font-size: 10px;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1fr 180px;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-light);
+  transition: background 0.2s;
+}
+
+.table-row:hover {
+  background: var(--bg-hover);
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.td-name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.patient-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 48px;
+}
+
+.patient-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.patient-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.patient-cpf {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.td-age {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.patient-age {
+  font-size: 15px;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.patient-birth {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.td-visit {
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.td-action {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.btn-prescribe {
+  padding: 8px 16px;
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.btn-prescribe:hover {
+  background: var(--primary);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.select-limit {
+  padding: 4px 8px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  background: white;
+  font-size: 14px;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.pagination-btn {
+  padding: 8px 12px;
+  background: white;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-number {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pagination-number:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.pagination-number.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}

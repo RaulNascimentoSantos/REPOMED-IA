@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste WorkspaceSimple - RepoMed IA</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+
+        function WorkspaceSimple() {
+          const [activePanel, setActivePanel] = useState('editor')
+          const [aiMode, setAiMode] = useState('off')
+          const [document, setDocument] = useState('')
+          const [isRecording, setIsRecording] = useState(false)
+
+          const activePatient = {
+            name: 'Maria Silva Santos',
+            cpf: '123.456.789-00',
+            age: 45,
+            allergies: ['Penicilina', 'Dipirona'],
+            conditions: ['Hipertensão', 'Diabetes Tipo 2']
+          }
+
+          const insertTemplate = (type) => {
+            let template = ''
+            if (type === 'receita') {
+              template = `**RECEITA MÉDICA**
+
+Paciente: ${activePatient.name}
+CPF: ${activePatient.cpf}
+
+**Prescrição:**
+□ Medicamento: ________________
+   Dosagem: ___________________
+   Posologia: __________________
+
+**Orientações:**
+• Tomar conforme orientação médica
+• Em caso de efeitos adversos, suspender
+
+Data: ${new Date().toLocaleDateString()}
+Médico: Dr. João Silva - CRM: 123456-SP`
+            }
+            setDocument(template)
+          }
+
+          const toggleRecording = () => {
+            setIsRecording(!isRecording)
+            if (!isRecording) {
+              setTimeout(() => {
+                setDocument(document + '\n\nTranscrição: Paciente relata dor de cabeça há 3 dias. Sem febre. Solicita medicação.')
+                setIsRecording(false)
+              }, 3000)
+            }
+          }
+
+          return React.createElement('div', {
+            style: {
+              height: '100vh',
+              display: 'flex',
+              flexDirection: 'column',
+              fontFamily: 'system-ui, sans-serif',
+              background: '#f8fafc'
+            }
+          }, 
+            // Header
+            React.createElement('div', {
+              style: {
+                background: 'white',
+                borderBottom: '1px solid #e2e8f0',
+                padding: '16px 24px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }
+            },
+              React.createElement('div', {
+                style: { display: 'flex', alignItems: 'center', gap: '12px' }
+              },
+                React.createElement('div', {
+                  style: { 
+                    width: '32px', 
+                    height: '32px', 
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontSize: '18px'
+                  }
+                }, '🏥'),
+                React.createElement('h1', {
+                  style: { margin: 0, fontSize: '24px', fontWeight: '600' }
+                }, 'RepoMed IA')
+              ),
+              
+              React.createElement('div', {
+                style: { display: 'flex', gap: '8px' }
+              },
+                React.createElement('button', {
+                  onClick: toggleRecording,
+                  style: {
+                    background: isRecording ? '#ef4444' : '#6b7280',
+                    color: 'white',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }
+                }, `🎤 ${isRecording ? 'Gravando...' : 'Ditar'}`),
+                
+                React.createElement('button', {
+                  onClick: () => setAiMode(aiMode === 'off' ? 'on' : 'off'),
+                  style: {
+                    background: aiMode === 'off' ? '#6b7280' : '#3b82f6',
+                    color: 'white',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }
+                }, `🧠 IA ${aiMode === 'off' ? 'Off' : 'On'}`),
+                
+                React.createElement('button', {
+                  style: {
+                    background: '#10b981',
+                    color: 'white',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '6px',
+                    cursor: 'pointer'
+                  }
+                }, '💾 Salvar'),
+                
+                React.createElement('button', {
+                  style: {
+                    background: '#3b82f6',
+                    color: 'white',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '6px',
+                    cursor: 'pointer'
+                  }
+                }, '✍️ Assinar')
+              )
+            ),
+
+            // Toolbar
+            React.createElement('div', {
+              style: {
+                background: '#f8fafc',
+                borderBottom: '1px solid #e2e8f0',
+                padding: '8px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }
+            },
+              React.createElement('select', {
+                onChange: (e) => e.target.value && insertTemplate(e.target.value),
+                style: {
+                  padding: '4px 8px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '4px',
+                  background: 'white'
+                },
+                value: ""
+              },
+                React.createElement('option', { value: "" }, 'Inserir Template'),
+                React.createElement('option', { value: "receita" }, 'Receita Médica'),
+                React.createElement('option', { value: "atestado" }, 'Atestado'),
+                React.createElement('option', { value: "laudo" }, 'Laudo')
+              ),
+              
+              React.createElement('div', {
+                style: { height: '20px', width: '1px', background: '#d1d5db', margin: '0 8px' }
+              }),
+              
+              React.createElement('button', {
+                style: { padding: '4px 8px', border: '1px solid #d1d5db', background: 'white', borderRadius: '4px', cursor: 'pointer' }
+              }, React.createElement('strong', null, 'B')),
+              React.createElement('button', {
+                style: { padding: '4px 8px', border: '1px solid #d1d5db', background: 'white', borderRadius: '4px', cursor: 'pointer' }
+              }, React.createElement('em', null, 'I')),
+              React.createElement('button', {
+                style: { padding: '4px 8px', border: '1px solid #d1d5db', background: 'white', borderRadius: '4px', cursor: 'pointer' }
+              }, React.createElement('u', null, 'U'))
+            ),
+
+            // Main Workspace
+            React.createElement('div', {
+              style: { flex: 1, display: 'flex' }
+            },
+              // Patient Panel
+              React.createElement('div', {
+                style: {
+                  width: activePanel === 'patient' ? '320px' : '60px',
+                  background: 'white',
+                  borderRight: '1px solid #e2e8f0',
+                  transition: 'width 0.3s ease',
+                  padding: activePanel === 'patient' ? '16px' : '8px'
+                }
+              },
+                React.createElement('button', {
+                  onClick: () => setActivePanel(activePanel === 'patient' ? 'editor' : 'patient'),
+                  style: {
+                    width: '100%',
+                    padding: '8px',
+                    background: activePanel === 'patient' ? '#3b82f6' : '#f3f4f6',
+                    color: activePanel === 'patient' ? 'white' : '#374151',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    marginBottom: '16px'
+                  }
+                }, `👤 ${activePanel === 'patient' ? 'Paciente' : ''}`),
+                
+                activePanel === 'patient' && React.createElement('div', null,
+                  React.createElement('h3', {
+                    style: { margin: '0 0 16px 0', fontSize: '18px' }
+                  }, 'Paciente Ativo'),
+                  React.createElement('div', {
+                    style: { fontSize: '14px', lineHeight: '1.5' }
+                  },
+                    React.createElement('p', null, React.createElement('strong', null, 'Nome:'), ` ${activePatient.name}`),
+                    React.createElement('p', null, React.createElement('strong', null, 'CPF:'), ` ${activePatient.cpf}`),
+                    React.createElement('p', null, React.createElement('strong', null, 'Idade:'), ` ${activePatient.age} anos`),
+                    
+                    React.createElement('div', {
+                      style: { marginTop: '16px' }
+                    },
+                      React.createElement('strong', null, '⚠️ Alergias:'),
+                      React.createElement('ul', {
+                        style: { margin: '4px 0', paddingLeft: '20px' }
+                      }, activePatient.allergies.map(allergy => 
+                        React.createElement('li', { 
+                          key: allergy, 
+                          style: { color: '#ef4444' } 
+                        }, allergy)
+                      ))
+                    ),
+                    
+                    React.createElement('div', {
+                      style: { marginTop: '16px' }
+                    },
+                      React.createElement('strong', null, '🏥 Condições:'),
+                      React.createElement('ul', {
+                        style: { margin: '4px 0', paddingLeft: '20px' }
+                      }, activePatient.conditions.map(condition => 
+                        React.createElement('li', { 
+                          key: condition, 
+                          style: { color: '#f59e0b' } 
+                        }, condition)
+                      ))
+                    )
+                  )
+                )
+              ),
+
+              // Editor Panel
+              React.createElement('div', {
+                style: { flex: 1, display: 'flex', flexDirection: 'column' }
+              },
+                isRecording && React.createElement('div', {
+                  style: {
+                    background: '#dbeafe',
+                    border: '1px solid #3b82f6',
+                    padding: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px'
+                  }
+                },
+                  React.createElement('div', {
+                    style: { color: '#3b82f6', fontSize: '18px' }
+                  }, '🎤'),
+                  React.createElement('div', null,
+                    React.createElement('div', {
+                      style: { fontWeight: '600', color: '#1e40af' }
+                    }, 'Gravando áudio...'),
+                    React.createElement('div', {
+                      style: { fontSize: '14px', color: '#3730a3' }
+                    }, 'Fale naturalmente. A transcrição aparecerá automaticamente.')
+                  )
+                ),
+                
+                React.createElement('textarea', {
+                  value: document,
+                  onChange: (e) => setDocument(e.target.value),
+                  placeholder: "Comece a escrever ou use um template...",
+                  style: {
+                    flex: 1,
+                    border: 'none',
+                    outline: 'none',
+                    padding: '24px',
+                    fontSize: '14px',
+                    lineHeight: '1.6',
+                    fontFamily: 'ui-monospace, "Cascadia Code", monospace',
+                    resize: 'none'
+                  }
+                })
+              ),
+
+              // AI Panel
+              aiMode === 'on' && React.createElement('div', {
+                style: {
+                  width: '300px',
+                  background: 'linear-gradient(to bottom, #dbeafe, #ede9fe)',
+                  borderLeft: '1px solid #e2e8f0',
+                  padding: '16px'
+                }
+              },
+                React.createElement('div', {
+                  style: { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }
+                },
+                  React.createElement('span', {
+                    style: { fontSize: '18px' }
+                  }, '✨'),
+                  React.createElement('h3', {
+                    style: { margin: 0, fontSize: '16px', fontWeight: '600', color: '#1e40af' }
+                  }, 'Assistente IA')
+                ),
+                
+                React.createElement('div', {
+                  style: { space: '12px' }
+                },
+                  activePatient.allergies.length > 0 && document.toLowerCase().includes('medicamento') && React.createElement('div', {
+                    style: {
+                      background: 'white',
+                      padding: '12px',
+                      borderRadius: '8px',
+                      border: '1px solid #fbbf24',
+                      marginBottom: '12px'
+                    }
+                  },
+                    React.createElement('div', {
+                      style: { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }
+                    },
+                      React.createElement('span', null, '⚠️'),
+                      React.createElement('span', {
+                        style: { fontWeight: '600', fontSize: '14px' }
+                      }, 'Alerta de Alergia'),
+                      React.createElement('span', {
+                        style: { background: '#f59e0b', color: 'white', padding: '2px 6px', borderRadius: '12px', fontSize: '12px' }
+                      }, '95%')
+                    ),
+                    React.createElement('p', {
+                      style: { margin: '0 0 8px 0', fontSize: '13px', color: '#374151' }
+                    }, `Paciente alérgico a ${activePatient.allergies.join(', ')}`),
+                    React.createElement('button', {
+                      style: {
+                        background: '#3b82f6',
+                        color: 'white',
+                        border: 'none',
+                        padding: '6px 12px',
+                        borderRadius: '4px',
+                        fontSize: '12px',
+                        cursor: 'pointer'
+                      }
+                    }, '✓ Aplicar')
+                  ),
+                  
+                  document.toLowerCase().includes('dor') && React.createElement('div', {
+                    style: {
+                      background: 'white',
+                      padding: '12px',
+                      borderRadius: '8px',
+                      border: '1px solid #10b981',
+                      marginBottom: '12px'
+                    }
+                  },
+                    React.createElement('div', {
+                      style: { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }
+                    },
+                      React.createElement('span', null, '💊'),
+                      React.createElement('span', {
+                        style: { fontWeight: '600', fontSize: '14px' }
+                      }, 'Analgésico'),
+                      React.createElement('span', {
+                        style: { background: '#10b981', color: 'white', padding: '2px 6px', borderRadius: '12px', fontSize: '12px' }
+                      }, '80%')
+                    ),
+                    React.createElement('p', {
+                      style: { margin: '0 0 8px 0', fontSize: '13px', color: '#374151' }
+                    }, 'Sugestão: Paracetamol 500mg - 8/8h por 3 dias'),
+                    React.createElement('button', {
+                      onClick: () => setDocument(document + '\n\n□ Paracetamol 500mg\n   Dosagem: 500mg\n   Posologia: 8/8h por 3 dias'),
+                      style: {
+                        background: '#3b82f6',
+                        color: 'white',
+                        border: 'none',
+                        padding: '6px 12px',
+                        borderRadius: '4px',
+                        fontSize: '12px',
+                        cursor: 'pointer'
+                      }
+                    }, '✓ Aplicar')
+                  )
+                )
+              )
+            ),
+
+            // Footer
+            React.createElement('div', {
+              style: {
+                background: '#f8fafc',
+                borderTop: '1px solid #e2e8f0',
+                padding: '8px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                fontSize: '12px',
+                color: '#6b7280'
+              }
+            },
+              React.createElement('div', {
+                style: { display: 'flex', gap: '16px' }
+              },
+                React.createElement('span', null, `Paciente: ${activePatient.name}`),
+                React.createElement('span', null, `Idade: ${activePatient.age} anos`),
+                activePatient.allergies.length > 0 && React.createElement('span', {
+                  style: { color: '#ef4444' }
+                }, `⚠️ Alergias: ${activePatient.allergies.join(', ')}`)
+              ),
+              React.createElement('div', null, `Caracteres: ${document.length}`)
+            )
+          )
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(WorkspaceSimple));
+    </script>
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, sans-serif;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+    </style>
+</body>
+</html>

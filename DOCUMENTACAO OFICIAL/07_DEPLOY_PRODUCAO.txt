@@ -1,0 +1,612 @@
+========================================
+REPOMED IA - DEPLOY PRODUÇÃO
+========================================
+
+ESTRATÉGIAS DE DEPLOY:
+=====================
+
+1. CONTAINERIZAÇÃO COM DOCKER
+------------------------------
+
+VANTAGENS:
+✅ Ambiente isolado e consistente
+✅ Fácil escalabilidade horizontal
+✅ Rollback rápido em caso de problemas
+✅ Compatibilidade multi-cloud
+
+ESTRUTURA DE CONTAINERS:
+┌─────────────────────────────────────────┐
+│ nginx-proxy     (Reverse Proxy)         │
+│ ├── repomed-web (Frontend React)        │
+│ ├── repomed-api (Backend Fastify)       │
+│ └── postgres    (Database)              │
+└─────────────────────────────────────────┘
+
+DOCKERFILE BACKEND (repomed-api/Dockerfile):
+```dockerfile
+FROM node:18-alpine
+
+# Instalar dependências do sistema
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    freetype-dev \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
+
+# Definir variáveis do Puppeteer
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+# Criar diretório da aplicação
+WORKDIR /app
+
+# Copiar package files
+COPY package*.json ./
+
+# Instalar dependências
+RUN npm ci --only=production && npm cache clean --force
+
+# Copiar código fonte
+COPY . .
+
+# Criar usuário não-root
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nodejs -u 1001
+
+# Mudar ownership dos arquivos
+RUN chown -R nodejs:nodejs /app
+USER nodejs
+
+# Expor porta
+EXPOSE 8081
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8081/health || exit 1
+
+# Comando de inicialização
+CMD ["npm", "start"]
+```
+
+DOCKERFILE FRONTEND (repomed-web/Dockerfile):
+```dockerfile
+# Build stage
+FROM node:18-alpine as builder
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+RUN npm run build
+
+# Production stage
+FROM nginx:alpine
+
+# Copiar arquivos buildados
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Configuração customizada do Nginx
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost/ || exit 1
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+DOCKER-COMPOSE.YML:
+```yaml
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: repomed_ia
+      POSTGRES_USER: repomed_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - repomed-network
+
+  backend:
+    build: ./repomed-api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://repomed_user:${DB_PASSWORD}@postgres:5432/repomed_ia
+      NODE_ENV: production
+      PORT: 8081
+    depends_on:
+      - postgres
+    ports:
+      - "8081:8081"
+    networks:
+      - repomed-network
+    volumes:
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+
+  frontend:
+    build: ./repomed-web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - repomed-network
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - repomed-network
+
+volumes:
+  postgres_data:
+
+networks:
+  repomed-network:
+    driver: bridge
+```
+
+2. DEPLOY EM VPS/SERVIDOR DEDICADO
+-----------------------------------
+
+CONFIGURAÇÃO DO SERVIDOR:
+┌─────────────────────────────────────────┐
+│ Sistema Operacional: Ubuntu 22.04 LTS   │
+│ CPU: 2+ cores                           │
+│ RAM: 4GB+ (8GB recomendado)             │
+│ Storage: 50GB+ SSD                      │
+│ Rede: IPv4 público + firewall          │
+└─────────────────────────────────────────┘
+
+SCRIPT DE INSTALAÇÃO (setup.sh):
+```bash
+#!/bin/bash
+
+# Atualizar sistema
+sudo apt update && sudo apt upgrade -y
+
+# Instalar Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker $USER
+
+# Instalar Docker Compose
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+
+# Instalar Nginx (para proxy reverso)
+sudo apt install nginx certbot python3-certbot-nginx -y
+
+# Configurar firewall
+sudo ufw allow ssh
+sudo ufw allow http
+sudo ufw allow https
+sudo ufw --force enable
+
+# Criar diretórios do projeto
+sudo mkdir -p /opt/repomed-ia
+sudo chown $USER:$USER /opt/repomed-ia
+
+echo "✅ Servidor configurado com sucesso!"
+echo "Próximo passo: fazer deploy da aplicação"
+```
+
+3. DEPLOY EM CLOUD (AWS/DigitalOcean)
+-------------------------------------
+
+AWS ECS (Elastic Container Service):
+┌─────────────────────────────────────────┐
+│ • Cluster ECS para containers           │
+│ • RDS PostgreSQL para database          │
+│ • ALB (Application Load Balancer)       │
+│ • ECR para registry de containers       │
+│ • CloudWatch para logs/métricas         │
+│ • Route 53 para DNS                     │
+│ • ACM para certificados SSL            │
+└─────────────────────────────────────────┘
+
+DigitalOcean App Platform:
+┌─────────────────────────────────────────┐
+│ • App Platform para containers          │
+│ • Managed Database PostgreSQL           │
+│ • Load Balancer                         │
+│ • Container Registry                    │
+│ • Monitoring & Alerting                 │
+│ • Custom Domain + SSL                   │
+└─────────────────────────────────────────┘
+
+CONFIGURAÇÃO DE SSL/TLS:
+========================
+
+CERTIFICADO COM CERTBOT (Let's Encrypt):
+```bash
+# Instalar certbot
+sudo apt install certbot python3-certbot-nginx
+
+# Obter certificado
+sudo certbot --nginx -d seudominio.com -d www.seudominio.com
+
+# Renovação automática
+sudo crontab -e
+# Adicionar linha:
+0 12 * * * /usr/bin/certbot renew --quiet
+```
+
+NGINX.CONF PARA PRODUÇÃO:
+```nginx
+upstream backend {
+    server backend:8081;
+}
+
+upstream frontend {
+    server frontend:80;
+}
+
+# Redirect HTTP to HTTPS
+server {
+    listen 80;
+    server_name seudominio.com www.seudominio.com;
+    return 301 https://$server_name$request_uri;
+}
+
+# HTTPS Configuration
+server {
+    listen 443 ssl http2;
+    server_name seudominio.com www.seudominio.com;
+
+    ssl_certificate /etc/nginx/ssl/cert.pem;
+    ssl_certificate_key /etc/nginx/ssl/key.pem;
+    
+    # SSL Security Headers
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+    
+    # Security Headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
+    add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
+
+    # Frontend
+    location / {
+        proxy_pass http://frontend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # API
+    location /api/ {
+        proxy_pass http://backend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Timeout configurations
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+
+    # Health checks
+    location /health {
+        proxy_pass http://backend;
+        proxy_set_header Host $host;
+        access_log off;
+    }
+
+    # Static files caching
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+        proxy_pass http://frontend;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+}
+```
+
+VARIÁVEIS DE AMBIENTE PRODUÇÃO:
+==============================
+
+.env.production (Backend):
+```env
+# Database
+DATABASE_URL=postgresql://user:pass@postgres:5432/repomed_ia
+
+# Server
+NODE_ENV=production
+PORT=8081
+HOST=0.0.0.0
+
+# Security
+JWT_SECRET=chave_jwt_super_segura_producao
+SESSION_SECRET=chave_sessao_super_segura_producao
+CORS_ORIGIN=https://seudominio.com
+
+# SSL/Security
+FORCE_HTTPS=true
+TRUST_PROXY=true
+
+# Logging
+LOG_LEVEL=warn
+LOG_FILE=/app/logs/app.log
+
+# Performance
+NODE_OPTIONS=--max-old-space-size=2048
+UV_THREADPOOL_SIZE=16
+
+# PDF
+PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+PDF_TEMP_DIR=/app/temp/pdfs
+```
+
+.env.production (Frontend):
+```env
+VITE_API_URL=https://seudominio.com
+VITE_APP_NAME=RepoMed IA
+VITE_NODE_ENV=production
+VITE_ENABLE_DEBUG=false
+VITE_ENABLE_ANALYTICS=true
+```
+
+SCRIPT DE DEPLOY AUTOMÁTICO:
+============================
+
+deploy.sh:
+```bash
+#!/bin/bash
+
+set -e  # Exit on any error
+
+echo "🚀 Iniciando deploy do RepoMed IA..."
+
+# Configurações
+PROJECT_DIR="/opt/repomed-ia"
+BACKUP_DIR="/opt/backups/repomed-ia"
+DATE=$(date +%Y%m%d_%H%M%S)
+
+# Criar backup do banco de dados
+echo "📦 Criando backup do banco de dados..."
+mkdir -p $BACKUP_DIR
+docker exec postgres pg_dump -U repomed_user repomed_ia > $BACKUP_DIR/backup_$DATE.sql
+
+# Parar containers antigos
+echo "🛑 Parando containers antigos..."
+cd $PROJECT_DIR
+docker-compose down
+
+# Baixar código atualizado
+echo "📥 Baixando código atualizado..."
+git pull origin main
+
+# Rebuild containers
+echo "🔨 Rebuilding containers..."
+docker-compose build --no-cache
+
+# Executar migrações (se necessário)
+echo "🗄️ Executando migrações..."
+# docker-compose run --rm backend npm run migrate
+
+# Iniciar containers
+echo "🚀 Iniciando containers..."
+docker-compose up -d
+
+# Aguardar serviços ficarem saudáveis
+echo "⏳ Aguardando serviços ficarem saudáveis..."
+sleep 30
+
+# Verificar health checks
+echo "🔍 Verificando health checks..."
+curl -f http://localhost:8081/health || {
+    echo "❌ Backend não está saudável!"
+    docker-compose logs backend
+    exit 1
+}
+
+curl -f http://localhost/ || {
+    echo "❌ Frontend não está respondendo!"
+    docker-compose logs frontend
+    exit 1
+}
+
+# Limpeza
+echo "🧹 Limpando images antigas..."
+docker image prune -f
+
+echo "✅ Deploy concluído com sucesso!"
+echo "🌐 Aplicação disponível em: https://seudominio.com"
+```
+
+MONITORAMENTO E ALERTAS:
+========================
+
+DOCKER COMPOSE COM MONITORING:
+```yaml
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: senha_segura
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+  node-exporter:
+    image: prom/node-exporter
+    ports:
+      - "9100:9100"
+
+volumes:
+  grafana_data:
+```
+
+BACKUP AUTOMÁTICO:
+==================
+
+backup.sh:
+```bash
+#!/bin/bash
+
+BACKUP_DIR="/opt/backups/repomed-ia"
+DATE=$(date +%Y%m%d_%H%M%S)
+RETENTION_DAYS=30
+
+# Criar diretório de backup
+mkdir -p $BACKUP_DIR
+
+# Backup do banco de dados
+docker exec postgres pg_dump -U repomed_user repomed_ia | gzip > $BACKUP_DIR/db_backup_$DATE.sql.gz
+
+# Backup de uploads (se existir)
+if [ -d "/opt/repomed-ia/uploads" ]; then
+    tar -czf $BACKUP_DIR/uploads_backup_$DATE.tar.gz -C /opt/repomed-ia uploads/
+fi
+
+# Backup de configurações
+tar -czf $BACKUP_DIR/config_backup_$DATE.tar.gz -C /opt/repomed-ia .env docker-compose.yml nginx.conf
+
+# Remover backups antigos
+find $BACKUP_DIR -name "*.gz" -mtime +$RETENTION_DAYS -delete
+find $BACKUP_DIR -name "*.sql.gz" -mtime +$RETENTION_DAYS -delete
+
+echo "✅ Backup concluído: $DATE"
+```
+
+Crontab para backup automático:
+```bash
+# Backup diário às 2:00 AM
+0 2 * * * /opt/scripts/backup.sh >> /var/log/repomed-backup.log 2>&1
+```
+
+ROLLBACK EM CASO DE PROBLEMAS:
+==============================
+
+rollback.sh:
+```bash
+#!/bin/bash
+
+set -e
+
+BACKUP_DIR="/opt/backups/repomed-ia"
+PROJECT_DIR="/opt/repomed-ia"
+
+echo "⚠️  Iniciando rollback..."
+
+# Listar backups disponíveis
+echo "Backups disponíveis:"
+ls -la $BACKUP_DIR/*.sql.gz | tail -5
+
+read -p "Digite o nome do backup para restaurar (ex: db_backup_20240115_020001.sql.gz): " BACKUP_FILE
+
+if [ ! -f "$BACKUP_DIR/$BACKUP_FILE" ]; then
+    echo "❌ Backup não encontrado!"
+    exit 1
+fi
+
+# Parar aplicação
+cd $PROJECT_DIR
+docker-compose down
+
+# Restaurar banco de dados
+echo "🔄 Restaurando banco de dados..."
+gunzip -c $BACKUP_DIR/$BACKUP_FILE | docker exec -i postgres psql -U repomed_user -d repomed_ia
+
+# Voltar para commit anterior (opcional)
+git reset --hard HEAD~1
+
+# Rebuild e restart
+docker-compose build
+docker-compose up -d
+
+echo "✅ Rollback concluído!"
+```
+
+CHECKLIST DE DEPLOY:
+====================
+
+PRÉ-DEPLOY:
+☐ Testes passando em ambiente de desenvolvimento
+☐ Backup do banco de dados criado
+☐ Variáveis de ambiente configuradas
+☐ Certificados SSL válidos
+☐ Firewall configurado corretamente
+☐ Monitoramento configurado
+
+PÓS-DEPLOY:
+☐ Health checks passando
+☐ Frontend acessível via HTTPS
+☐ API respondendo corretamente
+☐ Logs sem erros críticos
+☐ Métricas de performance normais
+☐ Backup automático configurado
+☐ Alertas de monitoramento ativos
+
+TROUBLESHOOTING PRODUÇÃO:
+=========================
+
+Container não inicia:
+```bash
+# Verificar logs
+docker-compose logs service_name
+
+# Verificar recursos
+docker stats
+
+# Verificar rede
+docker network ls
+```
+
+Banco de dados inacessível:
+```bash
+# Verificar status do PostgreSQL
+docker exec postgres pg_isready -U repomed_user
+
+# Verificar conexões
+docker exec postgres psql -U postgres -c "SELECT * FROM pg_stat_activity;"
+```
+
+Performance ruim:
+```bash
+# Verificar uso de recursos
+htop
+df -h
+free -m
+
+# Logs de performance
+docker-compose logs backend | grep "slow"
+```
