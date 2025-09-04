@@ -5,14 +5,7 @@ import multipart from '@fastify/multipart';
 import rateLimit from '@fastify/rate-limit';
 import helmet from '@fastify/helmet';
 import compress from '@fastify/compress';
-// Configurações locais para evitar problema de caminho
-const REPOMED_CONFIG = {
-  monitoring: { logLevel: 'info' },
-  urls: { frontend: 'http://localhost:3008' },
-  security: { jwtSecret: 'repomed-jwt-secret', jwtExpiry: '24h', rateLimitMax: 100, rateLimitWindow: '15m' },
-  redis: { host: 'localhost', port: 6379, password: process.env.REDIS_PASSWORD },
-  ports: { backend: 8081 }
-};
+import { REPOMED_CONFIG } from '../../config/master.config';
 import { errorHandler } from './middleware/errorHandler';
 import { requestLogger } from './middleware/requestLogger';
 import { metricsCollector } from './middleware/metrics';
