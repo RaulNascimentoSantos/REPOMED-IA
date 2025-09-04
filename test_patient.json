@@ -1,0 +1,11 @@
+{
+  "name": "João Silva",
+  "cpf": "12345678901",
+  "dateOfBirth": "1985-05-15",
+  "email": "joao.silva@email.com",
+  "phone": "(11) 99999-9999",
+  "address": "Rua das Flores, 123",
+  "city": "São Paulo",
+  "state": "SP",
+  "zipCode": "01234-567"
+}

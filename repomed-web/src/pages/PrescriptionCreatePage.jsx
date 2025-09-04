@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
-const API_BASE = 'http://localhost:8085'
+const API_BASE = 'http://localhost:8081'
 
 export default function PrescriptionCreatePage() {
   const navigate = useNavigate()

@@ -36,7 +36,7 @@ export default function DocumentDetail(){
   if (error) return <ErrorState error={error}/>; 
   if (!data) return null;
 
-  const API = import.meta.env.VITE_API_URL || 'http://localhost:8085';
+  const API = import.meta.env.VITE_API_URL || 'http://localhost:8081';
   
   return (
     <div className="space-y-4 p-6">

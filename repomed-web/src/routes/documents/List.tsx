@@ -36,7 +36,7 @@ export default function DocumentsList(){
     );
   }
 
-  const API = import.meta.env.VITE_API_URL || 'http://localhost:8085';
+  const API = import.meta.env.VITE_API_URL || 'http://localhost:8081';
   
   return (
     <div className="p-6 space-y-4">

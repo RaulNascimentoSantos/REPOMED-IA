@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 
-const API_BASE = 'http://localhost:8090'
+const API_BASE = 'http://localhost:8081'
 
 export default function PatientEditPage() {
   const navigate = useNavigate()

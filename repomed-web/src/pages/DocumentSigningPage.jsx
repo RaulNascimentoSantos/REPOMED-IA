@@ -20,7 +20,7 @@ const DocumentSigningPage = () => {
 
   const fetchDocument = async () => {
     try {
-      const response = await fetch(`http://localhost:8085/api/documents/${id}`);
+      const response = await fetch(`http://localhost:8081/api/documents/${id}`);
       if (response.ok) {
         const data = await response.json();
         setDocument(data);
@@ -46,7 +46,7 @@ const DocumentSigningPage = () => {
         password: certificatePassword
       };
 
-      const response = await fetch(`http://localhost:8085/api/documents/${id}/sign`, {
+      const response = await fetch(`http://localhost:8081/api/documents/${id}/sign`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

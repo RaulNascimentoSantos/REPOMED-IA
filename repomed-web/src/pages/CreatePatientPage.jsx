@@ -51,7 +51,7 @@ export default function CreatePatientPage() {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:8090/api/patients', {
+      const response = await fetch('http://localhost:8081/api/patients', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

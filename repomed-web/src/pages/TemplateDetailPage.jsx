@@ -15,7 +15,7 @@ const TemplateDetailPage = () => {
 
   const fetchTemplate = async () => {
     try {
-      const response = await fetch(`http://localhost:8085/api/templates/${id}`);
+      const response = await fetch(`http://localhost:8081/api/templates/${id}`);
       if (response.ok) {
         const data = await response.json();
         setTemplate(data);

@@ -13,7 +13,7 @@ export default function UploadPage(){
     const form=new FormData();
     form.append('file',file);
     
-    const API=import.meta.env.VITE_API_BASE||'http://localhost:8085';
+    const API=import.meta.env.VITE_API_BASE||'http://localhost:8081';
     const xhr=new XMLHttpRequest();
     
     xhr.open('POST',`${API}/api/upload`);

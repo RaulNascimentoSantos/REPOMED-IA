@@ -1,6 +1,6 @@
 import { ProblemDetails } from '@repomed/contracts';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8085';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8081';
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -25,4 +25,5 @@ export const api = {
   post: <T>(p: string, b?: unknown) => request<T>(p, { method: 'POST', body: JSON.stringify(b || {}) }),
   put:  <T>(p: string, b?: unknown) => request<T>(p, { method: 'PUT',  body: JSON.stringify(b || {}) }),
   del:  <T>(p: string) => request<T>(p, { method: 'DELETE' }),
+  patch: <T>(p: string, b?: unknown) => request<T>(p, { method: 'PATCH', body: JSON.stringify(b || {}) }),
 };

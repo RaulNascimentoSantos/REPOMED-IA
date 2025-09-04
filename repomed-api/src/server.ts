@@ -8,7 +8,7 @@ import compress from '@fastify/compress';
 // Configurações locais para evitar problema de caminho
 const REPOMED_CONFIG = {
   monitoring: { logLevel: 'info' },
-  urls: { frontend: 'http://localhost:3010' },
+  urls: { frontend: 'http://localhost:3008' },
   security: { jwtSecret: 'repomed-jwt-secret', jwtExpiry: '24h', rateLimitMax: 100, rateLimitWindow: '15m' },
   redis: { host: 'localhost', port: 6379, password: process.env.REDIS_PASSWORD },
   ports: { backend: 8081 }
@@ -27,6 +27,9 @@ import { eq, desc } from 'drizzle-orm';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { registerTemplateRoutes } from './routes/templates';
+import { registerSignatureRoutes } from './routes/signatures.js';
+import { registerCid10Routes } from './routes/cid10.js';
+import { registerMedicationsRoutes } from './routes/medications.js';
 import { crmValidationService } from './services/CrmValidation';
 
 // ====== CONFIGURAÇÃO FASTIFY ======
@@ -52,34 +55,34 @@ server.setErrorHandler(errorHandler);
 
 // ====== PLUGINS REGISTRATION ======
 const registerPlugins = async () => {
-  // Security
-  await server.register(helmet, {
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", "data:", "https:"],
-      },
-    },
-  });
+  // Security (helmet temporariamente desabilitado por incompatibilidade de versão)
+  // await server.register(helmet, {
+  //   contentSecurityPolicy: {
+  //     directives: {
+  //       defaultSrc: ["'self'"],
+  //       styleSrc: ["'self'", "'unsafe-inline'"],
+  //       scriptSrc: ["'self'", "'unsafe-inline'"],
+  //       imgSrc: ["'self'", "data:", "https:"],
+  //     },
+  //   },
+  // });
 
-  // CORS
-  await server.register(cors, {
-    origin: (origin, cb) => {
-      const allowedOrigins = [
-        REPOMED_CONFIG.urls.frontend,
-        'http://localhost:3000', // Grafana
-        'http://localhost:5601', // Kibana
-      ];
-      if (!origin || allowedOrigins.includes(origin)) {
-        cb(null, true);
-      } else {
-        cb(new Error('Not allowed by CORS'));
-      }
-    },
-    credentials: true,
-  });
+  // CORS (temporariamente desabilitado por incompatibilidade de versão)
+  // await server.register(cors, {
+  //   origin: (origin, cb) => {
+  //     const allowedOrigins = [
+  //       REPOMED_CONFIG.urls.frontend,
+  //       'http://localhost:3000', // Grafana
+  //       'http://localhost:5601', // Kibana
+  //     ];
+  //     if (!origin || allowedOrigins.includes(origin)) {
+  //       cb(null, true);
+  //     } else {
+  //       cb(new Error('Not allowed by CORS'), false);
+  //     }
+  //   },
+  //   credentials: true,
+  // });
 
   // JWT
   await server.register(jwt, {
@@ -89,31 +92,26 @@ const registerPlugins = async () => {
     },
   });
 
-  // Rate limiting
-  await server.register(rateLimit, {
-    max: REPOMED_CONFIG.security.rateLimitMax,
-    timeWindow: REPOMED_CONFIG.security.rateLimitWindow,
-    redis: {
-      host: REPOMED_CONFIG.redis.host,
-      port: REPOMED_CONFIG.redis.port,
-      password: REPOMED_CONFIG.redis.password,
-    },
-  });
+  // Rate limiting (temporariamente desabilitado por incompatibilidade de versão)
+  // await server.register(rateLimit, {
+  //   max: REPOMED_CONFIG.security.rateLimitMax,
+  //   timeWindow: REPOMED_CONFIG.security.rateLimitWindow,
+  // });
 
-  // Compression
-  await server.register(compress, {
-    global: true,
-    threshold: 1024,
-    encodings: ['gzip', 'deflate'],
-  });
+  // Compression (temporariamente desabilitado por incompatibilidade de versão)
+  // await server.register(compress, {
+  //   global: true,
+  //   threshold: 1024,
+  //   encodings: ['gzip', 'deflate'],
+  // });
 
-  // File upload
-  await server.register(multipart, {
-    limits: {
-      fileSize: 10 * 1024 * 1024, // 10MB
-      files: 10,
-    },
-  });
+  // File upload (temporariamente desabilitado por incompatibilidade de versão)
+  // await server.register(multipart, {
+  //   limits: {
+  //     fileSize: 10 * 1024 * 1024, // 10MB
+  //     files: 10,
+  //   },
+  // });
 
   // Metrics
   server.addHook('onRequest', async (request, reply) => {
@@ -691,6 +689,15 @@ const registerRoutes = async () => {
 
   // ====== TEMPLATES ROUTES ======
   await registerTemplateRoutes(server);
+  
+  // ====== SIGNATURE ROUTES ======
+  await registerSignatureRoutes(server);
+  
+  // ====== CID-10 ROUTES ======
+  await registerCid10Routes(server);
+  
+  // ====== MEDICATIONS ROUTES ======
+  await registerMedicationsRoutes(server);
 };
 
 // ====== STARTUP ======

@@ -1,0 +1,26 @@
+{
+  "title": "Receita Médica - João Silva",
+  "patientId": "a011a35a-119b-4ff3-a875-63b5e51e4017",
+  "templateId": "receita-simples",
+  "content": {
+    "medications": [
+      {
+        "name": "Dipirona 500mg",
+        "dosage": "1 comprimido",
+        "frequency": "de 6 em 6 horas",
+        "duration": "por 3 dias",
+        "instructions": "Em caso de dor ou febre"
+      },
+      {
+        "name": "Ibuprofeno 600mg", 
+        "dosage": "1 comprimido",
+        "frequency": "de 8 em 8 horas",
+        "duration": "por 5 dias",
+        "instructions": "Após as refeições"
+      }
+    ],
+    "observations": "Paciente apresenta quadro gripal. Retornar se sintomas piorarem.",
+    "date": "2025-01-04"
+  },
+  "type": "receituario"
+}

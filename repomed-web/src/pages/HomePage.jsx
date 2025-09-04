@@ -8,8 +8,8 @@ export default function HomePage() {
   React.useEffect(() => {
     // Test API connection and get stats
     Promise.all([
-      fetch('http://localhost:8085/api/templates'),
-      fetch('http://localhost:8085/documentation').catch(() => null)
+      fetch('http://localhost:8081/api/templates'),
+      fetch('http://localhost:8081/documentation').catch(() => null)
     ]).then(async ([templatesRes, docsRes]) => {
       if (templatesRes.ok) {
         setApiStatus('online')
@@ -208,7 +208,7 @@ export default function HomePage() {
           </p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', flexWrap: 'wrap' }}>
             <a 
-              href="http://localhost:8085/documentation" 
+              href="http://localhost:8081/documentation" 
               target="_blank"
               rel="noopener noreferrer"
               style={{ color: '#c7d2fe', textDecoration: 'none' }}

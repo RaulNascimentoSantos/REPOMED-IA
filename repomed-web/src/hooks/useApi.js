@@ -2,7 +2,7 @@ import { useQuery, useMutation, useInfiniteQuery } from '@tanstack/react-query'
 import { queryKeys, invalidationPatterns, prefetchStrategies, performanceMetrics } from '../lib/queryClient'
 
 // Base API URL
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8085'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8081'
 
 // ================ UTILITY FUNCTIONS ================
 

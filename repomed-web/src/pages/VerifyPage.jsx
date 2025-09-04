@@ -31,7 +31,7 @@ export default function VerifyPage() {
     
     try {
       const includeMetadata = searchParams.get('metadata') === 'true'
-      const API = import.meta.env.VITE_API_BASE || 'http://localhost:8085'
+      const API = import.meta.env.VITE_API_BASE || 'http://localhost:8081'
       const response = await fetch(`${API}/api/documents/verify/${documentHash}?includeMetadata=${includeMetadata}`)
       const data = await response.json()
       

@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // API instance with base configuration
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8090',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8081',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -13,7 +13,7 @@ export const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     // Add auth token if available
-    const token = localStorage.getItem('authToken')
+    const token = localStorage.getItem('repomed_token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -30,8 +30,10 @@ api.interceptors.response.use(
   (error) => {
     // Handle common errors
     if (error.response?.status === 401) {
-      localStorage.removeItem('authToken')
-      window.location.href = '/login'
+      localStorage.removeItem('repomed_token')
+      localStorage.removeItem('repomed_refresh_token')
+      localStorage.removeItem('repomed_user')
+      window.location.href = '/auth/login'
     }
     return Promise.reject(error)
   }
