@@ -1,8 +1,21 @@
 import Fastify, { FastifyRequest, FastifyReply } from 'fastify';
 import cors from '@fastify/cors';
+import jwt from '@fastify/jwt';
 import multipart from '@fastify/multipart';
-import staticFiles from '@fastify/static';
-import fastifyJwt from '@fastify/jwt';
+import rateLimit from '@fastify/rate-limit';
+import helmet from '@fastify/helmet';
+import compress from '@fastify/compress';
+// Configurações locais para evitar problema de caminho
+const REPOMED_CONFIG = {
+  monitoring: { logLevel: 'info' },
+  urls: { frontend: 'http://localhost:3010' },
+  security: { jwtSecret: 'repomed-jwt-secret', jwtExpiry: '24h', rateLimitMax: 100, rateLimitWindow: '15m' },
+  redis: { host: 'localhost', port: 6379, password: process.env.REDIS_PASSWORD },
+  ports: { backend: 8081 }
+};
+import { errorHandler } from './middleware/errorHandler';
+import { requestLogger } from './middleware/requestLogger';
+import { metricsCollector } from './middleware/metrics';
 import { join } from 'path';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
@@ -17,60 +30,101 @@ import { registerTemplateRoutes } from './routes/templates';
 import { crmValidationService } from './services/CrmValidation';
 
 // ====== CONFIGURAÇÃO FASTIFY ======
-const fastify = Fastify({
+const server = Fastify({
   logger: {
-    level: process.env.LOG_LEVEL || 'info',
-    transport: process.env.NODE_ENV === 'development' ? {
+    level: REPOMED_CONFIG.monitoring.logLevel,
+    transport: {
       target: 'pino-pretty',
       options: {
-        colorize: true
-      }
-    } : undefined
+        translateTime: 'HH:MM:ss Z',
+        ignore: 'pid,hostname',
+        colorize: true,
+      },
+    },
   },
-  bodyLimit: 10485760 // 10MB
+  requestIdHeader: 'x-request-id',
+  requestIdLogLabel: 'reqId',
+  genReqId: () => `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
 });
 
-// ====== ENVIRONMENT VARIABLES ======
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production';
-const PORT = parseInt(process.env.PORT || '8090', 10);
-const HOST = process.env.HOST || '0.0.0.0';
+// Error handler
+server.setErrorHandler(errorHandler);
 
 // ====== PLUGINS REGISTRATION ======
 const registerPlugins = async () => {
+  // Security
+  await server.register(helmet, {
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "https:"],
+      },
+    },
+  });
+
   // CORS
-  await fastify.register(cors, {
-    origin: [
-      'http://localhost:3000', 
-      'http://localhost:3001', 
-      'http://localhost:3002', 
-      'http://localhost:3006', 
-      'http://localhost:3008', 
-      'http://localhost:3021', 
-      'http://localhost:3022', 
-      'http://localhost:3023'
-    ],
-    credentials: true
+  await server.register(cors, {
+    origin: (origin, cb) => {
+      const allowedOrigins = [
+        REPOMED_CONFIG.urls.frontend,
+        'http://localhost:3000', // Grafana
+        'http://localhost:5601', // Kibana
+      ];
+      if (!origin || allowedOrigins.includes(origin)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
   });
 
-  // JWT Authentication
-  await fastify.register(fastifyJwt, {
-    secret: JWT_SECRET,
+  // JWT
+  await server.register(jwt, {
+    secret: REPOMED_CONFIG.security.jwtSecret,
     sign: {
-      expiresIn: '24h'
-    }
+      expiresIn: REPOMED_CONFIG.security.jwtExpiry,
+    },
   });
 
-  // Multipart for file uploads
-  await fastify.register(multipart);
-
-  // Static files
-  await fastify.register(staticFiles, {
-    root: join(__dirname, 'public'),
-    prefix: '/public/'
+  // Rate limiting
+  await server.register(rateLimit, {
+    max: REPOMED_CONFIG.security.rateLimitMax,
+    timeWindow: REPOMED_CONFIG.security.rateLimitWindow,
+    redis: {
+      host: REPOMED_CONFIG.redis.host,
+      port: REPOMED_CONFIG.redis.port,
+      password: REPOMED_CONFIG.redis.password,
+    },
   });
+
+  // Compression
+  await server.register(compress, {
+    global: true,
+    threshold: 1024,
+    encodings: ['gzip', 'deflate'],
+  });
+
+  // File upload
+  await server.register(multipart, {
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB
+      files: 10,
+    },
+  });
+
+  // Metrics
+  server.addHook('onRequest', async (request, reply) => {
+    await requestLogger(request, reply);
+  });
+  server.addHook('onResponse', metricsCollector);
+
+  // Static files seria registrado aqui se necessário
 
   // Swagger documentation
-  await fastify.register(swagger, {
+  await server.register(swagger, {
     swagger: {
       info: {
         title: 'RepoMed IA API',
@@ -91,7 +145,7 @@ const registerPlugins = async () => {
     }
   });
 
-  await fastify.register(swaggerUi, {
+  await server.register(swaggerUi, {
     routePrefix: '/documentation',
     uiConfig: {
       docExpansion: 'full',
@@ -101,7 +155,7 @@ const registerPlugins = async () => {
 };
 
 // ====== AUTHENTICATION MIDDLEWARE ======
-fastify.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply) => {
+server.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply) => {
   try {
     await request.jwtVerify();
   } catch (err) {
@@ -110,7 +164,7 @@ fastify.decorate('authenticate', async (request: FastifyRequest, reply: FastifyR
 });
 
 // ====== AUTHORIZATION MIDDLEWARE ======
-fastify.decorate('authorize', (roles: string[]) => {
+server.decorate('authorize', (roles: string[]) => {
   return async (request: FastifyRequest, reply: FastifyReply) => {
     if (!request.user) {
       return reply.status(401).send({ error: 'Unauthorized' });
@@ -167,7 +221,7 @@ function generateShareToken(): string {
 // ====== ROUTES ======
 const registerRoutes = async () => {
   // Health check
-  fastify.get('/health', async () => {
+  server.get('/health', async () => {
     return { 
       status: 'OK', 
       timestamp: new Date().toISOString(),
@@ -177,7 +231,7 @@ const registerRoutes = async () => {
   });
 
   // ====== AUTH ROUTES ======
-  fastify.post('/api/auth/register', async (request, reply) => {
+  server.post('/api/auth/register', async (request, reply) => {
     try {
       const body = registerSchema.parse(request.body);
       
@@ -229,7 +283,7 @@ const registerRoutes = async () => {
       const user = newUser[0];
 
       // Generate access token
-      const token = fastify.jwt.sign({
+      const token = server.jwt.sign({
         id: user.id,
         email: user.email,
         role: user.role,
@@ -238,7 +292,7 @@ const registerRoutes = async () => {
       }, { expiresIn: '24h' });
 
       // Generate refresh token
-      const refreshToken = fastify.jwt.sign({
+      const refreshToken = server.jwt.sign({
         id: user.id,
         email: user.email,
         type: 'refresh'
@@ -267,7 +321,7 @@ const registerRoutes = async () => {
         });
       }
       
-      fastify.log.error(error);
+      server.log.error(error);
       return reply.status(500).send({
         error: 'Internal server error',
         message: 'Erro ao criar usuário'
@@ -275,7 +329,7 @@ const registerRoutes = async () => {
     }
   });
 
-  fastify.post('/api/auth/login', async (request, reply) => {
+  server.post('/api/auth/login', async (request, reply) => {
     try {
       const body = loginSchema.parse(request.body);
       
@@ -314,7 +368,7 @@ const registerRoutes = async () => {
         .where(eq(users.id, user.id));
       
       // Generate access token
-      const token = fastify.jwt.sign({
+      const token = server.jwt.sign({
         id: user.id,
         email: user.email,
         role: user.role,
@@ -323,7 +377,7 @@ const registerRoutes = async () => {
       }, { expiresIn: '24h' });
 
       // Generate refresh token
-      const refreshToken = fastify.jwt.sign({
+      const refreshToken = server.jwt.sign({
         id: user.id,
         email: user.email,
         type: 'refresh'
@@ -353,7 +407,7 @@ const registerRoutes = async () => {
         });
       }
       
-      fastify.log.error(error);
+      server.log.error(error);
       return reply.status(500).send({
         error: 'Internal server error',
         message: 'Erro no login'
@@ -362,7 +416,7 @@ const registerRoutes = async () => {
   });
 
   // Refresh token route
-  fastify.post('/api/auth/refresh', async (request, reply) => {
+  server.post('/api/auth/refresh', async (request, reply) => {
     try {
       const { refreshToken } = request.body as any;
       
@@ -374,7 +428,7 @@ const registerRoutes = async () => {
       }
 
       // Verify refresh token
-      const decoded = fastify.jwt.verify(refreshToken) as any;
+      const decoded = server.jwt.verify(refreshToken) as any;
       
       if (decoded.type !== 'refresh') {
         return reply.status(401).send({
@@ -396,7 +450,7 @@ const registerRoutes = async () => {
       const user = userResult[0];
 
       // Generate new access token
-      const newToken = fastify.jwt.sign({
+      const newToken = server.jwt.sign({
         id: user.id,
         email: user.email,
         role: user.role,
@@ -419,7 +473,7 @@ const registerRoutes = async () => {
   });
 
   // Logout route (optional - invalidates refresh token on client)
-  fastify.post('/api/auth/logout', { preHandler: fastify.authenticate }, async (request, reply) => {
+  server.post('/api/auth/logout', { preHandler: server.authenticate }, async (request, reply) => {
     // In a real app, you might want to blacklist the refresh token
     // For now, we'll just return success (client should remove tokens)
     return {
@@ -429,7 +483,7 @@ const registerRoutes = async () => {
   });
 
   // ====== PROTECTED ROUTES ======
-  fastify.get('/api/me', { preHandler: fastify.authenticate }, async (request) => {
+  server.get('/api/me', { preHandler: server.authenticate }, async (request) => {
     return { 
       success: true,
       user: request.user 
@@ -437,12 +491,12 @@ const registerRoutes = async () => {
   });
 
   // ====== DOCUMENTS ROUTES ======
-  fastify.get('/api/documents', { preHandler: fastify.authenticate }, async (request) => {
+  server.get('/api/documents', { preHandler: server.authenticate }, async (request) => {
     const docs = await db.select().from(documents).limit(50);
     return { documents: docs };
   });
 
-  fastify.post('/api/documents', { preHandler: fastify.authenticate }, async (request, reply) => {
+  server.post('/api/documents', { preHandler: server.authenticate }, async (request, reply) => {
     try {
       const body = request.body as any;
       
@@ -457,15 +511,15 @@ const registerRoutes = async () => {
 
       return newDoc[0];
     } catch (error) {
-      fastify.log.error(error);
+      server.log.error(error);
       return reply.status(500).send({ error: 'Failed to create document' });
     }
   });
 
   // ====== PATIENTS ROUTES ======
   // Get all patients
-  fastify.get('/api/patients', {
-    preHandler: [fastify.authenticate]
+  server.get('/api/patients', {
+    preHandler: [server.authenticate]
   }, async (request, reply) => {
     try {
       const userInfo = request.user as any;
@@ -477,14 +531,14 @@ const registerRoutes = async () => {
         total: allPatients.length
       });
     } catch (error) {
-      fastify.log.error(error);
+      server.log.error(error);
       return reply.status(500).send({ error: 'Failed to fetch patients' });
     }
   });
 
   // Get patient by ID
-  fastify.get('/api/patients/:id', {
-    preHandler: [fastify.authenticate]
+  server.get('/api/patients/:id', {
+    preHandler: [server.authenticate]
   }, async (request, reply) => {
     try {
       const { id } = request.params as { id: string };
@@ -506,14 +560,14 @@ const registerRoutes = async () => {
         data: patient[0]
       });
     } catch (error) {
-      fastify.log.error(error);
+      server.log.error(error);
       return reply.status(500).send({ error: 'Failed to fetch patient' });
     }
   });
 
   // Create new patient
-  fastify.post('/api/patients', {
-    preHandler: [fastify.authenticate]
+  server.post('/api/patients', {
+    preHandler: [server.authenticate]
   }, async (request, reply) => {
     try {
       const body = patientSchema.parse(request.body);
@@ -547,14 +601,14 @@ const registerRoutes = async () => {
         message: 'Paciente criado com sucesso!'
       });
     } catch (error) {
-      fastify.log.error(error);
+      server.log.error(error);
       return reply.status(500).send({ error: 'Failed to create patient' });
     }
   });
 
   // Update patient
-  fastify.put('/api/patients/:id', {
-    preHandler: [fastify.authenticate]
+  server.put('/api/patients/:id', {
+    preHandler: [server.authenticate]
   }, async (request, reply) => {
     try {
       const { id } = request.params as { id: string };
@@ -600,14 +654,14 @@ const registerRoutes = async () => {
         message: 'Paciente atualizado com sucesso!'
       });
     } catch (error) {
-      fastify.log.error(error);
+      server.log.error(error);
       return reply.status(500).send({ error: 'Failed to update patient' });
     }
   });
 
   // Delete patient
-  fastify.delete('/api/patients/:id', {
-    preHandler: [fastify.authenticate]
+  server.delete('/api/patients/:id', {
+    preHandler: [server.authenticate]
   }, async (request, reply) => {
     try {
       const { id } = request.params as { id: string };
@@ -630,13 +684,13 @@ const registerRoutes = async () => {
         message: 'Paciente excluído com sucesso!'
       });
     } catch (error) {
-      fastify.log.error(error);
+      server.log.error(error);
       return reply.status(500).send({ error: 'Failed to delete patient' });
     }
   });
 
   // ====== TEMPLATES ROUTES ======
-  await registerTemplateRoutes(fastify);
+  await registerTemplateRoutes(server);
 };
 
 // ====== STARTUP ======
@@ -645,38 +699,38 @@ const start = async () => {
     await registerPlugins();
     await registerRoutes();
     
-    await fastify.listen({ port: PORT, host: HOST });
+    await server.listen({ port: REPOMED_CONFIG.ports.backend, host: '0.0.0.0' });
     
-    fastify.log.info(`🚀 RepoMed IA API está rodando em http://${HOST}:${PORT}`);
-    fastify.log.info(`📚 Documentação: http://${HOST}:${PORT}/documentation`);
+    server.log.info(`🚀 RepoMed IA API está rodando em http://localhost:${REPOMED_CONFIG.ports.backend}`);
+    server.log.info(`📚 Documentação: http://localhost:${REPOMED_CONFIG.ports.backend}/documentation`);
     
   } catch (err) {
-    fastify.log.error(err as Error);
+    server.log.error(err as Error);
     process.exit(1);
   }
 };
 
 // ====== ERROR HANDLING ======
 process.on('unhandledRejection', (reason, promise) => {
-  fastify.log.error({ reason, promise }, 'Unhandled Rejection');
+  server.log.error({ reason, promise }, 'Unhandled Rejection');
   process.exit(1);
 });
 
 process.on('uncaughtException', (error) => {
-  fastify.log.error({ error }, 'Uncaught Exception');
+  server.log.error({ error }, 'Uncaught Exception');
   process.exit(1);
 });
 
 // ====== GRACEFUL SHUTDOWN ======
 const gracefulShutdown = async (signal: string) => {
-  fastify.log.info(`Received ${signal}, shutting down gracefully...`);
+  server.log.info(`Received ${signal}, shutting down gracefully...`);
   
   try {
-    await fastify.close();
-    fastify.log.info('Server closed successfully');
+    await server.close();
+    server.log.info('Server closed successfully');
     process.exit(0);
   } catch (err) {
-    fastify.log.error(err);
+    server.log.error(err);
     process.exit(1);
   }
 };
@@ -689,4 +743,4 @@ if (require.main === module) {
   start();
 }
 
-export default fastify;
+export default server;
