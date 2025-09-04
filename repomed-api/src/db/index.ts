@@ -3,7 +3,7 @@ import postgres from 'postgres';
 import * as schema from './schema';
 
 // Environment variables
-const connectionString = process.env.DATABASE_URL!;
+const connectionString = process.env.DATABASE_URL || 'postgresql://repomed:senha123@localhost:5432/repomed_dev';
 
 // Disable prefetch as it is not supported for "Transaction" pool mode
 const client = postgres(connectionString, { prepare: false });

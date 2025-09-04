@@ -1,6 +1,6 @@
 import React from 'react'
 
-export function TestSimple() {
+export default function TestSimple() {
   return (
     <div style={{ 
       padding: '20px', 

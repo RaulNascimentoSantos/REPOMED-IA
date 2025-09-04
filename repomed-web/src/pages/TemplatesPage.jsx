@@ -1,215 +1,600 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { FileText, Plus, Search, Filter, Clock, User, Shield } from 'lucide-react';
+import React, { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
-const TemplatesPage = () => {
-  const [templates, setTemplates] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedSpecialty, setSelectedSpecialty] = useState('all');
+const API_BASE = 'http://localhost:8085'
 
-  useEffect(() => {
-    fetchTemplates();
-  }, []);
+export default function TemplatesPage() {
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedSpecialty, setSelectedSpecialty] = useState('all')
+  const [selectedCategory, setSelectedCategory] = useState('all')
+  const [viewMode, setViewMode] = useState('grid') // grid or list
+  const [sortBy, setSortBy] = useState('name') // name, specialty, createdAt
+  const [sortOrder, setSortOrder] = useState('asc')
 
-  const fetchTemplates = async () => {
-    try {
-      const response = await fetch('http://localhost:8082/api/templates');
-      const data = await response.json();
-      setTemplates(data.data || []);
-    } catch (error) {
-      console.error('Error fetching templates:', error);
-    } finally {
-      setLoading(false);
+  // Fetch templates from API
+  const { data: templatesData, isLoading, error } = useQuery({
+    queryKey: ['templates'],
+    queryFn: async () => {
+      const response = await fetch(`${API_BASE}/api/templates`)
+      if (!response.ok) throw new Error('Erro ao carregar templates')
+      return response.json()
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  })
+
+  // Delete template mutation
+  const deleteTemplateMutation = useMutation({
+    mutationFn: async (templateId) => {
+      const response = await fetch(`${API_BASE}/api/templates/${templateId}`, {
+        method: 'DELETE'
+      })
+      if (!response.ok) throw new Error('Erro ao excluir template')
+      return response.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['templates'])
     }
-  };
+  })
 
-  const filteredTemplates = templates.filter(template => {
-    const matchesSearch = template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         template.specialty.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesSpecialty = selectedSpecialty === 'all' || template.specialty === selectedSpecialty;
-    return matchesSearch && matchesSpecialty;
-  });
+  const templates = templatesData?.data || []
 
-  const specialties = [...new Set(templates.map(t => t.specialty))];
+  // Filter and sort templates
+  const filteredAndSortedTemplates = templates
+    .filter(template => {
+      const matchesSearch = template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           template.specialty.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           (template.description || '').toLowerCase().includes(searchTerm.toLowerCase())
+      
+      const matchesSpecialty = selectedSpecialty === 'all' || template.specialty === selectedSpecialty
+      const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory
+      
+      return matchesSearch && matchesSpecialty && matchesCategory
+    })
+    .sort((a, b) => {
+      let aVal = a[sortBy] || ''
+      let bVal = b[sortBy] || ''
+      
+      if (sortBy === 'createdAt') {
+        aVal = new Date(aVal)
+        bVal = new Date(bVal)
+      } else {
+        aVal = aVal.toString().toLowerCase()
+        bVal = bVal.toString().toLowerCase()
+      }
+      
+      if (sortOrder === 'asc') {
+        return aVal > bVal ? 1 : -1
+      } else {
+        return bVal > aVal ? 1 : -1
+      }
+    })
 
-  const getSpecialtyName = (specialty) => {
-    const names = {
-      'clinica_geral': 'Clínica Geral',
-      'cardiologia': 'Cardiologia',
-      'pediatria': 'Pediatria',
-      'ginecologia': 'Ginecologia'
-    };
-    return names[specialty] || specialty;
-  };
+  const specialties = [...new Set(templates.map(t => t.specialty))]
+  const categories = [...new Set(templates.map(t => t.category || 'Geral'))]
 
-  if (loading) {
+  const getSpecialtyIcon = (specialty) => {
+    const icons = {
+      'clinica_geral': '🩺',
+      'cardiologia': '❤️',
+      'pediatria': '🧸',
+      'ginecologia': '🌸',
+      'dermatologia': '🔬',
+      'ortopedia': '🦴'
+    }
+    return icons[specialty] || '📋'
+  }
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('pt-BR')
+  }
+
+  const handleDelete = (template) => {
+    if (window.confirm(`Tem certeza que deseja excluir o template "${template.name}"?`)) {
+      deleteTemplateMutation.mutate(template.id)
+    }
+  }
+
+  if (error) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="bg-white shadow-sm border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 py-6">
-            <div className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <span className="ml-3 text-gray-600">Carregando templates...</span>
-            </div>
-          </div>
+      <div style={{ minHeight: '100vh', background: '#f8fafc', padding: '24px' }}>
+        <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '16px' }}>❌</div>
+          <h2 style={{ color: '#ef4444' }}>Erro ao carregar templates</h2>
+          <p>{error.message}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            style={{
+              padding: '12px 24px',
+              background: '#6366f1',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer'
+            }}
+          >
+            Tentar Novamente
+          </button>
         </div>
       </div>
-    );
+    )
+  }
+
+  const cardStyle = {
+    background: 'white',
+    borderRadius: '12px',
+    padding: '24px',
+    marginBottom: '24px',
+    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div style={{ minHeight: '100vh', background: '#f8fafc', padding: '24px' }}>
+      
       {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 flex items-center">
-                <FileText className="h-8 w-8 text-blue-600 mr-3" />
-                Templates Médicos
-              </h1>
-              <p className="text-gray-600 mt-1">
-                Modelos de documentos médicos pré-configurados
-              </p>
-            </div>
+      <div style={cardStyle}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h1 style={{ margin: '0 0 8px 0', fontSize: '2rem', color: '#1f2937' }}>
+              📋 Templates Médicos
+            </h1>
+            <p style={{ color: '#6b7280', margin: 0 }}>
+              {isLoading ? 'Carregando...' : `${filteredAndSortedTemplates.length} templates encontrados`}
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '12px' }}>
             <Link 
-              to="/templates/create"
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center"
+              to="/templates/create" 
+              style={{
+                padding: '12px 24px',
+                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                color: 'white',
+                borderRadius: '8px',
+                textDecoration: 'none',
+                fontWeight: '600',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <span>+</span>
               Novo Template
+            </Link>
+            <Link 
+              to="/" 
+              style={{
+                padding: '12px 20px',
+                background: '#e5e7eb',
+                color: '#374151',
+                borderRadius: '8px',
+                textDecoration: 'none',
+                fontWeight: '500'
+              }}
+            >
+              ← Voltar
             </Link>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* Filters */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Buscar templates..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-                />
-              </div>
-            </div>
-            <div className="w-full md:w-64">
-              <div className="relative">
-                <Filter className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-                <select
-                  value={selectedSpecialty}
-                  onChange={(e) => setSelectedSpecialty(e.target.value)}
-                  className="w-full pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent appearance-none bg-white"
-                >
-                  <option value="all">Todas as especialidades</option>
-                  {specialties.map(specialty => (
-                    <option key={specialty} value={specialty}>
-                      {getSpecialtyName(specialty)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+      {/* Filters and Search */}
+      <div style={cardStyle}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '20px' }}>
+          
+          {/* Search */}
+          <div>
+            <input
+              type="text"
+              placeholder="🔍 Buscar templates..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                border: '2px solid #e5e7eb',
+                borderRadius: '8px',
+                fontSize: '14px',
+                outline: 'none',
+                transition: 'border-color 0.3s ease'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#6366f1'}
+              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+            />
+          </div>
+
+          {/* Specialty Filter */}
+          <div>
+            <select
+              value={selectedSpecialty}
+              onChange={(e) => setSelectedSpecialty(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                border: '2px solid #e5e7eb',
+                borderRadius: '8px',
+                fontSize: '14px',
+                outline: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              <option value="all">🏥 Todas Especialidades</option>
+              {specialties.map(specialty => (
+                <option key={specialty} value={specialty}>
+                  {getSpecialtyIcon(specialty)} {specialty.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Category Filter */}
+          <div>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                border: '2px solid #e5e7eb',
+                borderRadius: '8px',
+                fontSize: '14px',
+                outline: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              <option value="all">📂 Todas Categorias</option>
+              {categories.map(category => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Sort */}
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              style={{
+                flex: 1,
+                padding: '12px 16px',
+                border: '2px solid #e5e7eb',
+                borderRadius: '8px',
+                fontSize: '14px',
+                outline: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              <option value="name">📝 Nome</option>
+              <option value="specialty">🏥 Especialidade</option>
+              <option value="createdAt">📅 Data</option>
+            </select>
+            <button
+              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+              style={{
+                padding: '12px',
+                border: '2px solid #e5e7eb',
+                borderRadius: '8px',
+                background: 'white',
+                cursor: 'pointer',
+                fontSize: '14px'
+              }}
+            >
+              {sortOrder === 'asc' ? '⬆️' : '⬇️'}
+            </button>
           </div>
         </div>
 
-        {/* Templates Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredTemplates.map(template => (
-            <div key={template.id} className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center">
-                    <FileText className="h-8 w-8 text-blue-600" />
-                    <div className="ml-3">
-                      <h3 className="text-lg font-semibold text-gray-900">{template.name}</h3>
-                      <p className="text-sm text-gray-600">{getSpecialtyName(template.specialty)}</p>
+        {/* View Mode Toggle */}
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <span style={{ fontSize: '14px', fontWeight: '500', color: '#6b7280' }}>Visualização:</span>
+          <button
+            onClick={() => setViewMode('grid')}
+            style={{
+              padding: '8px 16px',
+              background: viewMode === 'grid' ? '#6366f1' : '#e5e7eb',
+              color: viewMode === 'grid' ? 'white' : '#374151',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '12px',
+              fontWeight: '500'
+            }}
+          >
+            📊 Grid
+          </button>
+          <button
+            onClick={() => setViewMode('list')}
+            style={{
+              padding: '8px 16px',
+              background: viewMode === 'list' ? '#6366f1' : '#e5e7eb',
+              color: viewMode === 'list' ? 'white' : '#374151',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '12px',
+              fontWeight: '500'
+            }}
+          >
+            📋 Lista
+          </button>
+        </div>
+      </div>
+
+      {/* Templates List */}
+      <div>
+        {isLoading ? (
+          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <div style={{ fontSize: '3rem', marginBottom: '16px' }}>⏳</div>
+            <h3>Carregando templates...</h3>
+            <p style={{ color: '#6b7280' }}>Aguarde um momento</p>
+          </div>
+        ) : filteredAndSortedTemplates.length === 0 ? (
+          <div style={{
+            background: 'white',
+            borderRadius: '12px',
+            padding: '60px 20px',
+            textAlign: 'center',
+            boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+          }}>
+            <div style={{ fontSize: '4rem', marginBottom: '16px' }}>📋</div>
+            <h3 style={{ margin: '0 0 8px 0', color: '#1f2937' }}>
+              {searchTerm || selectedSpecialty !== 'all' ? 'Nenhum template encontrado' : 'Nenhum template cadastrado'}
+            </h3>
+            <p style={{ color: '#6b7280', marginBottom: '24px' }}>
+              {searchTerm || selectedSpecialty !== 'all' ? 
+                'Tente ajustar os filtros de busca' : 
+                'Comece criando o primeiro template médico'
+              }
+            </p>
+            <Link 
+              to="/templates/create" 
+              style={{
+                display: 'inline-block',
+                padding: '16px 32px',
+                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                color: 'white',
+                borderRadius: '8px',
+                textDecoration: 'none',
+                fontWeight: '600'
+              }}
+            >
+              + Criar Primeiro Template
+            </Link>
+          </div>
+        ) : viewMode === 'grid' ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '24px' }}>
+            {filteredAndSortedTemplates.map(template => (
+              <div 
+                key={template.id} 
+                style={{
+                  background: 'white',
+                  borderRadius: '12px',
+                  padding: '24px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)'
+                  e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'start', justifyContent: 'space-between', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{
+                      fontSize: '2rem',
+                      padding: '12px',
+                      background: '#f0f9ff',
+                      borderRadius: '8px'
+                    }}>
+                      {getSpecialtyIcon(template.specialty)}
+                    </div>
+                    <div>
+                      <h3 style={{ margin: '0 0 4px 0', fontSize: '1.2rem', color: '#1f2937' }}>
+                        {template.name}
+                      </h3>
+                      <span style={{ 
+                        fontSize: '0.8rem', 
+                        color: '#6366f1', 
+                        background: '#ede9fe',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        fontWeight: '500'
+                      }}>
+                        {template.specialty.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                      </span>
                     </div>
                   </div>
-                  <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
-                    v{template.version}
-                  </span>
-                </div>
-
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center text-sm text-gray-600">
-                    <User className="h-4 w-4 mr-2" />
-                    {template.fields?.length || 0} campos obrigatórios
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <Link
+                      to={`/templates/${template.id}`}
+                      style={{
+                        padding: '8px',
+                        background: '#3b82f6',
+                        color: 'white',
+                        borderRadius: '6px',
+                        textDecoration: 'none',
+                        fontSize: '14px'
+                      }}
+                    >
+                      👁️
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(template)}
+                      style={{
+                        padding: '8px',
+                        background: '#ef4444',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '14px'
+                      }}
+                    >
+                      🗑️
+                    </button>
                   </div>
-                  {template.compliance && (
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Shield className="h-4 w-4 mr-2" />
-                      {template.compliance.cfm && 'CFM '}
-                      {template.compliance.anvisa && 'ANVISA '}
-                      {template.compliance.requires_signature && 'Assinatura Digital'}
-                    </div>
-                  )}
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <Link 
-                    to={`/templates/${template.id}`}
-                    className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
-                  >
-                    Ver Detalhes
-                  </Link>
-                  <Link 
-                    to={`/documents/create?template=${template.id}`}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm"
-                  >
-                    Usar Template
-                  </Link>
+                <p style={{ 
+                  color: '#6b7280', 
+                  fontSize: '0.9rem', 
+                  marginBottom: '16px',
+                  lineHeight: '1.5'
+                }}>
+                  {template.description || 'Sem descrição disponível'}
+                </p>
+
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  fontSize: '0.8rem',
+                  color: '#9ca3af',
+                  borderTop: '1px solid #e5e7eb',
+                  paddingTop: '16px'
+                }}>
+                  <span>📅 {formatDate(template.createdAt)}</span>
+                  <span>👨‍⚕️ {template.createdBy || 'Sistema'}</span>
                 </div>
               </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ background: 'white', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
+            <div style={{ padding: '24px', borderBottom: '1px solid #e5e7eb' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 100px', gap: '16px', fontWeight: '600', color: '#374151' }}>
+                <span>Template</span>
+                <span>Especialidade</span>
+                <span>Categoria</span>
+                <span>Data</span>
+                <span>Ações</span>
+              </div>
             </div>
-          ))}
-        </div>
-
-        {filteredTemplates.length === 0 && !loading && (
-          <div className="text-center py-12">
-            <FileText className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Nenhum template encontrado</h3>
-            <p className="text-gray-600">
-              {searchTerm || selectedSpecialty !== 'all' 
-                ? 'Tente ajustar os filtros para encontrar templates.'
-                : 'Não há templates disponíveis no momento.'}
-            </p>
+            
+            {filteredAndSortedTemplates.map(template => (
+              <div 
+                key={template.id}
+                style={{ 
+                  padding: '20px 24px', 
+                  borderBottom: '1px solid #e5e7eb',
+                  transition: 'background-color 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+              >
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 100px', gap: '16px', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ fontSize: '1.5rem' }}>{getSpecialtyIcon(template.specialty)}</span>
+                      <div>
+                        <div style={{ fontWeight: '500', color: '#1f2937' }}>{template.name}</div>
+                        <div style={{ fontSize: '0.8rem', color: '#6b7280' }}>
+                          {template.description || 'Sem descrição'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <span style={{
+                      fontSize: '0.8rem',
+                      color: '#6366f1',
+                      background: '#ede9fe',
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                      fontWeight: '500'
+                    }}>
+                      {template.specialty.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    </span>
+                  </div>
+                  <div style={{ color: '#6b7280' }}>
+                    {template.category || 'Geral'}
+                  </div>
+                  <div style={{ color: '#6b7280', fontSize: '0.9rem' }}>
+                    {formatDate(template.createdAt)}
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <Link
+                      to={`/templates/${template.id}`}
+                      style={{
+                        padding: '6px 8px',
+                        background: '#3b82f6',
+                        color: 'white',
+                        borderRadius: '4px',
+                        textDecoration: 'none',
+                        fontSize: '12px'
+                      }}
+                    >
+                      Ver
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(template)}
+                      style={{
+                        padding: '6px 8px',
+                        background: '#ef4444',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '12px'
+                      }}
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
+      </div>
 
-        {/* Template Statistics */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <Clock className="h-5 w-5 mr-2" />
-            Estatísticas
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">{templates.length}</div>
-              <div className="text-sm text-gray-600">Templates Disponíveis</div>
+      {/* Statistics */}
+      <div style={{ ...cardStyle, marginTop: '32px' }}>
+        <h3 style={{ margin: '0 0 20px 0', fontSize: '1.3rem', color: '#1f2937' }}>
+          📊 Estatísticas
+        </h3>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px' }}>
+          
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#6366f1', marginBottom: '8px' }}>
+              {templates.length}
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">{specialties.length}</div>
-              <div className="text-sm text-gray-600">Especialidades</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">
-                {templates.filter(t => t.compliance?.requires_signature).length}
-              </div>
-              <div className="text-sm text-gray-600">Com Assinatura Digital</div>
-            </div>
+            <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>Templates Disponíveis</div>
           </div>
+
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#10b981', marginBottom: '8px' }}>
+              {specialties.length}
+            </div>
+            <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>Especialidades</div>
+          </div>
+
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#f59e0b', marginBottom: '8px' }}>
+              {categories.length}
+            </div>
+            <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>Categorias</div>
+          </div>
+
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#8b5cf6', marginBottom: '8px' }}>
+              {filteredAndSortedTemplates.length}
+            </div>
+            <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>Filtrados</div>
+          </div>
+
         </div>
       </div>
     </div>
-  );
-};
-
-export default TemplatesPage;
+  )
+}

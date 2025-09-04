@@ -1,0 +1,819 @@
+# 🔌 PROMPT INTEGRATION MASTER - Validação Total Backend ↔️ Frontend
+
+## 🎯 MISSÃO ESPECÍFICA
+Você é um **Integration QA Engineer** especializado em validar comunicação entre sistemas. Sua missão é testar CADA rota do backend com CADA chamada do frontend, garantindo 100% de integração funcional. Onde encontrar desconexão, você deve CORRIGIR imediatamente.
+
+## 🔍 METODOLOGIA DE VALIDAÇÃO DE INTEGRAÇÃO
+
+### PRINCÍPIO: Map → Test → Fix → Verify
+```bash
+# Setup inicial para validação
+npm run dev:full  # Backend (3333) + Frontend (5173)
+
+# Ferramentas de interceptação
+npm install -D msw @mswjs/data  # Mock Service Worker
+npm install -D axios-mock-adapter  # Para testes
+npm install -D newman  # Para rodar Postman collections
+```
+
+## 📋 MAPEAMENTO COMPLETO DE ROTAS E INTEGRAÇÕES
+
+### 1️⃣ **INVENTÁRIO DE ROTAS BACKEND**
+```typescript
+// tests/integration/backend-routes-inventory.ts
+const BACKEND_ROUTES = {
+  // AUTENTICAÇÃO
+  auth: {
+    login: { method: 'POST', path: '/auth/login', body: { email: string, password: string } },
+    refresh: { method: 'POST', path: '/auth/refresh', body: { refreshToken: string } },
+    logout: { method: 'POST', path: '/auth/logout' },
+    register: { method: 'POST', path: '/auth/register', body: { email: string, password: string, name: string, crm?: string } }
+  },
+  
+  // PACIENTES
+  patients: {
+    list: { method: 'GET', path: '/api/patients', query: { page?: number, limit?: number, search?: string } },
+    get: { method: 'GET', path: '/api/patients/:id' },
+    create: { method: 'POST', path: '/api/patients', body: { name: string, cpf: string, email?: string } },
+    update: { method: 'PUT', path: '/api/patients/:id', body: { partial: true } },
+    delete: { method: 'DELETE', path: '/api/patients/:id' },
+    search: { method: 'GET', path: '/api/patients/search', query: { q: string } }
+  },
+  
+  // TEMPLATES
+  templates: {
+    list: { method: 'GET', path: '/api/templates', query: { category?: string, active?: boolean } },
+    get: { method: 'GET', path: '/api/templates/:id' },
+    create: { method: 'POST', path: '/api/templates', body: { name: string, fields: object } },
+    update: { method: 'PUT', path: '/api/templates/:id' },
+    delete: { method: 'DELETE', path: '/api/templates/:id' },
+    categories: { method: 'GET', path: '/api/templates/categories' }
+  },
+  
+  // DOCUMENTOS
+  documents: {
+    list: { method: 'GET', path: '/api/documents', query: { status?: string, patientId?: string } },
+    get: { method: 'GET', path: '/api/documents/:id' },
+    create: { method: 'POST', path: '/api/documents', body: { templateId: string, patientId: string, content: object } },
+    update: { method: 'PUT', path: '/api/documents/:id' },
+    delete: { method: 'DELETE', path: '/api/documents/:id' },
+    sign: { method: 'POST', path: '/api/documents/:id/sign', body: { password?: string } },
+    pdf: { method: 'GET', path: '/api/documents/:id/pdf' },
+    share: { method: 'POST', path: '/api/documents/:id/share', body: { expiresIn?: string, password?: string } },
+    verify: { method: 'GET', path: '/api/documents/verify/:hash' },
+    audit: { method: 'GET', path: '/api/audit/:documentId' }
+  },
+  
+  // PRESCRIÇÕES
+  prescriptions: {
+    list: { method: 'GET', path: '/api/prescriptions' },
+    get: { method: 'GET', path: '/api/prescriptions/:id' },
+    create: { method: 'POST', path: '/api/prescriptions', body: { patientId: string, medications: array } },
+    update: { method: 'PUT', path: '/api/prescriptions/:id' },
+    delete: { method: 'DELETE', path: '/api/prescriptions/:id' }
+  },
+  
+  // ASSINATURAS
+  signatures: {
+    request: { method: 'POST', path: '/api/signatures/request', body: { documentId: string } },
+    verify: { method: 'POST', path: '/api/signatures/verify', body: { token: string } },
+    sign: { method: 'POST', path: '/api/signatures/sign', body: { requestId: string, password: string } },
+    status: { method: 'GET', path: '/api/signatures/status/:requestId' }
+  },
+  
+  // MÉTRICAS
+  metrics: {
+    dashboard: { method: 'GET', path: '/api/metrics/dashboard' },
+    performance: { method: 'GET', path: '/api/metrics/performance' },
+    cache: { method: 'GET', path: '/api/metrics/cache' },
+    health: { method: 'GET', path: '/api/metrics/health' }
+  },
+  
+  // UPLOAD
+  upload: {
+    file: { method: 'POST', path: '/api/upload', body: FormData }
+  },
+  
+  // SHARES PÚBLICAS
+  public: {
+    share: { method: 'GET', path: '/api/documents/share/:token' },
+    verify: { method: 'GET', path: '/api/documents/verify/:hash' }
+  }
+}
+```
+
+### 2️⃣ **MAPEAMENTO DE HOOKS/CHAMADAS FRONTEND**
+```typescript
+// tests/integration/frontend-api-calls-inventory.ts
+const FRONTEND_API_CALLS = {
+  // src/hooks/useApi.js
+  useAuth: {
+    login: 'POST /auth/login',
+    logout: 'POST /auth/logout',
+    refresh: 'POST /auth/refresh',
+    register: 'POST /auth/register'
+  },
+  
+  // src/hooks/usePatients.ts
+  usePatients: {
+    list: 'GET /api/patients',
+    get: 'GET /api/patients/:id',
+    create: 'POST /api/patients',
+    update: 'PUT /api/patients/:id',
+    delete: 'DELETE /api/patients/:id'
+  },
+  
+  // src/hooks/useDocuments.ts
+  useDocuments: {
+    list: 'GET /api/documents',
+    create: 'POST /api/documents',
+    sign: 'POST /api/documents/:id/sign',
+    generatePDF: 'GET /api/documents/:id/pdf',
+    share: 'POST /api/documents/:id/share'
+  },
+  
+  // TanStack Query keys
+  queryKeys: [
+    ['patients'],
+    ['patients', id],
+    ['documents'],
+    ['documents', id],
+    ['templates'],
+    ['templates', id],
+    ['metrics', 'dashboard'],
+    ['prescriptions']
+  ]
+}
+```
+
+## 🧪 TESTES DE INTEGRAÇÃO COMPLETOS
+
+### 3️⃣ **VALIDAÇÃO DE CADA ENDPOINT**
+```typescript
+// tests/integration/endpoint-validation.spec.ts
+import { test, expect } from '@playwright/test'
+import axios from 'axios'
+
+const API_BASE = 'http://localhost:3333'
+const FRONTEND = 'http://localhost:5173'
+
+test.describe('Validação Completa de Endpoints', () => {
+  
+  // TESTE PARA CADA ROTA DO BACKEND
+  test.describe('Auth Endpoints', () => {
+    test('POST /auth/login - Frontend chama corretamente', async ({ page }) => {
+      // 1. Interceptar request do frontend
+      const requestPromise = page.waitForRequest(req => 
+        req.url().includes('/auth/login') && req.method() === 'POST'
+      )
+      
+      // 2. Executar ação no frontend
+      await page.goto(`${FRONTEND}/auth/login`)
+      await page.fill('input[name="email"]', 'test@example.com')
+      await page.fill('input[name="password"]', 'password123')
+      await page.click('button[type="submit"]')
+      
+      // 3. Validar request
+      const request = await requestPromise
+      const postData = request.postDataJSON()
+      
+      expect(postData).toEqual({
+        email: 'test@example.com',
+        password: 'password123'
+      })
+      
+      // 4. Validar response handling
+      const response = await request.response()
+      expect(response.status()).toBeLessThan(400)
+      
+      // 5. Validar que frontend processa response
+      await expect(page).toHaveURL(/\/home|\/dashboard/)
+    })
+    
+    test('POST /auth/logout - Limpa estado corretamente', async ({ page }) => {
+      // Login primeiro
+      await loginUser(page)
+      
+      // Interceptar logout
+      const logoutPromise = page.waitForRequest(req => 
+        req.url().includes('/auth/logout')
+      )
+      
+      // Executar logout
+      await page.click('button[aria-label="Logout"]')
+      
+      // Validar request
+      await logoutPromise
+      
+      // Validar limpeza de estado
+      const localStorage = await page.evaluate(() => window.localStorage)
+      expect(localStorage.token).toBeUndefined()
+      
+      // Validar redirect
+      await expect(page).toHaveURL('/auth/login')
+    })
+  })
+  
+  test.describe('Patients CRUD - Integração Completa', () => {
+    test('Lista de Pacientes - Paginação funciona', async ({ page }) => {
+      await page.goto(`${FRONTEND}/patients`)
+      
+      // Validar primeira página
+      const firstPageRequest = page.waitForRequest(req => 
+        req.url().includes('/api/patients?page=1')
+      )
+      await firstPageRequest
+      
+      // Clicar próxima página
+      await page.click('button[aria-label="Next page"]')
+      
+      // Validar segunda página
+      const secondPageRequest = page.waitForRequest(req => 
+        req.url().includes('/api/patients?page=2')
+      )
+      await secondPageRequest
+      
+      // Validar que dados mudaram
+      const patients = await page.locator('[data-testid="patient-row"]').count()
+      expect(patients).toBeGreaterThan(0)
+    })
+    
+    test('Criar Paciente - Fluxo completo', async ({ page }) => {
+      await page.goto(`${FRONTEND}/patients/create`)
+      
+      // Preencher form
+      await page.fill('input[name="name"]', 'João Silva')
+      await page.fill('input[name="cpf"]', '123.456.789-00')
+      await page.fill('input[name="email"]', 'joao@example.com')
+      
+      // Interceptar POST
+      const createPromise = page.waitForRequest(req => 
+        req.url().includes('/api/patients') && req.method() === 'POST'
+      )
+      
+      // Submit
+      await page.click('button[type="submit"]')
+      
+      // Validar request
+      const request = await createPromise
+      const body = request.postDataJSON()
+      
+      expect(body).toMatchObject({
+        name: 'João Silva',
+        cpf: '12345678900', // Sem máscara
+        email: 'joao@example.com'
+      })
+      
+      // Validar redirect após sucesso
+      await page.waitForURL(/\/patients\/[a-f0-9-]+/)
+    })
+  })
+  
+  test.describe('Documents - Ciclo Completo', () => {
+    test('Criar → Assinar → PDF → Compartilhar', async ({ page }) => {
+      // 1. CRIAR DOCUMENTO
+      await page.goto(`${FRONTEND}/documents/new`)
+      
+      const createRequest = page.waitForRequest(req => 
+        req.url().includes('/api/documents') && req.method() === 'POST'
+      )
+      
+      await page.selectOption('select[name="templateId"]', { index: 1 })
+      await page.selectOption('select[name="patientId"]', { index: 1 })
+      await page.fill('textarea[name="content"]', 'Conteúdo médico')
+      await page.click('button:has-text("Salvar")')
+      
+      const created = await createRequest
+      const response = await created.response()
+      const { id } = await response.json()
+      
+      // 2. ASSINAR DOCUMENTO
+      await page.goto(`${FRONTEND}/documents/${id}`)
+      
+      const signRequest = page.waitForRequest(req => 
+        req.url().includes(`/api/documents/${id}/sign`)
+      )
+      
+      await page.click('button:has-text("Assinar")')
+      await page.fill('input[name="password"]', 'senha123')
+      await page.click('button:has-text("Confirmar")')
+      
+      await signRequest
+      
+      // 3. GERAR PDF
+      const pdfRequest = page.waitForRequest(req => 
+        req.url().includes(`/api/documents/${id}/pdf`)
+      )
+      
+      await page.click('button:has-text("Gerar PDF")')
+      await pdfRequest
+      
+      // 4. COMPARTILHAR
+      const shareRequest = page.waitForRequest(req => 
+        req.url().includes(`/api/documents/${id}/share`)
+      )
+      
+      await page.click('button:has-text("Compartilhar")')
+      await page.selectOption('select[name="expiresIn"]', '7d')
+      await page.click('button:has-text("Gerar Link")')
+      
+      const shareResponse = await (await shareRequest).response()
+      const { shareUrl } = await shareResponse.json()
+      
+      expect(shareUrl).toContain('/share/')
+    })
+  })
+})
+```
+
+### 4️⃣ **VALIDAÇÃO DE HEADERS E AUTH**
+```typescript
+// tests/integration/headers-auth-validation.spec.ts
+test.describe('Headers e Autenticação', () => {
+  test('Token JWT enviado em todas requests autenticadas', async ({ page }) => {
+    await loginUser(page)
+    
+    // Interceptar qualquer request
+    page.on('request', request => {
+      if (request.url().includes('/api/') && !request.url().includes('/auth/')) {
+        const headers = request.headers()
+        expect(headers['authorization']).toMatch(/^Bearer .+/)
+      }
+    })
+    
+    // Navegar por páginas protegidas
+    await page.goto(`${FRONTEND}/patients`)
+    await page.goto(`${FRONTEND}/documents`)
+    await page.goto(`${FRONTEND}/templates`)
+  })
+  
+  test('CORS headers corretos', async () => {
+    const response = await axios.options(`${API_BASE}/api/patients`)
+    
+    expect(response.headers['access-control-allow-origin']).toBeTruthy()
+    expect(response.headers['access-control-allow-methods']).toContain('GET')
+    expect(response.headers['access-control-allow-headers']).toContain('authorization')
+  })
+  
+  test('401 redireciona para login', async ({ page }) => {
+    // Forçar token inválido
+    await page.evaluate(() => {
+      localStorage.setItem('token', 'invalid-token')
+    })
+    
+    await page.goto(`${FRONTEND}/patients`)
+    
+    // Deve redirecionar
+    await page.waitForURL('/auth/login')
+    
+    // Token deve ser limpo
+    const token = await page.evaluate(() => localStorage.getItem('token'))
+    expect(token).toBeNull()
+  })
+})
+```
+
+### 5️⃣ **VALIDAÇÃO DE QUERY PARAMS E FILTROS**
+```typescript
+// tests/integration/query-filters-validation.spec.ts
+test.describe('Query Parameters e Filtros', () => {
+  test('Filtros de pacientes funcionam', async ({ page }) => {
+    await page.goto(`${FRONTEND}/patients`)
+    
+    // Busca por nome
+    await page.fill('input[name="search"]', 'João')
+    
+    const searchRequest = page.waitForRequest(req => {
+      const url = new URL(req.url())
+      return url.searchParams.get('search') === 'João'
+    })
+    
+    await searchRequest
+    
+    // Filtro por gênero
+    await page.selectOption('select[name="gender"]', 'M')
+    
+    const genderRequest = page.waitForRequest(req => {
+      const url = new URL(req.url())
+      return url.searchParams.get('gender') === 'M'
+    })
+    
+    await genderRequest
+  })
+  
+  test('Paginação envia params corretos', async ({ page }) => {
+    await page.goto(`${FRONTEND}/documents`)
+    
+    // Mudar items per page
+    await page.selectOption('select[name="limit"]', '50')
+    
+    const limitRequest = page.waitForRequest(req => {
+      const url = new URL(req.url())
+      return url.searchParams.get('limit') === '50'
+    })
+    
+    await limitRequest
+  })
+})
+```
+
+### 6️⃣ **VALIDAÇÃO DE UPLOADS E MULTIPART**
+```typescript
+// tests/integration/upload-validation.spec.ts
+test.describe('Upload de Arquivos', () => {
+  test('Upload envia FormData corretamente', async ({ page }) => {
+    await page.goto(`${FRONTEND}/upload`)
+    
+    // Selecionar arquivo
+    const fileInput = page.locator('input[type="file"]')
+    await fileInput.setInputFiles({
+      name: 'test.pdf',
+      mimeType: 'application/pdf',
+      buffer: Buffer.from('PDF content')
+    })
+    
+    // Interceptar upload
+    const uploadRequest = page.waitForRequest(req => {
+      const headers = req.headers()
+      return (
+        req.url().includes('/api/upload') &&
+        headers['content-type'].includes('multipart/form-data')
+      )
+    })
+    
+    await page.click('button:has-text("Upload")')
+    
+    const request = await uploadRequest
+    expect(request.method()).toBe('POST')
+  })
+  
+  test('Progress bar funciona', async ({ page }) => {
+    await page.goto(`${FRONTEND}/upload`)
+    
+    // Mock slow upload
+    await page.route('**/api/upload', async route => {
+      await page.waitForTimeout(2000) // Simular upload lento
+      await route.fulfill({ status: 200, body: JSON.stringify({ url: 'test.pdf' }) })
+    })
+    
+    await page.setInputFiles('input[type="file"]', 'test.pdf')
+    await page.click('button:has-text("Upload")')
+    
+    // Progress deve aparecer
+    await expect(page.locator('[role="progressbar"]')).toBeVisible()
+    
+    // E depois sumir
+    await expect(page.locator('[role="progressbar"]')).toBeHidden({ timeout: 5000 })
+  })
+})
+```
+
+### 7️⃣ **VALIDAÇÃO DE CACHE E INVALIDAÇÃO**
+```typescript
+// tests/integration/cache-validation.spec.ts
+test.describe('Cache e Invalidação', () => {
+  test('React Query cache funciona', async ({ page }) => {
+    let requestCount = 0
+    
+    // Contar requests
+    page.on('request', req => {
+      if (req.url().includes('/api/patients')) {
+        requestCount++
+      }
+    })
+    
+    // Primeira visita
+    await page.goto(`${FRONTEND}/patients`)
+    await page.waitForLoadState('networkidle')
+    
+    const firstCount = requestCount
+    
+    // Segunda visita (deve usar cache)
+    await page.goto(`${FRONTEND}/home`)
+    await page.goto(`${FRONTEND}/patients`)
+    await page.waitForLoadState('networkidle')
+    
+    // Não deve ter feito nova request
+    expect(requestCount).toBe(firstCount)
+  })
+  
+  test('Mutation invalida cache', async ({ page }) => {
+    await page.goto(`${FRONTEND}/patients`)
+    
+    // Criar paciente
+    await page.click('button:has-text("Novo Paciente")')
+    await page.fill('input[name="name"]', 'Teste Cache')
+    await page.click('button[type="submit"]')
+    
+    // Deve refazer request da lista
+    const refetchRequest = page.waitForRequest(req => 
+      req.url().includes('/api/patients') && req.method() === 'GET'
+    )
+    
+    await refetchRequest
+  })
+})
+```
+
+### 8️⃣ **VALIDAÇÃO DE ERROS E RETRY**
+```typescript
+// tests/integration/error-handling-validation.spec.ts
+test.describe('Tratamento de Erros', () => {
+  test('Erro 500 mostra mensagem amigável', async ({ page }) => {
+    // Mock erro 500
+    await page.route('**/api/patients', route => {
+      route.fulfill({
+        status: 500,
+        contentType: 'application/problem+json',
+        body: JSON.stringify({
+          type: '/errors/internal-server-error',
+          title: 'Internal Server Error',
+          status: 500,
+          detail: 'Database connection failed'
+        })
+      })
+    })
+    
+    await page.goto(`${FRONTEND}/patients`)
+    
+    // Deve mostrar erro
+    await expect(page.locator('text=Erro ao carregar')).toBeVisible()
+    
+    // Botão retry deve aparecer
+    await expect(page.locator('button:has-text("Tentar Novamente")')).toBeVisible()
+  })
+  
+  test('Retry funciona após erro', async ({ page }) => {
+    let attempts = 0
+    
+    await page.route('**/api/documents', route => {
+      attempts++
+      if (attempts === 1) {
+        // Primeira tentativa falha
+        route.fulfill({ status: 500 })
+      } else {
+        // Segunda tentativa sucesso
+        route.fulfill({ 
+          status: 200, 
+          body: JSON.stringify([]) 
+        })
+      }
+    })
+    
+    await page.goto(`${FRONTEND}/documents`)
+    
+    // Erro aparece
+    await expect(page.locator('text=Erro')).toBeVisible()
+    
+    // Clicar retry
+    await page.click('button:has-text("Tentar Novamente")')
+    
+    // Sucesso
+    await expect(page.locator('text=Erro')).toBeHidden()
+  })
+})
+```
+
+## 🔧 CORREÇÕES AUTOMÁTICAS DE INTEGRAÇÃO
+
+### PADRÕES DE CORREÇÃO
+```typescript
+// PROBLEMA 1: Frontend chamando rota errada
+FIX_WRONG_ROUTE: {
+  file: 'src/hooks/useApi.js',
+  find: '/api/patient/', // Errado
+  replace: '/api/patients/', // Correto
+}
+
+// PROBLEMA 2: Token não sendo enviado
+FIX_MISSING_TOKEN: {
+  file: 'src/lib/api.ts',
+  add: `
+    axios.interceptors.request.use(config => {
+      const token = localStorage.getItem('token')
+      if (token) {
+        config.headers.Authorization = \`Bearer \${token}\`
+      }
+      return config
+    })
+  `
+}
+
+// PROBLEMA 3: Query params não sendo enviados
+FIX_QUERY_PARAMS: {
+  file: 'src/hooks/usePatients.ts',
+  change: `
+    // De:
+    const { data } = useQuery(['patients'], () => 
+      api.get('/api/patients')
+    )
+    
+    // Para:
+    const { data } = useQuery(['patients', filters], () => 
+      api.get('/api/patients', { params: filters })
+    )
+  `
+}
+
+// PROBLEMA 4: FormData para upload
+FIX_UPLOAD_FORMDATA: {
+  file: 'src/pages/Upload.tsx',
+  change: `
+    const handleUpload = async (file: File) => {
+      const formData = new FormData()
+      formData.append('file', file)
+      
+      await api.post('/api/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+    }
+  `
+}
+
+// PROBLEMA 5: Erro não tratado
+FIX_ERROR_HANDLING: {
+  file: 'src/hooks/useDocuments.ts',
+  add: `
+    const mutation = useMutation({
+      mutationFn: createDocument,
+      onError: (error) => {
+        if (error.response?.data?.detail) {
+          toast.error(error.response.data.detail)
+        } else {
+          toast.error('Erro ao criar documento')
+        }
+      }
+    })
+  `
+}
+```
+
+## 📊 MATRIZ DE COMPATIBILIDADE
+
+### VALIDAÇÃO CRUZADA
+```typescript
+// tests/integration/compatibility-matrix.spec.ts
+const COMPATIBILITY_MATRIX = [
+  // [Frontend Route, Backend Endpoint, Expected Status]
+  ['/patients', 'GET /api/patients', 200],
+  ['/patients/create', 'POST /api/patients', 201],
+  ['/patients/:id', 'GET /api/patients/:id', 200],
+  ['/patients/:id/edit', 'PUT /api/patients/:id', 200],
+  ['/documents', 'GET /api/documents', 200],
+  ['/documents/new', 'POST /api/documents', 201],
+  ['/documents/:id', 'GET /api/documents/:id', 200],
+  ['/documents/:id/sign', 'POST /api/documents/:id/sign', 200],
+  ['/templates', 'GET /api/templates', 200],
+  ['/prescriptions/create', 'POST /api/prescriptions', 201],
+  ['/metrics', 'GET /api/metrics/dashboard', 200],
+  ['/upload', 'POST /api/upload', 200],
+]
+
+test.describe('Matriz de Compatibilidade', () => {
+  for (const [route, endpoint, status] of COMPATIBILITY_MATRIX) {
+    test(`${route} → ${endpoint}`, async ({ page }) => {
+      const [method, path] = endpoint.split(' ')
+      
+      // Interceptar request
+      const requestPromise = page.waitForRequest(req => 
+        req.url().includes(path.replace(':id', '')) && 
+        req.method() === method
+      )
+      
+      // Navegar para rota
+      await page.goto(`${FRONTEND}${route.replace(':id', 'test-id')}`)
+      
+      // Validar request
+      const request = await requestPromise
+      const response = await request.response()
+      
+      expect(response.status()).toBe(status)
+    })
+  }
+})
+```
+
+## 🚀 SCRIPT DE EXECUÇÃO COMPLETA
+
+```bash
+#!/bin/bash
+# integration-validation.sh
+
+echo "🔌 Iniciando Validação de Integração Backend ↔️ Frontend"
+
+# 1. Verificar serviços rodando
+echo "✓ Verificando serviços..."
+curl -f http://localhost:3333/health || (echo "❌ Backend não está rodando" && exit 1)
+curl -f http://localhost:5173 || (echo "❌ Frontend não está rodando" && exit 1)
+
+# 2. Gerar documentação de rotas
+echo "📄 Gerando documentação de APIs..."
+curl http://localhost:3333/docs/json > backend-routes.json
+npm run generate:api-types  # Se existir
+
+# 3. Validar contratos
+echo "📝 Validando contratos..."
+npx playwright test tests/integration/backend-routes-inventory.spec.ts
+
+# 4. Testar cada integração
+echo "🧪 Testando integrações..."
+npx playwright test tests/integration/endpoint-validation.spec.ts --headed
+
+# 5. Validar headers e auth
+echo "🔐 Validando autenticação..."
+npx playwright test tests/integration/headers-auth-validation.spec.ts
+
+# 6. Testar query params
+echo "🔍 Validando query parameters..."
+npx playwright test tests/integration/query-filters-validation.spec.ts
+
+# 7. Testar uploads
+echo "📤 Validando uploads..."
+npx playwright test tests/integration/upload-validation.spec.ts
+
+# 8. Validar cache
+echo "💾 Validando cache..."
+npx playwright test tests/integration/cache-validation.spec.ts
+
+# 9. Testar erros
+echo "❌ Validando tratamento de erros..."
+npx playwright test tests/integration/error-handling-validation.spec.ts
+
+# 10. Matriz de compatibilidade
+echo "📊 Executando matriz de compatibilidade..."
+npx playwright test tests/integration/compatibility-matrix.spec.ts
+
+# 11. Gerar relatório
+echo "📈 Gerando relatório..."
+node scripts/generate-integration-report.js
+
+echo "✅ Validação de Integração Completa!"
+echo "📄 Relatório: ./integration-report.html"
+```
+
+## 📈 RELATÓRIO DE INTEGRAÇÃO
+
+### TEMPLATE DO RELATÓRIO
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Integration Report - RepoMed IA</title>
+  <style>
+    .endpoint { display: flex; justify-content: space-between; padding: 10px; }
+    .success { background: #d4edda; }
+    .error { background: #f8d7da; }
+    .warning { background: #fff3cd; }
+  </style>
+</head>
+<body>
+  <h1>Backend ↔️ Frontend Integration Report</h1>
+  
+  <section>
+    <h2>Summary</h2>
+    <div>Total Endpoints: <b>85</b></div>
+    <div>Connected: <b class="success">78</b></div>
+    <div>Disconnected: <b class="error">5</b></div>
+    <div>Not Used: <b class="warning">2</b></div>
+  </section>
+  
+  <section>
+    <h2>Endpoint Status</h2>
+    <div class="endpoint success">
+      <span>GET /api/patients</span>
+      <span>✅ Connected</span>
+      <span>Used in: PatientsPage.tsx</span>
+    </div>
+    <!-- Mais endpoints... -->
+  </section>
+  
+  <section>
+    <h2>Issues Fixed</h2>
+    <ol>
+      <li>Token not being sent in /api/documents requests - FIXED</li>
+      <li>Wrong endpoint /api/patient/ → /api/patients/ - FIXED</li>
+      <!-- Mais correções... -->
+    </ol>
+  </section>
+</body>
+</html>
+```
+
+## ✅ CRITÉRIOS DE SUCESSO
+
+A integração está perfeita quando:
+
+✓ **100% das rotas** backend têm chamada correspondente no frontend  
+✓ **Todos os tokens** são enviados corretamente  
+✓ **Query params** funcionam em filtros e paginação  
+✓ **Uploads** funcionam com progress bar  
+✓ **Erros** são tratados e exibidos corretamente  
+✓ **Cache** funciona e invalida quando necessário  
+✓ **Auth flow** completo sem falhas  
+✓ **Public routes** acessíveis sem login  
+✓ **CORS** configurado corretamente  
+✓ **Response types** match frontend expectations  
+
+---
+
+**IMPORTANTE**: Execute este prompt APÓS validar frontend e backend separadamente. Este é o teste final de integração total do sistema.

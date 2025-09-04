@@ -1,0 +1,40 @@
+### Auth
+POST http://localhost:8087/api/auth/login
+Content-Type: application/json
+
+{ "email": "doctor@example.com", "password": "dev123456" }
+
+### Templates list
+GET http://localhost:8087/api/templates
+
+### Create template
+POST http://localhost:8087/api/templates
+Content-Type: application/json
+
+{
+  "name": "Receita Simples",
+  "description": "Modelo básico",
+  "fields": [
+    {"key":"patientName","label":"Paciente","type":"text"},
+    {"key":"drug","label":"Medicamento","type":"text"}
+  ]
+}
+
+### Documents list
+GET http://localhost:8087/api/documents
+
+### Create document
+POST http://localhost:8087/api/documents
+Content-Type: application/json
+
+{
+  "templateId": "TEMPLATE_ID",
+  "title": "Receita de teste",
+  "content": { "patientName":"João", "drug":"Dipirona 500mg" }
+}
+
+### Sign document
+POST http://localhost:8087/api/documents/DOC_ID/sign
+
+### PDF
+GET http://localhost:8087/api/documents/DOC_ID/pdf

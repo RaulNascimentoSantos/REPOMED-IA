@@ -1,291 +1,441 @@
-import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, Users, FileText, Clock, Activity, Download } from 'lucide-react';
+import React, { useState, useMemo } from 'react'
+import { useMetricsDashboard, useDetailedMetrics, usePerformanceMetrics, useCacheStats } from '../hooks/useApi'
+import { RefreshCw, TrendingUp, TrendingDown, Activity, Database, Zap, AlertCircle } from 'lucide-react'
 
 const MetricsPage = () => {
-  const [metrics, setMetrics] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [selectedPeriod, setSelectedPeriod] = useState('7days')
+  const [autoRefresh, setAutoRefresh] = useState(true)
 
-  useEffect(() => {
-    fetchMetrics();
-  }, []);
+  // Usando TanStack Query hooks otimizados
+  const { 
+    data: dashboardData, 
+    isLoading: dashboardLoading, 
+    error: dashboardError,
+    refetch: refetchDashboard
+  } = useMetricsDashboard()
 
-  const fetchMetrics = async () => {
-    try {
-      const response = await fetch('http://localhost:8082/metrics');
-      const data = await response.json();
-      setMetrics(data);
-    } catch (error) {
-      console.error('Error fetching metrics:', error);
-      // Mock data for demonstration
-      setMetrics({
-        documents_total: 156,
-        templates_total: 5,
-        api_latency_p95: 85.2,
-        uptime: 2847392
-      });
-    } finally {
-      setLoading(false);
+  const { 
+    data: detailedData, 
+    isLoading: detailedLoading 
+  } = useDetailedMetrics(selectedPeriod)
+
+  const { 
+    data: performanceData, 
+    isLoading: performanceLoading 
+  } = usePerformanceMetrics()
+
+  const { 
+    data: cacheStats, 
+    isLoading: cacheLoading 
+  } = useCacheStats()
+
+  // Computar métricas derivadas
+  const computedMetrics = useMemo(() => {
+    if (!dashboardData) return null
+
+    return {
+      totalDocuments: dashboardData.totalDocuments || 0,
+      signedDocuments: dashboardData.signedDocuments || 0,
+      pendingDocuments: dashboardData.pendingDocuments || 0,
+      activePatients: dashboardData.activePatients || 0,
+      signingRate: dashboardData.totalDocuments > 0 
+        ? ((dashboardData.signedDocuments / dashboardData.totalDocuments) * 100).toFixed(1)
+        : 0,
+      growthRate: dashboardData.growthRate || 0
     }
-  };
+  }, [dashboardData])
 
-  const formatUptime = (seconds) => {
-    const days = Math.floor(seconds / 86400);
-    const hours = Math.floor((seconds % 86400) / 3600);
-    return `${days}d ${hours}h`;
-  };
-
-  // Mock data for charts
-  const documentsOverTime = [
-    { month: 'Jan', documents: 20 },
-    { month: 'Fev', documents: 35 },
-    { month: 'Mar', documents: 28 },
-    { month: 'Abr', documents: 45 },
-    { month: 'Mai', documents: 67 },
-    { month: 'Jun', documents: 52 },
-    { month: 'Jul', documents: 78 },
-    { month: 'Ago', documents: 89 }
-  ];
-
-  const documentTypes = [
-    { name: 'Receitas', value: 65, color: '#6366f1' },
-    { name: 'Atestados', value: 45, color: '#10b981' },
-    { name: 'Exames', value: 30, color: '#f59e0b' },
-    { name: 'Relatórios', value: 16, color: '#ef4444' }
-  ];
-
-  const apiMetrics = [
-    { time: '00:00', latency: 45 },
-    { time: '04:00', latency: 52 },
-    { time: '08:00', latency: 78 },
-    { time: '12:00', latency: 85 },
-    { time: '16:00', latency: 72 },
-    { time: '20:00', latency: 59 }
-  ];
-
-  if (loading) {
+  // Loading state
+  if (dashboardLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando métricas...</p>
+      <div style={{ 
+        padding: '40px', 
+        textAlign: 'center', 
+        minHeight: '100vh', 
+        background: '#f8fafc',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div>
+          <RefreshCw className="animate-spin" size={32} color="#6366f1" />
+          <p style={{ marginTop: '16px', color: '#6b7280' }}>Carregando métricas...</p>
         </div>
       </div>
-    );
+    )
+  }
+
+  // Error state
+  if (dashboardError) {
+    return (
+      <div style={{ 
+        padding: '40px', 
+        textAlign: 'center', 
+        minHeight: '100vh', 
+        background: '#f8fafc',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{ 
+          background: 'white', 
+          padding: '32px', 
+          borderRadius: '12px',
+          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+          maxWidth: '400px'
+        }}>
+          <AlertCircle size={48} color="#ef4444" style={{ margin: '0 auto 16px' }} />
+          <h3 style={{ color: '#1f2937', marginBottom: '8px' }}>Erro ao carregar métricas</h3>
+          <p style={{ color: '#6b7280', marginBottom: '20px' }}>
+            {dashboardError.message || 'Não foi possível conectar com o servidor'}
+          </p>
+          <button
+            onClick={() => refetchDashboard()}
+            style={{
+              padding: '12px 24px',
+              background: '#6366f1',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              margin: '0 auto'
+            }}
+          >
+            <RefreshCw size={16} />
+            Tentar Novamente
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  const cardStyle = {
+    background: 'white',
+    borderRadius: '12px',
+    padding: '24px',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    marginBottom: '24px'
+  }
+
+  const metricCardStyle = {
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    color: 'white',
+    borderRadius: '12px',
+    padding: '24px',
+    textAlign: 'center',
+    position: 'relative',
+    overflow: 'hidden'
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 flex items-center">
-                <Activity className="h-8 w-8 text-blue-600 mr-3" />
-                Dashboard de Métricas
-              </h1>
-              <p className="text-gray-600 mt-1">
-                Acompanhe o desempenho e uso do sistema
-              </p>
-            </div>
-            <button 
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center"
-              onClick={() => {
-                // TODO: Implement export functionality
-                alert('Exportar Relatório - Funcionalidade em desenvolvimento');
-              }}
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Exportar Relatório
-            </button>
-          </div>
+    <div style={{ 
+      padding: '32px', 
+      background: '#f8fafc', 
+      minHeight: '100vh',
+      fontFamily: 'Inter, system-ui, sans-serif'
+    }}>
+      
+      {/* Header com controles */}
+      <div style={{ ...cardStyle, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h1 style={{ margin: 0, color: '#1f2937', fontSize: '24px', fontWeight: '600' }}>
+            📊 Métricas do Sistema
+          </h1>
+          <p style={{ margin: '8px 0 0 0', color: '#6b7280' }}>
+            Monitoramento em tempo real do RepoMed IA
+          </p>
+        </div>
+        
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <select
+            value={selectedPeriod}
+            onChange={(e) => setSelectedPeriod(e.target.value)}
+            style={{
+              padding: '8px 12px',
+              border: '1px solid #d1d5db',
+              borderRadius: '6px',
+              background: 'white'
+            }}
+          >
+            <option value="24hours">Últimas 24h</option>
+            <option value="7days">Últimos 7 dias</option>
+            <option value="30days">Últimos 30 dias</option>
+            <option value="90days">Últimos 90 dias</option>
+          </select>
+          
+          <button
+            onClick={() => setAutoRefresh(!autoRefresh)}
+            style={{
+              padding: '8px 12px',
+              background: autoRefresh ? '#10b981' : '#6b7280',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <Activity size={16} />
+            {autoRefresh ? 'Auto-refresh ON' : 'Auto-refresh OFF'}
+          </button>
+
+          <button
+            onClick={() => refetchDashboard()}
+            style={{
+              padding: '8px 12px',
+              background: '#6366f1',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <RefreshCw size={16} />
+            Atualizar
+          </button>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <FileText className="h-6 w-6 text-blue-600" />
+      {/* KPIs Principais */}
+      {computedMetrics && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
+          
+          <div style={metricCardStyle}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', opacity: 0.9 }}>Total de Documentos</h3>
+                <p style={{ margin: 0, fontSize: '32px', fontWeight: 'bold' }}>
+                  {computedMetrics.totalDocuments.toLocaleString()}
+                </p>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total de Documentos</p>
-                <p className="text-2xl font-bold text-gray-900">{metrics.documents_total}</p>
-              </div>
+              <Database size={32} style={{ opacity: 0.8 }} />
             </div>
-            <div className="mt-4 flex items-center text-sm">
-              <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-              <span className="text-green-600 font-medium">+12.5%</span>
-              <span className="text-gray-600 ml-1">vs mês anterior</span>
+            {computedMetrics.growthRate !== 0 && (
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '4px', 
+                marginTop: '12px',
+                fontSize: '14px',
+                opacity: 0.9
+              }}>
+                {computedMetrics.growthRate > 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+                {Math.abs(computedMetrics.growthRate)}% vs período anterior
+              </div>
+            )}
+          </div>
+
+          <div style={{
+            ...metricCardStyle,
+            background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', opacity: 0.9 }}>Documentos Assinados</h3>
+                <p style={{ margin: 0, fontSize: '32px', fontWeight: 'bold' }}>
+                  {computedMetrics.signedDocuments.toLocaleString()}
+                </p>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{computedMetrics.signingRate}%</div>
+                <div style={{ fontSize: '12px', opacity: 0.8 }}>Taxa de Assinatura</div>
+              </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Users className="h-6 w-6 text-green-600" />
+          <div style={{
+            ...metricCardStyle,
+            background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', opacity: 0.9 }}>Documentos Pendentes</h3>
+                <p style={{ margin: 0, fontSize: '32px', fontWeight: 'bold' }}>
+                  {computedMetrics.pendingDocuments.toLocaleString()}
+                </p>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Templates Ativos</p>
-                <p className="text-2xl font-bold text-gray-900">{metrics.templates_total}</p>
-              </div>
-            </div>
-            <div className="mt-4 flex items-center text-sm">
-              <span className="text-gray-600">Todos funcionais</span>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <Clock className="h-6 w-6 text-yellow-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Latência API (P95)</p>
-                <p className="text-2xl font-bold text-gray-900">{metrics.api_latency_p95.toFixed(1)}ms</p>
-              </div>
-            </div>
-            <div className="mt-4 flex items-center text-sm">
-              <span className="text-green-600 font-medium">Excelente</span>
-              <span className="text-gray-600 ml-1">&lt; 100ms</span>
+              <AlertCircle size={32} style={{ opacity: 0.8 }} />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Activity className="h-6 w-6 text-purple-600" />
+          <div style={{
+            ...metricCardStyle,
+            background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', opacity: 0.9 }}>Pacientes Ativos</h3>
+                <p style={{ margin: 0, fontSize: '32px', fontWeight: 'bold' }}>
+                  {computedMetrics.activePatients.toLocaleString()}
+                </p>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Uptime</p>
-                <p className="text-2xl font-bold text-gray-900">{formatUptime(metrics.uptime)}</p>
-              </div>
-            </div>
-            <div className="mt-4 flex items-center text-sm">
-              <span className="text-green-600 font-medium">99.9%</span>
-              <span className="text-gray-600 ml-1">disponibilidade</span>
+              <Activity size={32} style={{ opacity: 0.8 }} />
             </div>
           </div>
+
         </div>
+      )}
 
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Documents Over Time */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Documentos Criados por Mês</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={documentsOverTime}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="documents" fill="#6366f1" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Document Types Distribution */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Distribuição por Tipo</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={documentTypes}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  dataKey="value"
-                  label={({ name, value }) => `${name}: ${value}`}
-                >
-                  {documentTypes.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* API Performance */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance da API (24h)</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={apiMetrics}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="time" />
-              <YAxis />
-              <Tooltip formatter={(value) => [`${value}ms`, 'Latência']} />
-              <Line type="monotone" dataKey="latency" stroke="#6366f1" strokeWidth={2} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* System Status */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Status dos Serviços</h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
-              <div className="flex items-center">
-                <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-                <span className="font-medium text-gray-900">API Principal</span>
-              </div>
-              <span className="text-green-600 font-medium">Operacional</span>
-            </div>
+      {/* Performance do Sistema */}
+      <div style={cardStyle}>
+        <h3 style={{ 
+          margin: '0 0 24px 0', 
+          color: '#1f2937',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <Zap size={20} />
+          Performance do Sistema
+          {performanceLoading && <RefreshCw size={16} className="animate-spin" />}
+        </h3>
+        
+        {performanceData && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
             
-            <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
-              <div className="flex items-center">
-                <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-                <span className="font-medium text-gray-900">Sistema de Assinatura</span>
+            <div style={{ padding: '16px', background: '#f0f9ff', borderRadius: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ fontWeight: '500' }}>Tempo de Resposta</span>
+                <span style={{ color: '#0ea5e9', fontWeight: 'bold' }}>
+                  {performanceData.summary?.averageResponseTime || 0}ms
+                </span>
               </div>
-              <span className="text-green-600 font-medium">Operacional</span>
-            </div>
-            
-            <div className="flex items-center justify-between p-4 bg-yellow-50 rounded-lg">
-              <div className="flex items-center">
-                <div className="w-3 h-3 bg-yellow-500 rounded-full mr-3"></div>
-                <span className="font-medium text-gray-900">Base de Dados</span>
+              <div style={{ width: '100%', height: '4px', background: '#e0f2fe', borderRadius: '2px' }}>
+                <div style={{ 
+                  width: `${Math.min((performanceData.summary?.averageResponseTime || 0) / 10, 100)}%`, 
+                  height: '100%', 
+                  background: '#0ea5e9', 
+                  borderRadius: '2px' 
+                }} />
               </div>
-              <span className="text-yellow-600 font-medium">Modo Mock</span>
             </div>
-            
-            <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
-              <div className="flex items-center">
-                <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-                <span className="font-medium text-gray-900">Sistema de Verificação</span>
-              </div>
-              <span className="text-green-600 font-medium">Operacional</span>
-            </div>
-          </div>
-        </div>
 
-        {/* Recent Activity */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Atividade Recente</h3>
-          <div className="space-y-3">
-            {[
-              { time: '14:32', action: 'Documento assinado', details: 'Receita Simples - João Silva' },
-              { time: '14:28', action: 'Novo template criado', details: 'Encaminhamento Médico' },
-              { time: '14:15', action: 'Verificação realizada', details: 'Hash: a1b2c3d4...' },
-              { time: '14:02', action: 'Usuário registrado', details: 'Dr. Maria Santos' },
-              { time: '13:45', action: 'Documento criado', details: 'Atestado Médico - Pedro Costa' }
-            ].map((activity, index) => (
-              <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                <div>
-                  <p className="font-medium text-gray-900">{activity.action}</p>
-                  <p className="text-sm text-gray-600">{activity.details}</p>
-                </div>
-                <span className="text-sm text-gray-500">{activity.time}</span>
+            <div style={{ padding: '16px', background: '#f0fdf4', borderRadius: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ fontWeight: '500' }}>Taxa de Sucesso</span>
+                <span style={{ color: '#10b981', fontWeight: 'bold' }}>
+                  {((1 - (performanceData.summary?.errorRate || 0)) * 100).toFixed(1)}%
+                </span>
               </div>
-            ))}
+              <div style={{ width: '100%', height: '4px', background: '#dcfce7', borderRadius: '2px' }}>
+                <div style={{ 
+                  width: `${((1 - (performanceData.summary?.errorRate || 0)) * 100)}%`, 
+                  height: '100%', 
+                  background: '#10b981', 
+                  borderRadius: '2px' 
+                }} />
+              </div>
+            </div>
+
           </div>
+        )}
+      </div>
+
+      {/* Cache Performance */}
+      <div style={cardStyle}>
+        <h3 style={{ 
+          margin: '0 0 24px 0', 
+          color: '#1f2937',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <Database size={20} />
+          Performance do Cache
+          {cacheLoading && <RefreshCw size={16} className="animate-spin" />}
+        </h3>
+        
+        {cacheStats && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+            
+            <div style={{ padding: '16px', background: '#fef3c7', borderRadius: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ fontWeight: '500' }}>Total de Chaves</span>
+                <span style={{ color: '#f59e0b', fontWeight: 'bold' }}>
+                  {cacheStats.totalKeys || 0}
+                </span>
+              </div>
+            </div>
+
+            <div style={{ padding: '16px', background: '#e0f2fe', borderRadius: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ fontWeight: '500' }}>Uso de Memória</span>
+                <span style={{ color: '#0ea5e9', fontWeight: 'bold' }}>
+                  {cacheStats.memoryUsed || 'N/A'}
+                </span>
+              </div>
+            </div>
+
+            <div style={{ padding: '16px', background: '#f0fdf4', borderRadius: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ fontWeight: '500' }}>Status</span>
+                <span style={{ 
+                  color: cacheStats.connected ? '#10b981' : '#ef4444', 
+                  fontWeight: 'bold' 
+                }}>
+                  {cacheStats.connected ? '✅ Conectado' : '❌ Desconectado'}
+                </span>
+              </div>
+            </div>
+
+          </div>
+        )}
+      </div>
+
+      {/* Ações de Exportação */}
+      <div style={{ ...cardStyle, textAlign: 'center' }}>
+        <h3 style={{ margin: '0 0 16px 0', color: '#1f2937' }}>📥 Exportar Relatórios</h3>
+        <p style={{ color: '#6b7280', marginBottom: '24px' }}>
+          Baixe relatórios detalhados das métricas do sistema
+        </p>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button
+            style={{
+              padding: '12px 24px',
+              background: '#6366f1',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+            onClick={() => console.log('Export PDF')}
+          >
+            📄 Exportar PDF
+          </button>
+          <button
+            style={{
+              padding: '12px 24px',
+              background: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+            onClick={() => console.log('Export Excel')}
+          >
+            📊 Exportar Excel
+          </button>
         </div>
       </div>
+
     </div>
-  );
-};
+  )
+}
 
-export default MetricsPage;
+export default MetricsPage

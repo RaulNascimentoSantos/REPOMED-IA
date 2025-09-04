@@ -1,0 +1,33 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "RepoMed IA (Zod Source of Truth)",
+    "version": "1.0.0"
+  },
+  "schemas": [
+    {
+      "name": "AuthLoginRequest",
+      "type": "ZodObject"
+    },
+    {
+      "name": "AuthLoginResponse",
+      "type": "ZodObject"
+    },
+    {
+      "name": "Template",
+      "type": "ZodObject"
+    },
+    {
+      "name": "CreateTemplateRequest",
+      "type": "ZodObject"
+    },
+    {
+      "name": "Document",
+      "type": "ZodObject"
+    },
+    {
+      "name": "CreateDocumentRequest",
+      "type": "ZodObject"
+    }
+  ]
+}

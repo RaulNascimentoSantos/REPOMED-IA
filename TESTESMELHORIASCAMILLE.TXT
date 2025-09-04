@@ -1,0 +1,490 @@
+Você é Claude Code, Engenheiro(a) Sênior de QA/DevEx. Sua missão: implementar e executar a suíte completa de testes do RepoMed IA (front+back), localmente.
+
+🧭 Diretrizes
+
+Nada de feature nova — só testes e infraestrutura de testes.
+
+Zod em packages/contracts é a fonte. Gerar OpenAPI e validar drift.
+
+PDF determinístico: comparar buffers/sha256 em 3 execuções.
+
+A11y: usar axe-core (sem violação crítica).
+
+Visual: Playwright toHaveScreenshot.
+
+Load: k6 com p95 < 300ms nas listas.
+
+E2E: fluxos críticos (login → templates → new doc → assinar → PDF).
+
+CI local/PR gate: scripts falham se qualquer critério do checklist não for atendido.
+
+🧱 Tarefas (criar/atualizar arquivos exatamente como abaixo)
+
+Caminhos relativos à raiz do monorepo repomed-ia/.
+
+0) Scripts de orquestração (root)
+
+FILE: package.json (adicionar/mesclar scripts)
+
+{
+  "scripts": {
+    "test:unit": "vitest --run",
+    "test:unit:frontend": "vitest --run --dir packages/frontend",
+    "test:unit:backend": "vitest --run --dir packages/backend",
+    "test:contracts": "tsx tests/contracts/openapi-drift.ts",
+    "test:e2e": "playwright test",
+    "test:load": "k6 run tests/load/smoke.js",
+    "test:a11y": "playwright test --grep @a11y",
+    "test:visual": "playwright test --grep @visual",
+    "test:lighthouse": "tsx tests/lighthouse/lhci.ts",
+    "test:golden:pdf": "vitest --run tests/backend/pdf-golden.spec.ts",
+    "test:all": "npm run test:unit && npm run test:contracts && npm run test:golden:pdf && npm run test:e2e && npm run test:a11y && npm run test:visual && npm run test:load && npm run test:lighthouse"
+  },
+  "devDependencies": {
+    "vitest": "^2.0.0",
+    "@vitest/coverage-v8": "^2.0.0",
+    "tsx": "^4.15.7",
+    "playwright": "^1.46.0",
+    "@playwright/test": "^1.46.0",
+    "axe-core": "^4.9.1",
+    "k6": "0.0.0-virtual",
+    "zod-to-openapi": "^7.3.0",
+    "openapi-diff": "^3.0.0",
+    "lighthouse": "^12.0.0"
+  }
+}
+
+1) Configurações Vitest (front/back)
+
+FILE: vitest.config.ts (na raiz)
+
+import { defineConfig } from 'vitest/config';
+export default defineConfig({
+  test: {
+    globals: true,
+    environment: 'node',
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'lcov'],
+      lines: 80, functions: 80, branches: 70
+    }
+  }
+});
+
+
+FILE: packages/frontend/vitest.config.ts
+
+import { defineConfig } from 'vitest/config';
+export default defineConfig({
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./vitest.setup.ts']
+  }
+});
+
+
+FILE: packages/frontend/vitest.setup.ts
+
+import '@testing-library/jest-dom';
+
+
+FILE: packages/backend/vitest.config.ts
+
+import { defineConfig } from 'vitest/config';
+export default defineConfig({
+  test: { globals: true, environment: 'node' }
+});
+
+2) Playwright (E2E, A11y, Visual)
+
+FILE: playwright.config.ts (root)
+
+import { defineConfig, devices } from '@playwright/test';
+export default defineConfig({
+  timeout: 60_000,
+  testDir: 'tests/e2e',
+  use: {
+    baseURL: process.env.E2E_BASE_URL || 'http://localhost:5173',
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure'
+  },
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } }
+  ],
+  reporter: [['list']]
+});
+
+
+FILE: tests/e2e/login.spec.ts
+
+import { test, expect } from '@playwright/test';
+
+test('login feliz e erro credenciais', async ({ page }) => {
+  await page.goto('/auth/login');
+  await page.getByLabel('E-mail').fill('doctor@example.com');
+  await page.getByLabel('Senha').fill('dev123456');
+  await page.getByRole('button', { name: 'Entrar' }).click();
+  await expect(page).toHaveURL('/'); // redireciona pra Workspace
+
+  // Erro (logout simulado)
+  await page.context().clearCookies();
+  await page.goto('/auth/login');
+  await page.getByLabel('E-mail').fill('wrong@example.com');
+  await page.getByLabel('Senha').fill('badpass');
+  await page.getByRole('button', { name: 'Entrar' }).click();
+  // Deve aparecer mensagem vinda do RFC7807.detail (fallback se mock)
+  await expect(page.locator('text=Erro')).toBeVisible({ timeout: 5000 });
+});
+
+
+FILE: tests/e2e/templates.spec.ts
+
+import { test, expect } from '@playwright/test';
+
+test('templates: listar, preview e usar template', async ({ page }) => {
+  await page.goto('/auth/login');
+  await page.getByLabel('E-mail').fill('doctor@example.com');
+  await page.getByLabel('Senha').fill('dev123456');
+  await page.getByRole('button', { name: 'Entrar' }).click();
+
+  await page.goto('/templates');
+  await expect(page.getByRole('heading', { name: 'Templates' })).toBeVisible();
+
+  // Se lista vazia: criar rapidamente um template (se UI permitir)
+  const hasList = await page.locator('table').count();
+  if (!hasList) {
+    await page.getByRole('button', { name: 'Novo template' }).click();
+    await page.getByLabel('Nome').fill('Receita Simples');
+    await page.getByRole('button', { name: 'Adicionar campo' }).click();
+    await page.getByLabel('Key').first().fill('patientName');
+    await page.getByLabel('Label').first().fill('Paciente');
+    await page.getByRole('button', { name: 'Salvar' }).click();
+    await expect(page).toHaveURL('/templates');
+  }
+
+  // Preview
+  await page.getByRole('button', { name: 'Visualizar' }).first().click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.getByLabel('Close').click();
+
+  // Usar template
+  await page.getByRole('button', { name: /Usar este template/i }).first().click();
+  await expect(page).toHaveURL(/\\/documents\\/new\\?templateId=/);
+});
+
+
+FILE: tests/e2e/documents.spec.ts
+
+import { test, expect } from '@playwright/test';
+
+test('documento: criar → assinar (mock) → gerar/baixar PDF', async ({ page, context }) => {
+  // login
+  await page.goto('/auth/login');
+  await page.getByLabel('E-mail').fill('doctor@example.com');
+  await page.getByLabel('Senha').fill('dev123456');
+  await page.getByRole('button', { name: 'Entrar' }).click();
+
+  // criar documento (se veio de templateId na URL, só preencher título)
+  await page.goto('/documents/new');
+  await page.getByLabel('Template ID').fill('TEMPLATE_DE_TESTE'); // se já veio via query, ignora
+  await page.getByLabel('Título').fill('Receita de Teste');
+  await page.getByRole('button', { name: 'Criar' }).click();
+
+  await expect(page).toHaveURL(/\\/documents\\/\\w+/);
+  // voltar pra lista para assinar (caso sua ação de assinar esteja na lista)
+  await page.getByRole('button', { name: 'Voltar' }).click();
+  await expect(page).toHaveURL('/documents');
+
+  // Assinar
+  await page.getByRole('button', { name: /^Assinar$/ }).first().click();
+  await page.waitForTimeout(300); // aguardar mutate
+  // PDF
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByRole('link', { name: /^PDF$/ }).first().click()
+  ]);
+  const path = await download.path();
+  expect(path).toBeTruthy();
+});
+
+
+A11y via axe-core (marca @a11y)
+
+FILE: tests/e2e/a11y.spec.ts
+
+import { test, expect } from '@playwright/test';
+import axe from 'axe-core';
+
+async function runAxe(page) {
+  await page.addScriptTag({ path: require.resolve('axe-core') });
+  return await page.evaluate(async () => await (window as any).axe.run());
+}
+
+test('@a11y home/workspace sem violações críticas', async ({ page }) => {
+  await page.goto('/auth/login');
+  await page.getByLabel('E-mail').fill('doctor@example.com');
+  await page.getByLabel('Senha').fill('dev123456');
+  await page.getByRole('button', { name: 'Entrar' }).click();
+
+  await page.goto('/');
+  const res = await runAxe(page);
+  const critical = res.violations.filter((v:any) => ['critical','serious'].includes(v.impact));
+  expect(critical, JSON.stringify(critical, null, 2)).toHaveLength(0);
+});
+
+
+Visual regression (marca @visual)
+
+FILE: tests/e2e/visual.spec.ts
+
+import { test, expect } from '@playwright/test';
+
+test('@visual workspace', async ({ page }) => {
+  await page.goto('/auth/login');
+  await page.getByLabel('E-mail').fill('doctor@example.com');
+  await page.getByLabel('Senha').fill('dev123456');
+  await page.getByRole('button', { name: 'Entrar' }).click();
+
+  await page.goto('/');
+  await expect(page).toHaveScreenshot({ fullPage: true, maxDiffPixelRatio: 0.02 });
+});
+
+3) Contratos (Zod ↔ OpenAPI) e Drift
+
+FILE: tests/contracts/openapi-drift.ts
+
+import { writeFileSync, readFileSync } from 'fs';
+import { join } from 'path';
+import { OpenAPIRegistry, OpenApiGeneratorV3 } from 'zod-to-openapi';
+// IMPORT seus schemas reais
+import { AuthLoginRequest, AuthLoginResponse } from '../..//packages/contracts/src/schemas/auth';
+import { Template, CreateTemplateRequest } from '../..//packages/contracts/src/schemas/templates';
+import { Document, CreateDocumentRequest } from '../..//packages/contracts/src/schemas/documents';
+
+// 1) registrar
+const registry = new OpenAPIRegistry();
+registry.register('AuthLoginRequest', AuthLoginRequest);
+registry.register('AuthLoginResponse', AuthLoginResponse);
+registry.register('Template', Template);
+registry.register('CreateTemplateRequest', CreateTemplateRequest);
+registry.register('Document', Document);
+registry.register('CreateDocumentRequest', CreateDocumentRequest);
+
+// 2) gerar
+const generator = new OpenApiGeneratorV3(registry.definitions);
+const doc = generator.generateDocument({
+  openapi: '3.0.0',
+  info: { title: 'RepoMed IA (Zod Source of Truth)', version: '1.0.0' },
+  paths: {}
+});
+
+// 3) comparar com snapshot do repo (gerar se não existir)
+const target = join(process.cwd(), 'openapi.generated.json');
+writeFileSync(target, JSON.stringify(doc, null, 2));
+console.log('OpenAPI gerado em', target);
+
+// Se você mantém um arquivo openapi.json versionado, compare textos (drift)
+try {
+  const baseline = readFileSync(join(process.cwd(), 'openapi.json'), 'utf-8');
+  const current = JSON.stringify(doc, null, 2);
+  if (baseline.trim() !== current.trim()) {
+    console.error('❌ Drift entre Zod e openapi.json');
+    process.exit(1);
+  } else {
+    console.log('✅ Zod e openapi.json alinhados');
+  }
+} catch {
+  console.warn('ℹ️ Nenhum openapi.json base encontrado; considere versionar um baseline.');
+}
+
+4) Golden PDF (determinismo)
+
+FILE: tests/backend/pdf-golden.spec.ts
+
+import { describe, it, expect } from 'vitest';
+import crypto from 'crypto';
+import { readFileSync, writeFileSync } from 'fs';
+import { join } from 'path';
+import http from 'http';
+
+function sha256(buf: Buffer) { return crypto.createHash('sha256').update(buf).digest('hex'); }
+async function fetchBuffer(url: string) {
+  return new Promise<Buffer>((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    http.get(url, (res) => {
+      res.on('data', (c) => chunks.push(Buffer.from(c)));
+      res.on('end', () => resolve(Buffer.concat(chunks)));
+      res.on('error', reject);
+    }).on('error', reject);
+  });
+}
+
+describe('PDF determinístico', () => {
+  it('gera mesmo SHA-256 em 3 chamadas', async () => {
+    const base = process.env.API_BASE || 'http://localhost:3333';
+    const docId = process.env.TEST_DOC_ID || '1';
+    const url = `${base}/api/documents/${docId}/pdf`;
+
+    const a = await fetchBuffer(url);
+    const b = await fetchBuffer(url);
+    const c = await fetchBuffer(url);
+
+    const ha = sha256(a), hb = sha256(b), hc = sha256(c);
+    // opcional: se quiser snapshot do golden
+    writeFileSync(join(process.cwd(), 'tests/golden/pdf.hash.txt'), ha);
+    expect(ha).toBe(hb);
+    expect(hb).toBe(hc);
+  });
+});
+
+
+Dica: exporte TEST_DOC_ID via seed ou crie um documento no setup do teste E2E e reuse o id.
+
+5) Load (p95 < 300ms)
+
+FILE: tests/load/smoke.js
+
+import http from 'k6/http';
+import { check } from 'k6';
+
+export const options = {
+  vus: 10,
+  duration: '60s',
+  thresholds: {
+    http_req_duration: ['p(95)<300'],
+    http_req_failed: ['rate<0.01']
+  }
+};
+
+const BASE = __ENV.API_BASE || 'http://localhost:3333';
+
+export default function () {
+  const r1 = http.get(`${BASE}/api/templates`);
+  const r2 = http.get(`${BASE}/api/documents`);
+  check(r1, { 'templates 200': (r) => r.status === 200, 't p95<300': (r) => r.timings.duration < 300 });
+  check(r2, { 'documents 200': (r) => r.status === 200, 'd p95<300': (r) => r.timings.duration < 300 });
+}
+
+6) Lighthouse (Perf ≥ 90, A11y ≥ 95)
+
+FILE: tests/lighthouse/lhci.ts
+
+import { execSync } from 'node:child_process';
+
+const target = process.env.APP_BASE || 'http://localhost:4173'; // vite preview
+try {
+  const cmd = `npx lighthouse ${target} --quiet --chrome-flags="--headless" --only-categories=performance,accessibility --output=json --output-path=stdout`;
+  const out = execSync(cmd, { stdio: ['ignore','pipe','pipe'] }).toString();
+  const report = JSON.parse(out);
+  const perf = Math.round(report.categories.performance.score * 100);
+  const a11y = Math.round(report.categories.accessibility.score * 100);
+  console.log('Lighthouse => Perf:', perf, 'A11y:', a11y);
+  if (perf < 90 || a11y < 95) {
+    console.error('❌ Threshold não atingido (Perf>=90, A11y>=95)');
+    process.exit(1);
+  }
+  console.log('✅ Thresholds ok');
+} catch (e) {
+  console.error('Falha ao rodar Lighthouse', e?.message || e);
+  process.exit(1);
+}
+
+
+Rode vite preview (ou servidor estático do build) em :4173 antes de chamar este script.
+
+7) REST Client / Thunder (smoke manual)
+
+FILE: requests.http
+
+### Auth
+POST http://localhost:3333/api/auth/login
+Content-Type: application/json
+
+{ "email": "doctor@example.com", "password": "dev123456" }
+
+### Templates list
+GET http://localhost:3333/api/templates
+
+### Create template
+POST http://localhost:3333/api/templates
+Content-Type: application/json
+
+{
+  "name": "Receita Simples",
+  "description": "Modelo básico",
+  "fields": [
+    {"key":"patientName","label":"Paciente","type":"text"},
+    {"key":"drug","label":"Medicamento","type":"text"}
+  ]
+}
+
+### Documents list
+GET http://localhost:3333/api/documents
+
+### Create document
+POST http://localhost:3333/api/documents
+Content-Type: application/json
+
+{
+  "templateId": "TEMPLATE_ID",
+  "title": "Receita de teste",
+  "content": { "patientName":"João", "drug":"Dipirona 500mg" }
+}
+
+### Sign document
+POST http://localhost:3333/api/documents/DOC_ID/sign
+
+### PDF
+GET http://localhost:3333/api/documents/DOC_ID/pdf
+
+▶️ Execução (ordem sugerida, local)
+
+Subir stack: docker compose up -d → npm run setup:local → npm run db:reseed
+
+Frontend: npm run dev (Vite) e npm run build && npm run preview para Lighthouse
+
+Backend: npm run dev (Fastify)
+
+E2E: npm run test:e2e (Playwright abre/roda)
+
+A11y/Visual: npm run test:a11y e npm run test:visual
+
+Golden PDF: npm run test:golden:pdf (defina TEST_DOC_ID se preciso)
+
+Contratos: npm run test:contracts (gera e checa drift)
+
+Load: API_BASE=http://localhost:3333 npm run test:load
+
+Lighthouse: APP_BASE=http://localhost:4173 npm run test:lighthouse
+
+Tudo: npm run test:all
+
+✅ Checklist de Aceite (gates)
+
+ E2E: login; templates→preview→usar; documentos→criar→assinar (mock)→PDF (download).
+
+ Contratos: sem drift Zod↔OpenAPI.
+
+ PDF: 3 hashes iguais (golden).
+
+ Load: p95 < 300ms nas listas.
+
+ A11y (axe): 0 violações críticas/serious.
+
+ Visual: screenshots dentro do limiar (maxDiffPixelRatio ≤ 0.02).
+
+ Lighthouse: Performance ≥ 90, A11y ≥ 95.
+
+ Coverage (Vitest): linhas ≥ 80%.
+
+ℹ️ Observações
+
+Se alguma ação (ex.: Cancelar doc) depende de endpoint inexistente no seu back atual, marque o teste como skip (ex.: test.skip(...)) e deixe TODO apontando a rota.
+
+Para ambientes SIGN_MODE=mock, mantenha asserções de assinatura compatíveis (status/flags).
+
+Se já existe um openapi.json versionado, o teste de drift falha se o gerado do Zod divergir — ajuste o baseline ou o contrato real.
+
+FIM DO PROMPT

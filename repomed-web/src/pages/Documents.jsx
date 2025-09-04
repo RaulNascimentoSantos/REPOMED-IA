@@ -1,7 +1,12 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+// Redirecionamento para página unificada
+import DocumentsUnified from './DocumentsUnified'
 
-export function Documents() {
+export default function Documents() {
+  return <DocumentsUnified />
+}
+
+// Versão anterior mantida como backup
+export function DocumentsLegacy() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState('all')
   const [sortBy, setSortBy] = useState('date')

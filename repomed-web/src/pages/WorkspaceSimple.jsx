@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-export function WorkspaceSimple() {
+export default function WorkspaceSimple() {
   const [activePanel, setActivePanel] = useState('editor')
   const [aiMode, setAiMode] = useState('off')
   const [document, setDocument] = useState('')

@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test'
 import { faker } from '@faker-js/faker/locale/pt_BR'
 
-const API_URL = 'http://localhost:3003'
-const WEB_URL = 'http://localhost:3002'
+const API_URL = process.env.API_URL || 'http://localhost:8082'
+const WEB_URL = process.env.WEB_URL || 'http://localhost:3002'
 
 test.describe('RepoMed IA - E2E Tests', () => {
   

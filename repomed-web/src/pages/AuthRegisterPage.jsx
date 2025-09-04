@@ -1,60 +1,57 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { User, Mail, Key, Shield, Eye, EyeOff } from 'lucide-react';
 
+const registerSchema = z.object({
+  name: z.string().min(3, 'O nome deve ter pelo menos 3 caracteres'),
+  email: z.string().email('E-mail inválido'),
+  crm: z.string().min(4, 'CRM inválido'),
+  password: z.string().min(8, 'A senha deve ter pelo menos 8 caracteres'),
+  confirmPassword: z.string()
+}).refine(data => data.password === data.confirmPassword, {
+  message: 'As senhas não coincidem',
+  path: ['confirmPassword']
+});
+
 const AuthRegisterPage = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    crm: ''
-  });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    resolver: zodResolver(registerSchema)
+  });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     setLoading(true);
     setError('');
 
-    if (formData.password !== formData.confirmPassword) {
-      setError('As senhas não coincidem');
-      setLoading(false);
-      return;
-    }
-
     try {
-      const response = await fetch('http://localhost:8082/api/auth/register', {
+      const response = await fetch('http://localhost:8085/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          crm: formData.crm
+          name: data.name,
+          email: data.email,
+          password: data.password,
+          crm: data.crm
         })
       });
 
-      const data = await response.json();
+      const responseData = await response.json();
 
       if (response.ok) {
         // Store token and redirect
-        localStorage.setItem('token', data.token);
+        localStorage.setItem('token', responseData.token);
         window.location.href = '/patients';
       } else {
-        setError(data.message || 'Erro ao criar conta');
+        setError(responseData.message || 'Erro ao criar conta');
       }
     } catch (err) {
       setError('Erro de conexão. Tente novamente.');
@@ -79,7 +76,7 @@ const AuthRegisterPage = () => {
 
         {/* Form */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -89,14 +86,12 @@ const AuthRegisterPage = () => {
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
                   type="text"
-                  name="name"
-                  required
-                  value={formData.name}
-                  onChange={handleChange}
+                  {...register('name')}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition-all"
                   placeholder="Dr. João Silva"
                 />
               </div>
+              {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
             </div>
 
             {/* Email */}
@@ -108,14 +103,12 @@ const AuthRegisterPage = () => {
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
                   type="email"
-                  name="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
+                  {...register('email')}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition-all"
                   placeholder="joao@exemplo.com"
                 />
               </div>
+              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
             </div>
 
             {/* CRM */}
@@ -127,14 +120,12 @@ const AuthRegisterPage = () => {
                 <Shield className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
                   type="text"
-                  name="crm"
-                  required
-                  value={formData.crm}
-                  onChange={handleChange}
+                  {...register('crm')}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition-all"
                   placeholder="123456/SP"
                 />
               </div>
+              {errors.crm && <p className="text-red-500 text-xs mt-1">{errors.crm.message}</p>}
             </div>
 
             {/* Password */}
@@ -146,10 +137,7 @@ const AuthRegisterPage = () => {
                 <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
+                  {...register('password')}
                   className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition-all"
                   placeholder="••••••••"
                 />
@@ -161,6 +149,7 @@ const AuthRegisterPage = () => {
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
+              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
             </div>
 
             {/* Confirm Password */}
@@ -172,10 +161,7 @@ const AuthRegisterPage = () => {
                 <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
-                  name="confirmPassword"
-                  required
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
+                  {...register('confirmPassword')}
                   className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition-all"
                   placeholder="••••••••"
                 />
@@ -187,6 +173,7 @@ const AuthRegisterPage = () => {
                   {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
+              {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword.message}</p>}
             </div>
 
             {/* Error Message */}

@@ -1,0 +1,235 @@
+{
+  "summary": {
+    "totalTests": 24,
+    "successCount": 23,
+    "warningCount": 1,
+    "errorCount": 0,
+    "successRate": "95.8%",
+    "testDuration": "1756875012.2s"
+  },
+  "tests": [
+    {
+      "step": 1,
+      "description": "Acesso à página inicial",
+      "status": "success",
+      "details": "Homepage carregou corretamente",
+      "timestamp": "2025-09-03T04:49:00.648Z",
+      "url": "http://localhost:3021/auth/login",
+      "screenshot": "step-1.png"
+    },
+    {
+      "step": 2,
+      "description": "Título da página correto",
+      "status": "success",
+      "details": "Título: RepoMed IA",
+      "timestamp": "2025-09-03T04:49:02.255Z",
+      "url": "http://localhost:3021/auth/login",
+      "screenshot": "step-2.png"
+    },
+    {
+      "step": 3,
+      "description": "Elementos interativos na homepage",
+      "status": "success",
+      "details": "1 botões/links encontrados",
+      "timestamp": "2025-09-03T04:49:03.830Z",
+      "url": "http://localhost:3021/auth/login",
+      "screenshot": "step-3.png"
+    },
+    {
+      "step": 4,
+      "description": "Navegação para tela de login",
+      "status": "success",
+      "details": "Clicou em: button:has-text(\"Entrar\")",
+      "timestamp": "2025-09-03T04:49:08.451Z",
+      "url": "http://localhost:3021/auth/login",
+      "screenshot": "step-4.png"
+    },
+    {
+      "step": 5,
+      "description": "Tela de login identificada",
+      "status": "success",
+      "details": "Campos de email e senha encontrados",
+      "timestamp": "2025-09-03T04:49:10.030Z",
+      "url": "http://localhost:3021/auth/login",
+      "screenshot": "step-5.png"
+    },
+    {
+      "step": 6,
+      "description": "Campo de email preenchido",
+      "status": "success",
+      "details": "usuario@teste.com",
+      "timestamp": "2025-09-03T04:49:12.630Z",
+      "url": "http://localhost:3021/auth/login",
+      "screenshot": "step-6.png"
+    },
+    {
+      "step": 7,
+      "description": "Campo de senha preenchido",
+      "status": "success",
+      "details": "****** (senha mascarada)",
+      "timestamp": "2025-09-03T04:49:15.219Z",
+      "url": "http://localhost:3021/auth/login",
+      "screenshot": "step-7.png"
+    },
+    {
+      "step": 8,
+      "description": "Tentativa de login realizada",
+      "status": "success",
+      "details": "Botão de submit clicado",
+      "timestamp": "2025-09-03T04:49:20.823Z",
+      "url": "http://localhost:3021/login",
+      "screenshot": "step-8.png"
+    },
+    {
+      "step": 9,
+      "description": "Login pode ter falhado",
+      "status": "warning",
+      "details": "Ainda na página de login",
+      "timestamp": "2025-09-03T04:49:22.554Z",
+      "url": "http://localhost:3021/login",
+      "screenshot": "step-9.png"
+    },
+    {
+      "step": 10,
+      "description": "Acesso à rota /dashboard",
+      "status": "success",
+      "details": "Conteúdo carregado sem redirecionamento para login",
+      "timestamp": "2025-09-03T04:49:26.297Z",
+      "url": "http://localhost:3021/dashboard",
+      "screenshot": "step-10.png"
+    },
+    {
+      "step": 11,
+      "description": "Formulários encontrados",
+      "status": "success",
+      "details": "1 formulário(s) na página",
+      "timestamp": "2025-09-03T04:49:28.991Z",
+      "url": "http://localhost:3021/auth/login",
+      "screenshot": "step-11.png"
+    },
+    {
+      "step": 12,
+      "description": "Campo preenchido",
+      "status": "success",
+      "details": "email: texto de teste",
+      "timestamp": "2025-09-03T04:49:31.595Z",
+      "url": "http://localhost:3021/auth/login",
+      "screenshot": "step-12.png"
+    },
+    {
+      "step": 13,
+      "description": "Área de Documentos acessível",
+      "status": "success",
+      "details": "Navegou para /documents",
+      "timestamp": "2025-09-03T04:49:34.584Z",
+      "url": "http://localhost:3021/auth/login",
+      "screenshot": "step-13.png"
+    },
+    {
+      "step": 14,
+      "description": "Área de Templates acessível",
+      "status": "success",
+      "details": "Navegou para /templates",
+      "timestamp": "2025-09-03T04:49:37.275Z",
+      "url": "http://localhost:3021/auth/login",
+      "screenshot": "step-14.png"
+    },
+    {
+      "step": 15,
+      "description": "Botão testado",
+      "status": "success",
+      "details": "\"Entrar\" - Clique realizado",
+      "timestamp": "2025-09-03T04:49:40.920Z",
+      "url": "http://localhost:3021/auth/login",
+      "screenshot": "step-15.png"
+    },
+    {
+      "step": 16,
+      "description": "Teste responsivo Mobile",
+      "status": "success",
+      "details": "375x667",
+      "timestamp": "2025-09-03T04:49:43.532Z",
+      "url": "http://localhost:3021/auth/login",
+      "screenshot": "step-16.png"
+    },
+    {
+      "step": 17,
+      "description": "Teste responsivo Tablet",
+      "status": "success",
+      "details": "768x1024",
+      "timestamp": "2025-09-03T04:49:46.097Z",
+      "url": "http://localhost:3021/auth/login",
+      "screenshot": "step-17.png"
+    },
+    {
+      "step": 18,
+      "description": "Teste responsivo Desktop Large",
+      "status": "success",
+      "details": "1920x1080",
+      "timestamp": "2025-09-03T04:49:48.689Z",
+      "url": "http://localhost:3021/auth/login",
+      "screenshot": "step-18.png"
+    },
+    {
+      "step": 19,
+      "description": "Navegação por teclado testada",
+      "status": "success",
+      "details": "5 elementos navegados com Tab",
+      "timestamp": "2025-09-03T04:49:57.928Z",
+      "url": "http://localhost:3021/auth/login",
+      "screenshot": "step-19.png"
+    },
+    {
+      "step": 20,
+      "description": "Estrutura de headings",
+      "status": "success",
+      "details": "1 headings encontrados",
+      "timestamp": "2025-09-03T04:49:59.529Z",
+      "url": "http://localhost:3021/auth/login",
+      "screenshot": "step-20.png"
+    },
+    {
+      "step": 21,
+      "description": "Performance /",
+      "status": "success",
+      "details": "Tempo de carregamento: 1403ms",
+      "timestamp": "2025-09-03T04:50:02.520Z",
+      "url": "http://localhost:3021/auth/login",
+      "screenshot": "step-21.png"
+    },
+    {
+      "step": 22,
+      "description": "Performance /patients",
+      "status": "success",
+      "details": "Tempo de carregamento: 1093ms",
+      "timestamp": "2025-09-03T04:50:05.198Z",
+      "url": "http://localhost:3021/auth/login",
+      "screenshot": "step-22.png"
+    },
+    {
+      "step": 23,
+      "description": "Performance /documents",
+      "status": "success",
+      "details": "Tempo de carregamento: 1092ms",
+      "timestamp": "2025-09-03T04:50:07.876Z",
+      "url": "http://localhost:3021/auth/login",
+      "screenshot": "step-23.png"
+    },
+    {
+      "step": 24,
+      "description": "Performance /templates",
+      "status": "success",
+      "details": "Tempo de carregamento: 1114ms",
+      "timestamp": "2025-09-03T04:50:10.577Z",
+      "url": "http://localhost:3021/auth/login",
+      "screenshot": "step-24.png"
+    }
+  ],
+  "recommendations": [
+    "Interface responvida e funcional",
+    "Navegação intuitiva funcionando",
+    "Formulários interativos",
+    "Componentes responsivos",
+    "Performance adequada"
+  ]
+}

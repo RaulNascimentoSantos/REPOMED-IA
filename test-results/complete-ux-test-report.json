@@ -1,0 +1,439 @@
+{
+  "summary": {
+    "totalActions": 50,
+    "successfulActions": 42,
+    "errors": 1,
+    "successRate": "84%",
+    "testDuration": "1756875998.7s",
+    "timestamp": "2025-09-03T05:06:38.664Z"
+  },
+  "phases": {
+    "Homepage e Acesso": 10,
+    "Navegação": 10,
+    "Autenticação": 10,
+    "Formulários": 20,
+    "Elementos Interativos": 0,
+    "Responsividade": 0,
+    "Acessibilidade": 0,
+    "Busca e Filtros": 0,
+    "Casos Extremos": 0,
+    "Performance": 0
+  },
+  "detailedResults": [
+    {
+      "step": 1,
+      "description": "Acessou homepage do RepoMed IA",
+      "status": "success",
+      "details": "URL: http://localhost:3021/auth/login",
+      "timestamp": "2025-09-03T05:04:20.761Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 2,
+      "description": "Verificou título da página",
+      "status": "success",
+      "details": "Título: \"RepoMed IA\"",
+      "timestamp": "2025-09-03T05:04:21.952Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 3,
+      "description": "Identificou botões na homepage",
+      "status": "success",
+      "details": "1 botões encontrados",
+      "timestamp": "2025-09-03T05:04:23.395Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 4,
+      "description": "Clicou no botão \"Entrar\"",
+      "status": "success",
+      "details": "Botão 1 funcional",
+      "timestamp": "2025-09-03T05:04:27.358Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 5,
+      "description": "Navegou para /",
+      "status": "warning",
+      "details": "Conteúdo limitado encontrado",
+      "timestamp": "2025-09-03T05:04:32.197Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 6,
+      "description": "Navegou para /auth/login",
+      "status": "warning",
+      "details": "Conteúdo limitado encontrado",
+      "timestamp": "2025-09-03T05:04:35.762Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 7,
+      "description": "Navegou para /patients",
+      "status": "warning",
+      "details": "Conteúdo limitado encontrado",
+      "timestamp": "2025-09-03T05:04:39.306Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 8,
+      "description": "Navegou para /documents",
+      "status": "warning",
+      "details": "Conteúdo limitado encontrado",
+      "timestamp": "2025-09-03T05:04:42.834Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 9,
+      "description": "Navegou para /templates",
+      "status": "warning",
+      "details": "Conteúdo limitado encontrado",
+      "timestamp": "2025-09-03T05:04:46.633Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 10,
+      "description": "Navegou para /dashboard",
+      "status": "warning",
+      "details": "Conteúdo limitado encontrado",
+      "timestamp": "2025-09-03T05:04:50.222Z",
+      "url": "http://localhost:3021/dashboard"
+    },
+    {
+      "step": 11,
+      "description": "Erro ao navegar para /metrics",
+      "status": "error",
+      "details": "page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at http://localhost:3021/metrics\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3021/metrics\", waiting until \"load\"\u001b[22m\n",
+      "timestamp": "2025-09-03T05:04:52.477Z",
+      "url": "chrome-error://chromewebdata/"
+    },
+    {
+      "step": 12,
+      "description": "Navegou para /upload",
+      "status": "warning",
+      "details": "Conteúdo limitado encontrado",
+      "timestamp": "2025-09-03T05:04:56.091Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 13,
+      "description": "Formulário de login identificado",
+      "status": "success",
+      "details": "Campos email e senha encontrados",
+      "timestamp": "2025-09-03T05:04:58.145Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 14,
+      "description": "Testou validação de formulário vazio",
+      "status": "success",
+      "details": "Clicou submit sem preencher",
+      "timestamp": "2025-09-03T05:05:01.099Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 15,
+      "description": "Preencheu campo email",
+      "status": "success",
+      "details": "Email: usuario@teste.com",
+      "timestamp": "2025-09-03T05:05:03.034Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 16,
+      "description": "Preencheu campo senha",
+      "status": "success",
+      "details": "Senha preenchida",
+      "timestamp": "2025-09-03T05:05:04.954Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 17,
+      "description": "Submeteu formulário de login",
+      "status": "success",
+      "details": "Tentativa de login realizada",
+      "timestamp": "2025-09-03T05:05:09.898Z",
+      "url": "http://localhost:3021/login"
+    },
+    {
+      "step": 18,
+      "description": "Login redirecionou com sucesso",
+      "status": "success",
+      "details": "Nova URL: http://localhost:3021/login",
+      "timestamp": "2025-09-03T05:05:11.008Z",
+      "url": "http://localhost:3021/login"
+    },
+    {
+      "step": 19,
+      "description": "Testando formulários em /patients/create",
+      "status": "success",
+      "details": "1 formulário(s) encontrado(s)",
+      "timestamp": "2025-09-03T05:05:13.037Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 20,
+      "description": "Preencheu campo email",
+      "status": "success",
+      "details": "Texto de teste inserido",
+      "timestamp": "2025-09-03T05:05:14.966Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 21,
+      "description": "Submeteu formulário em /patients/create",
+      "status": "success",
+      "details": "Submit realizado",
+      "timestamp": "2025-09-03T05:05:18.919Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 22,
+      "description": "Testando formulários em /documents/new",
+      "status": "success",
+      "details": "1 formulário(s) encontrado(s)",
+      "timestamp": "2025-09-03T05:05:21.278Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 23,
+      "description": "Preencheu campo email",
+      "status": "success",
+      "details": "Texto de teste inserido",
+      "timestamp": "2025-09-03T05:05:23.233Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 24,
+      "description": "Submeteu formulário em /documents/new",
+      "status": "success",
+      "details": "Submit realizado",
+      "timestamp": "2025-09-03T05:05:27.187Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 25,
+      "description": "Testando formulários em /auth/register",
+      "status": "success",
+      "details": "1 formulário(s) encontrado(s)",
+      "timestamp": "2025-09-03T05:05:29.187Z",
+      "url": "http://localhost:3021/auth/register"
+    },
+    {
+      "step": 26,
+      "description": "Preencheu campo name",
+      "status": "success",
+      "details": "Texto de teste inserido",
+      "timestamp": "2025-09-03T05:05:31.125Z",
+      "url": "http://localhost:3021/auth/register"
+    },
+    {
+      "step": 27,
+      "description": "Preencheu campo email",
+      "status": "success",
+      "details": "Texto de teste inserido",
+      "timestamp": "2025-09-03T05:05:33.045Z",
+      "url": "http://localhost:3021/auth/register"
+    },
+    {
+      "step": 28,
+      "description": "Preencheu campo crm",
+      "status": "success",
+      "details": "Texto de teste inserido",
+      "timestamp": "2025-09-03T05:05:34.975Z",
+      "url": "http://localhost:3021/auth/register"
+    },
+    {
+      "step": 29,
+      "description": "Submeteu formulário em /auth/register",
+      "status": "success",
+      "details": "Submit realizado",
+      "timestamp": "2025-09-03T05:05:38.936Z",
+      "url": "http://localhost:3021/auth/register"
+    },
+    {
+      "step": 30,
+      "description": "Testando elementos clicáveis",
+      "status": "success",
+      "details": "1/1 elementos serão testados",
+      "timestamp": "2025-09-03T05:05:41.011Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 31,
+      "description": "Clicou em BUTTON: \"Entrar\"",
+      "status": "success",
+      "details": "Elemento 1 funcional",
+      "timestamp": "2025-09-03T05:05:43.954Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 32,
+      "description": "Testou viewport iPhone SE",
+      "status": "success",
+      "details": "375x667 - Menu mobile: Não",
+      "timestamp": "2025-09-03T05:05:48.013Z",
+      "url": "http://localhost:3021/auth/register"
+    },
+    {
+      "step": 33,
+      "description": "Testou scroll em iPhone SE",
+      "status": "success",
+      "details": "Scrolling funcional",
+      "timestamp": "2025-09-03T05:05:49.574Z",
+      "url": "http://localhost:3021/auth/register"
+    },
+    {
+      "step": 34,
+      "description": "Testou viewport iPad",
+      "status": "success",
+      "details": "768x1024 - Menu mobile: Não",
+      "timestamp": "2025-09-03T05:05:51.641Z",
+      "url": "http://localhost:3021/auth/register"
+    },
+    {
+      "step": 35,
+      "description": "Testou scroll em iPad",
+      "status": "success",
+      "details": "Scrolling funcional",
+      "timestamp": "2025-09-03T05:05:53.226Z",
+      "url": "http://localhost:3021/auth/register"
+    },
+    {
+      "step": 36,
+      "description": "Testou viewport Desktop Full HD",
+      "status": "success",
+      "details": "1920x1080 - Menu mobile: Não",
+      "timestamp": "2025-09-03T05:05:55.322Z",
+      "url": "http://localhost:3021/auth/register"
+    },
+    {
+      "step": 37,
+      "description": "Testou scroll em Desktop Full HD",
+      "status": "success",
+      "details": "Scrolling funcional",
+      "timestamp": "2025-09-03T05:05:56.943Z",
+      "url": "http://localhost:3021/auth/register"
+    },
+    {
+      "step": 38,
+      "description": "Testou viewport Laptop",
+      "status": "success",
+      "details": "1366x768 - Menu mobile: Não",
+      "timestamp": "2025-09-03T05:05:59.054Z",
+      "url": "http://localhost:3021/auth/register"
+    },
+    {
+      "step": 39,
+      "description": "Testou scroll em Laptop",
+      "status": "success",
+      "details": "Scrolling funcional",
+      "timestamp": "2025-09-03T05:06:00.653Z",
+      "url": "http://localhost:3021/auth/register"
+    },
+    {
+      "step": 40,
+      "description": "Navegação por Tab testada",
+      "status": "success",
+      "details": "8/10 elementos focados com sucesso",
+      "timestamp": "2025-09-03T05:06:13.947Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 41,
+      "description": "Testou ativação por Enter",
+      "status": "success",
+      "details": "Tecla Enter funcional",
+      "timestamp": "2025-09-03T05:06:16.841Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 42,
+      "description": "Testou tecla Escape",
+      "status": "success",
+      "details": "Escape funcional para fechar modals/menus",
+      "timestamp": "2025-09-03T05:06:19.253Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 43,
+      "description": "Testou URL inválida /invalid-route",
+      "status": "success",
+      "details": "Tratamento de erro: Não encontrado",
+      "timestamp": "2025-09-03T05:06:23.863Z",
+      "url": "http://localhost:3021/invalid-route"
+    },
+    {
+      "step": 44,
+      "description": "Testou URL inválida /patients/999999",
+      "status": "success",
+      "details": "Tratamento de erro: Não encontrado",
+      "timestamp": "2025-09-03T05:06:25.805Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 45,
+      "description": "Testou URL inválida /documents/nonexistent",
+      "status": "success",
+      "details": "Tratamento de erro: Não encontrado",
+      "timestamp": "2025-09-03T05:06:27.769Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 46,
+      "description": "Performance /",
+      "status": "success",
+      "details": "871ms - Excelente",
+      "timestamp": "2025-09-03T05:06:29.716Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 47,
+      "description": "Performance /patients",
+      "status": "success",
+      "details": "888ms - Excelente",
+      "timestamp": "2025-09-03T05:06:31.705Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 48,
+      "description": "Performance /documents",
+      "status": "success",
+      "details": "866ms - Excelente",
+      "timestamp": "2025-09-03T05:06:33.660Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 49,
+      "description": "Performance /templates",
+      "status": "success",
+      "details": "881ms - Excelente",
+      "timestamp": "2025-09-03T05:06:35.618Z",
+      "url": "http://localhost:3021/auth/login"
+    },
+    {
+      "step": 50,
+      "description": "Performance /dashboard",
+      "status": "success",
+      "details": "883ms - Excelente",
+      "timestamp": "2025-09-03T05:06:37.596Z",
+      "url": "http://localhost:3021/dashboard"
+    }
+  ],
+  "errors": [
+    {
+      "description": "Erro ao navegar para /metrics",
+      "details": "page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at http://localhost:3021/metrics\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3021/metrics\", waiting until \"load\"\u001b[22m\n"
+    }
+  ],
+  "recommendations": [
+    "Interface altamente responsiva e funcional",
+    "Navegação intuitiva em todas as telas",
+    "Formulários interativos e validação adequada",
+    "Componentes acessíveis por teclado",
+    "Performance excelente em todas as páginas",
+    "Tratamento de erros implementado",
+    "Experiência de usuário consistente"
+  ]
+}

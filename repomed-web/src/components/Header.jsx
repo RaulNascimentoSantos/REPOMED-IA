@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { NotificationsBell } from './notifications/NotificationsBell';
 import './Header.css';
 
 export default function Header() {
@@ -19,12 +20,29 @@ export default function Header() {
       <div className="header-container">
         <div className="header-left">
           <Link to="/" className="logo">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-              <rect width="32" height="32" rx="8" fill="#6366f1"/>
-              <path d="M16 8L20 12L16 16L12 12L16 8Z" fill="white"/>
-              <path d="M16 16L20 20L16 24L12 20L16 16Z" fill="white" opacity="0.8"/>
-            </svg>
-            <span>repomed</span>
+            <div style={{ 
+              width: '40px', 
+              height: '40px', 
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              borderRadius: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              fontSize: '20px',
+              marginRight: '12px'
+            }}>
+              🏥
+            </div>
+            <span style={{
+              fontSize: '24px',
+              fontWeight: '600',
+              background: 'linear-gradient(to right, #3b82f6, #10b981)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>
+              RepoMed IA
+            </span>
           </Link>
           
           <nav className="main-nav">
@@ -59,6 +77,8 @@ export default function Header() {
               <path d="M3 8H13M8 3V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
             </svg>
           </Link>
+          
+          <NotificationsBell />
           
           <div className="user-menu">
             <button className="user-button">CM</button>

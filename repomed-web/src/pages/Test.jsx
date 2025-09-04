@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
-export function Test() {
+export default function Test() {
   const [systemStatus, setSystemStatus] = useState({
     frontend: { status: 'checking', message: 'Verificando...' },
     backend: { status: 'checking', message: 'Verificando...' },

@@ -7,7 +7,7 @@ import { templatesApi, documentsApi } from '../lib/api'
 import { TemplateSelector } from '../components/TemplateSelector'
 import { ArrayField } from '../components/ArrayField'
 
-export function CreateDocumentPage() {
+export default function CreateDocumentPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const selectedTemplateId = searchParams.get('template')

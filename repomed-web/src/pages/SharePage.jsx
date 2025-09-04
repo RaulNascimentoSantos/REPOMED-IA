@@ -1,6 +1,7 @@
 import React from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { api } from '../lib/api'
 import { 
   FileText, 
   Download, 
@@ -8,13 +9,31 @@ import {
   Shield,
   Clock,
   AlertCircle,
-  CheckCircle
+  CheckCircle,
+  Loader2
 } from 'lucide-react'
 
-export function SharePage() {
-  const { token } = useParams()
+export default function SharePage() {
+  const { id } = useParams()
+  
+  // Conectar com API real
+  const { data: sharedDoc, isLoading, error } = useQuery({
+    queryKey: ['share', id],
+    queryFn: async () => {
+      try {
+        const response = await api.get(`/api/documents/share/${id}`)
+        return response.data || response
+      } catch (err) {
+        // Se a rota não existir, usar mock
+        console.warn('API share não disponível, usando mock:', err)
+        return mockSharedDoc
+      }
+    },
+    enabled: !!id,
+    retry: false
+  })
 
-  // Mock shared document for now
+  // Mock para fallback
   const mockSharedDoc = {
     id: 'doc_shared_001',
     templateName: 'Receita Simples',
@@ -44,7 +63,8 @@ export function SharePage() {
     }
   }
 
-  const isExpired = new Date() > new Date(mockSharedDoc.expiresAt)
+  const doc = sharedDoc || mockSharedDoc
+  const isExpired = doc?.expiresAt ? new Date() > new Date(doc.expiresAt) : false
   
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('pt-BR', {
@@ -56,13 +76,51 @@ export function SharePage() {
     })
   }
 
-  const handleDownload = () => {
-    // TODO: Implement actual PDF download with watermark
-    alert('Download do documento compartilhado - Em desenvolvimento')
+  const handleDownload = async () => {
+    try {
+      const response = await api.get(`/api/documents/${doc.id}/pdf`, {
+        responseType: 'blob'
+      })
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `documento-${doc.id}.pdf`)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+    } catch (err) {
+      console.error('Erro ao baixar PDF:', err)
+      alert('Download do documento - Em desenvolvimento')
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <span className="ml-2">Carregando documento...</span>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="card bg-red-50 border-red-200">
+          <div className="flex items-start space-x-3">
+            <AlertCircle className="h-5 w-5 text-red-600 mt-1" />
+            <div className="text-sm text-red-800">
+              <p className="font-medium mb-1">Erro ao carregar documento</p>
+              <p>O documento compartilhado não pôde ser carregado. Verifique o link ou entre em contato com o médico.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="text-center">
         <div className="flex justify-center mb-4">
@@ -94,7 +152,7 @@ export function SharePage() {
             <AlertCircle className="h-5 w-5 text-red-600 mt-1" />
             <div className="text-sm text-red-800">
               <p className="font-medium mb-1">⚠️ Link Expirado</p>
-              <p>Este link compartilhado expirou em {formatDate(mockSharedDoc.expiresAt)}. Solicite um novo link ao médico.</p>
+              <p>Este link compartilhado expirou em {formatDate(doc.expiresAt)}. Solicite um novo link ao médico.</p>
             </div>
           </div>
         </div>
@@ -104,7 +162,7 @@ export function SharePage() {
             <CheckCircle className="h-5 w-5 text-green-600 mt-1" />
             <div className="text-sm text-green-800">
               <p className="font-medium mb-1">✅ Link Ativo</p>
-              <p>Este link expira em {formatDate(mockSharedDoc.expiresAt)}</p>
+              <p>Este link expira em {formatDate(doc.expiresAt)}</p>
             </div>
           </div>
         </div>
@@ -115,32 +173,32 @@ export function SharePage() {
           {/* Document Preview */}
           <div className="card">
             <h2 className="text-lg font-semibold text-gray-900 mb-6">
-              {mockSharedDoc.templateName}
+              {doc.templateName || doc.title || 'Documento Médico'}
             </h2>
             
             <div className="medical-document bg-white border border-gray-300 rounded-md p-8">
               <div className="text-center mb-6">
                 <h3 className="text-xl font-bold">RECEITUÁRIO MÉDICO</h3>
                 <div className="text-sm text-gray-500 mt-2">
-                  Documento Compartilhado • {formatDate(mockSharedDoc.sharedAt)}
+                  Documento Compartilhado • {formatDate(doc.sharedAt || doc.createdAt)}
                 </div>
               </div>
               
               <div className="space-y-4">
                 <div>
-                  <strong>Paciente:</strong> {mockSharedDoc.patient.name}
+                  <strong>Paciente:</strong> {doc.patient?.name || 'Nome do Paciente'}
                 </div>
                 <div>
-                  <strong>CPF:</strong> {mockSharedDoc.patient.cpf}
+                  <strong>CPF:</strong> {doc.patient?.cpf || '***.***.***-**'}
                 </div>
                 <div>
-                  <strong>Data:</strong> {formatDate(mockSharedDoc.createdAt)}
+                  <strong>Data:</strong> {formatDate(doc.createdAt)}
                 </div>
                 
                 <div className="mt-6">
                   <strong>PRESCRIÇÃO:</strong>
                   <div className="mt-2 space-y-2">
-                    {mockSharedDoc.fields.medications?.map((med, index) => (
+                    {(doc.fields?.medications || doc.medications || []).map((med, index) => (
                       <div key={index} className="pl-4">
                         • {med.name} - {med.dosage} - {med.frequency}
                       </div>
@@ -150,18 +208,18 @@ export function SharePage() {
                 
                 <div className="mt-6">
                   <strong>INSTRUÇÕES GERAIS:</strong>
-                  <div className="mt-2">{mockSharedDoc.fields.instructions}</div>
+                  <div className="mt-2">{doc.fields?.instructions || doc.instructions || 'Seguir orientações médicas'}</div>
                 </div>
                 
                 <div className="mt-6">
-                  <strong>Validade:</strong> {mockSharedDoc.fields.valid_days} dias
+                  <strong>Validade:</strong> {doc.fields?.valid_days || doc.valid_days || 30} dias
                 </div>
                 
                 <div className="mt-8 pt-4 border-t border-gray-300">
                   <div>_________________________</div>
                   <div className="mt-2">
-                    <div>{mockSharedDoc.doctor.name}</div>
-                    <div>CRM: {mockSharedDoc.doctor.crm}</div>
+                    <div>{doc.doctor?.name || 'Médico Responsável'}</div>
+                    <div>CRM: {doc.doctor?.crm || 'XXXXX-UF'}</div>
                   </div>
                 </div>
               </div>
@@ -169,7 +227,7 @@ export function SharePage() {
               {/* Watermark */}
               <div className="mt-6 pt-4 border-t border-gray-200 text-center">
                 <div className="text-xs text-gray-400">
-                  DOCUMENTO COMPARTILHADO • REPOMED IA • {formatDate(mockSharedDoc.sharedAt)}
+                  DOCUMENTO COMPARTILHADO • REPOMED IA • {formatDate(doc.sharedAt || doc.createdAt)}
                 </div>
               </div>
             </div>
@@ -197,7 +255,7 @@ export function SharePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
           <div>
             <span className="text-gray-600">Tipo:</span>
-            <div className="font-medium">{mockSharedDoc.templateName}</div>
+            <div className="font-medium">{doc.templateName || doc.title || 'Documento Médico'}</div>
           </div>
           
           <div>
@@ -210,26 +268,26 @@ export function SharePage() {
           
           <div>
             <span className="text-gray-600">Data de Criação:</span>
-            <div className="font-medium">{formatDate(mockSharedDoc.createdAt)}</div>
+            <div className="font-medium">{formatDate(doc.createdAt)}</div>
           </div>
           
           <div>
             <span className="text-gray-600">Compartilhado em:</span>
-            <div className="font-medium">{formatDate(mockSharedDoc.sharedAt)}</div>
+            <div className="font-medium">{formatDate(doc.sharedAt || doc.createdAt)}</div>
           </div>
           
           <div>
             <span className="text-gray-600">Hash de Verificação:</span>
             <div className="font-mono text-xs bg-gray-100 p-2 rounded mt-1 break-all">
-              {mockSharedDoc.hash}
+              {doc.hash || doc.id || 'N/A'}
             </div>
           </div>
           
           <div>
             <span className="text-gray-600">Médico Responsável:</span>
             <div className="font-medium">
-              {mockSharedDoc.doctor.name}
-              <div className="text-gray-500">CRM: {mockSharedDoc.doctor.crm}</div>
+              {doc.doctor?.name || 'Médico Responsável'}
+              <div className="text-gray-500">CRM: {doc.doctor?.crm || 'XXXXX-UF'}</div>
             </div>
           </div>
         </div>

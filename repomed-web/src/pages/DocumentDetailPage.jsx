@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import { documentsApi } from '../lib/api'
 
-export function DocumentDetailPage() {
+export default function DocumentDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
 

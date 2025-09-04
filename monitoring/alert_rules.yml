@@ -1,0 +1,136 @@
+groups:
+  - name: repomed_api_alerts
+    rules:
+      # High Error Rate
+      - alert: HighErrorRate
+        expr: (rate(http_requests_total{status_code=~"5.."}[5m]) / rate(http_requests_total[5m])) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} for the last 5 minutes"
+
+      # High Response Time
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High response time detected"
+          description: "95th percentile response time is {{ $value }}s"
+
+      # API Down
+      - alert: APIDown
+        expr: up{job="repomed-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "RepoMed API is down"
+          description: "The RepoMed API has been down for more than 1 minute"
+
+      # Database Connection Issues
+      - alert: DatabaseConnectionFailure
+        expr: health_check_status{service="database"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Database connection failure"
+          description: "Database health check is failing"
+
+      # High Memory Usage
+      - alert: HighMemoryUsage
+        expr: (process_resident_memory_bytes / 1024 / 1024) > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value }}MB"
+
+      # Cache Connection Issues
+      - alert: CacheConnectionFailure
+        expr: health_check_status{service="cache"} == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Cache connection failure"
+          description: "Redis cache health check is failing"
+
+      # Document Processing Errors
+      - alert: DocumentProcessingErrors
+        expr: rate(errors_total{component="pdf"}[5m]) > 0.1
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High document processing error rate"
+          description: "Document processing errors: {{ $value }}/second"
+
+      # Signature Service Issues
+      - alert: SignatureServiceErrors
+        expr: rate(errors_total{component="signature"}[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Signature service errors"
+          description: "Signature service error rate: {{ $value }}/second"
+
+  - name: system_alerts
+    rules:
+      # High CPU Usage
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total[5m]) * 100 > 80
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}%"
+
+      # Disk Space Low
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_free_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 20
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low disk space"
+          description: "Disk space is {{ $value }}% full"
+
+  - name: business_alerts
+    rules:
+      # No Documents Created
+      - alert: NoDocumentsCreated
+        expr: increase(documents_created_total[1h]) == 0
+        for: 2h
+        labels:
+          severity: warning
+        annotations:
+          summary: "No documents created recently"
+          description: "No documents have been created in the last hour"
+
+      # High Document Signing Failures
+      - alert: HighSigningFailureRate
+        expr: (rate(errors_total{component="signature"}[10m]) / rate(documents_signed_total[10m])) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High document signing failure rate"
+          description: "Document signing failure rate is {{ $value | humanizePercentage }}"
+
+      # Slow PDF Generation
+      - alert: SlowPDFGeneration
+        expr: histogram_quantile(0.95, rate(pdf_generation_duration_seconds_bucket[10m])) > 5
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow PDF generation"
+          description: "95th percentile PDF generation time is {{ $value }}s"

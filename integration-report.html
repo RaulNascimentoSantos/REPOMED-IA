@@ -1,0 +1,239 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Integration Report - RepoMed IA</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+    .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .header { text-align: center; border-bottom: 2px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px; }
+    .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .metric { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; text-align: center; }
+    .metric h3 { margin: 0 0 10px 0; color: #1e293b; }
+    .metric .value { font-size: 2em; font-weight: bold; color: #2563eb; }
+    .section { margin-bottom: 30px; }
+    .section h2 { color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
+    .test-result { display: flex; justify-content: space-between; align-items: center; padding: 12px; margin: 8px 0; border-radius: 6px; }
+    .success { background: #dcfce7; border-left: 4px solid #16a34a; }
+    .failed { background: #fee2e2; border-left: 4px solid #dc2626; }
+    .endpoint { font-family: monospace; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; }
+    .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.8em; font-weight: bold; }
+    .badge.excellent { background: #16a34a; color: white; }
+    .badge.good { background: #22c55e; color: white; }
+    .badge.fair { background: #f59e0b; color: white; }
+    .badge.poor { background: #dc2626; color: white; }
+    .timestamp { text-align: center; margin-top: 30px; color: #64748b; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔌 Backend ↔️ Frontend Integration Report</h1>
+      <p>RepoMed IA System Integration Validation</p>
+    </div>
+    
+    <div class="summary">
+      <div class="metric">
+        <h3>Success Rate</h3>
+        <div class="value">89%</div>
+      </div>
+      <div class="metric">
+        <h3>Total Tests</h3>
+        <div class="value">18</div>
+      </div>
+      <div class="metric">
+        <h3>Successful</h3>
+        <div class="value" style="color: #16a34a;">16</div>
+      </div>
+      <div class="metric">
+        <h3>Failed</h3>
+        <div class="value" style="color: #dc2626;">2</div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2>🔗 Connectivity Tests</h2>
+      
+        <div class="test-result success">
+          <span><strong>Backend Health Check</strong></span>
+          <span>✅ OK</span>
+        </div>
+      
+        <div class="test-result success">
+          <span><strong>Frontend Health Check</strong></span>
+          <span>✅ OK</span>
+        </div>
+      
+    </div>
+    
+    <div class="section">
+      <h2>🔐 Authentication Tests</h2>
+      
+        <div class="test-result failed">
+          <span><strong>Login Request</strong></span>
+          <span>❌ 401</span>
+        </div>
+      
+        <div class="test-result success">
+          <span><strong>Login Redirect</strong></span>
+          <span>✅ OK</span>
+        </div>
+      
+    </div>
+    
+    <div class="section">
+      <h2>🎯 Endpoint Tests</h2>
+      
+        <div class="test-result success">
+          <div>
+            <strong>Templates List</strong>
+            <br><span class="endpoint">GET /api/templates</span>
+          </div>
+          <div>
+            ✅ 
+            200 
+            (N/Ams)
+            
+          </div>
+        </div>
+      
+        <div class="test-result success">
+          <div>
+            <strong>Patients List</strong>
+            <br><span class="endpoint">GET /api/patients</span>
+          </div>
+          <div>
+            ✅ 
+            200 
+            (N/Ams)
+            
+          </div>
+        </div>
+      
+        <div class="test-result success">
+          <div>
+            <strong>Documents List</strong>
+            <br><span class="endpoint">GET /api/documents</span>
+          </div>
+          <div>
+            ✅ 
+            200 
+            (N/Ams)
+            
+          </div>
+        </div>
+      
+        <div class="test-result success">
+          <div>
+            <strong>Dashboard Metrics</strong>
+            <br><span class="endpoint">GET /api/metrics/dashboard</span>
+          </div>
+          <div>
+            ✅ 
+            200 
+            (N/Ams)
+            
+          </div>
+        </div>
+      
+        <div class="test-result failed">
+          <div>
+            <strong>Login Endpoint</strong>
+            <br><span class="endpoint">POST /api/auth/login</span>
+          </div>
+          <div>
+            ❌ 
+            401 
+            
+            Request failed with status code 401
+          </div>
+        </div>
+      
+        <div class="test-result success">
+          <div>
+            <strong>Frontend Integration</strong>
+            
+          </div>
+          <div>
+            ✅ 
+             
+            
+            
+          </div>
+        </div>
+      
+    </div>
+    
+    <div class="section">
+      <h2>🌐 CORS Tests</h2>
+      
+        <div class="test-result success">
+          <span><span class="endpoint">/api/auth/login</span></span>
+          <span>✅ OK</span>
+        </div>
+      
+        <div class="test-result success">
+          <span><span class="endpoint">/api/patients</span></span>
+          <span>✅ OK</span>
+        </div>
+      
+        <div class="test-result success">
+          <span><span class="endpoint">/api/documents</span></span>
+          <span>✅ OK</span>
+        </div>
+      
+        <div class="test-result success">
+          <span><span class="endpoint">/api/templates</span></span>
+          <span>✅ OK</span>
+        </div>
+      
+        <div class="test-result success">
+          <span><span class="endpoint">/api/metrics/dashboard</span></span>
+          <span>✅ OK</span>
+        </div>
+      
+    </div>
+    
+    <div class="section">
+      <h2>⚡ Performance Tests</h2>
+      
+        <div class="test-result success">
+          <span><strong>Backend Health</strong></span>
+          <div>
+            ✅ 
+            3ms
+            <span class="badge excellent">EXCELLENT</span>
+            
+          </div>
+        </div>
+      
+        <div class="test-result success">
+          <span><strong>Templates API</strong></span>
+          <div>
+            ✅ 
+            1ms
+            <span class="badge excellent">EXCELLENT</span>
+            
+          </div>
+        </div>
+      
+        <div class="test-result success">
+          <span><strong>Frontend Home</strong></span>
+          <div>
+            ✅ 
+            3ms
+            <span class="badge excellent">EXCELLENT</span>
+            
+          </div>
+        </div>
+      
+    </div>
+    
+    <div class="timestamp">
+      Report generated: 03/09/2025, 01:59:41<br>
+      Backend: <span class="endpoint">http://localhost:8085</span> | Frontend: <span class="endpoint">http://localhost:3021</span>
+    </div>
+  </div>
+</body>
+</html>
+  

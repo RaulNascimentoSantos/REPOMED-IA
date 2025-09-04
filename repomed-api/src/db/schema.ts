@@ -1,15 +1,33 @@
 import { pgTable, uuid, varchar, text, timestamp, jsonb, boolean, serial } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
+export const organizations = pgTable('organizations', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  createdAt: timestamp('created_at').default(sql`CURRENT_TIMESTAMP`).notNull(),
+  updatedAt: timestamp('updated_at').default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const users = pgTable('users', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  email: varchar('email', { length: 255 }).notNull().unique(),
+  password: varchar('password', { length: 255 }).notNull(),
+  crm: varchar('crm', { length: 255 }),
+  role: varchar('role', { length: 50 }).notNull().default('medico'),
+  organizationId: uuid('organization_id').references(() => organizations.id),
+  createdAt: timestamp('created_at').default(sql`CURRENT_TIMESTAMP`).notNull(),
+  updatedAt: timestamp('updated_at').default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
 // Templates médicos (apenas 4 tabelas conforme V1)
 export const templates = pgTable('templates', {
   id: uuid('id').defaultRandom().primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
-  specialty: varchar('specialty', { length: 100 }).notNull(),
   description: text('description'),
-  contentJson: jsonb('content_json').notNull(),
-  fieldsSchema: jsonb('fields_schema').notNull(),
+  fields: jsonb('fields').default('[]'),
   isActive: boolean('is_active').default(true),
+  organizationId: uuid('organization_id').references(() => organizations.id),
   createdAt: timestamp('created_at').default(sql`CURRENT_TIMESTAMP`).notNull(),
   updatedAt: timestamp('updated_at').default(sql`CURRENT_TIMESTAMP`).notNull(),
 });
@@ -17,16 +35,19 @@ export const templates = pgTable('templates', {
 // Documentos gerados
 export const documents = pgTable('documents', {
   id: uuid('id').defaultRandom().primaryKey(),
-  templateId: uuid('template_id').references(() => templates.id).notNull(),
-  patientName: varchar('patient_name', { length: 255 }).notNull(),
-  doctorName: varchar('doctor_name', { length: 255 }).notNull(),
-  doctorCrm: varchar('doctor_crm', { length: 20 }).notNull(),
-  dataJson: jsonb('data_json').notNull(),
+  templateId: varchar('template_id', { length: 255 }),
+  title: varchar('title', { length: 255 }).notNull(),
+  content: jsonb('content').default('{}'),
+  patientName: varchar('patient_name', { length: 255 }),
+  doctorName: varchar('doctor_name', { length: 255 }),
+  doctorCrm: varchar('doctor_crm', { length: 20 }),
+  dataJson: jsonb('data_json'),
   pdfUrl: text('pdf_url'),
-  hash: varchar('hash', { length: 64 }).notNull(),
+  hash: varchar('hash', { length: 64 }),
   qrCode: text('qr_code'),
   isSigned: boolean('is_signed').default(false),
   signedAt: timestamp('signed_at'),
+  organizationId: uuid('organization_id').references(() => organizations.id),
   createdAt: timestamp('created_at').default(sql`CURRENT_TIMESTAMP`).notNull(),
 });
 
@@ -54,6 +75,10 @@ export const auditLogs = pgTable('audit_logs', {
 });
 
 // Types inferred from schema
+export type Organization = typeof organizations.$inferSelect;
+export type NewOrganization = typeof organizations.$inferInsert;
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
 export type Template = typeof templates.$inferSelect;
 export type NewTemplate = typeof templates.$inferInsert;
 export type Document = typeof documents.$inferSelect;  

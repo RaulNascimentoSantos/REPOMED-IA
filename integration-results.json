@@ -1,0 +1,176 @@
+{
+  "connectivity": [
+    {
+      "test": "Backend Health Check",
+      "status": "success",
+      "data": {
+        "ok": true,
+        "timestamp": "2025-09-03T04:59:23.105Z",
+        "version": "1.0.0",
+        "services": {
+          "api": "running",
+          "database": "mock",
+          "templates": "loaded"
+        }
+      },
+      "responseTime": "N/A"
+    },
+    {
+      "test": "Frontend Health Check",
+      "status": "success",
+      "statusCode": 200
+    }
+  ],
+  "authentication": [
+    {
+      "test": "Login Request",
+      "status": "failed",
+      "statusCode": 401,
+      "endpoint": "http://localhost:8085/api/auth/login",
+      "method": "POST"
+    },
+    {
+      "test": "Login Redirect",
+      "status": "success",
+      "redirectedTo": "http://localhost:3021/login"
+    }
+  ],
+  "endpoints": [
+    {
+      "name": "Templates List",
+      "method": "GET",
+      "path": "/api/templates",
+      "status": "success",
+      "statusCode": 200,
+      "responseTime": "N/A",
+      "dataSize": 859
+    },
+    {
+      "name": "Patients List",
+      "method": "GET",
+      "path": "/api/patients",
+      "status": "success",
+      "statusCode": 200,
+      "responseTime": "N/A",
+      "dataSize": 2483
+    },
+    {
+      "name": "Documents List",
+      "method": "GET",
+      "path": "/api/documents",
+      "status": "success",
+      "statusCode": 200,
+      "responseTime": "N/A",
+      "dataSize": 3024
+    },
+    {
+      "name": "Dashboard Metrics",
+      "method": "GET",
+      "path": "/api/metrics/dashboard",
+      "status": "success",
+      "statusCode": 200,
+      "responseTime": "N/A",
+      "dataSize": 288
+    },
+    {
+      "name": "Login Endpoint",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": "failed",
+      "statusCode": 401,
+      "error": "Request failed with status code 401"
+    },
+    {
+      "name": "Frontend Integration",
+      "status": "success",
+      "totalApiCalls": 0,
+      "successfulCalls": 0,
+      "failedCalls": 0,
+      "noResponseCalls": 0,
+      "avgResponseTime": 0
+    }
+  ],
+  "cors": [
+    {
+      "endpoint": "/api/auth/login",
+      "status": "success",
+      "corsHeaders": {
+        "origin": "http://localhost:3021",
+        "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+        "headers": "authorization, content-type"
+      }
+    },
+    {
+      "endpoint": "/api/patients",
+      "status": "success",
+      "corsHeaders": {
+        "origin": "http://localhost:3021",
+        "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+        "headers": "authorization, content-type"
+      }
+    },
+    {
+      "endpoint": "/api/documents",
+      "status": "success",
+      "corsHeaders": {
+        "origin": "http://localhost:3021",
+        "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+        "headers": "authorization, content-type"
+      }
+    },
+    {
+      "endpoint": "/api/templates",
+      "status": "success",
+      "corsHeaders": {
+        "origin": "http://localhost:3021",
+        "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+        "headers": "authorization, content-type"
+      }
+    },
+    {
+      "endpoint": "/api/metrics/dashboard",
+      "status": "success",
+      "corsHeaders": {
+        "origin": "http://localhost:3021",
+        "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+        "headers": "authorization, content-type"
+      }
+    }
+  ],
+  "errors": [],
+  "performance": [
+    {
+      "name": "Backend Health",
+      "url": "http://localhost:8085/health",
+      "status": "success",
+      "responseTime": 3,
+      "size": 136,
+      "rating": "excellent"
+    },
+    {
+      "name": "Templates API",
+      "url": "http://localhost:8085/api/templates",
+      "status": "success",
+      "responseTime": 1,
+      "size": 859,
+      "rating": "excellent"
+    },
+    {
+      "name": "Frontend Home",
+      "url": "http://localhost:3021/",
+      "status": "success",
+      "responseTime": 3,
+      "size": 797,
+      "rating": "excellent"
+    }
+  ],
+  "summary": {
+    "totalTests": 18,
+    "successfulTests": 16,
+    "failedTests": 2,
+    "successRate": 89,
+    "timestamp": "2025-09-03T04:59:41.340Z",
+    "backendUrl": "http://localhost:8085",
+    "frontendUrl": "http://localhost:3021"
+  }
+}

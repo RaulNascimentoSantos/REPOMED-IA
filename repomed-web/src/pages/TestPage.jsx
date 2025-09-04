@@ -2,7 +2,7 @@ import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { templatesApi } from '../lib/api'
 
-export function TestPage() {
+export default function TestPage() {
   const { data: templates, isLoading, error } = useQuery({
     queryKey: ['templates-test'],
     queryFn: async () => {

@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 import { documentsApi } from '../lib/api'
 
-export function DocumentsPage() {
+export default function DocumentsPage() {
   // Mock documents for now - replace with real API when ready
   const mockDocuments = [
     {

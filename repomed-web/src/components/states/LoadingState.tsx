@@ -1,0 +1,1 @@
+export function LoadingState(){ return <div className="animate-pulse p-6 text-slate-500">Carregando…</div>; }

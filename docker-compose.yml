@@ -1,0 +1,286 @@
+# 🐳 Docker Compose - RepoMed IA
+# Serviços de infraestrutura para desenvolvimento local
+
+version: '3.8'
+
+services:
+  # 🗄️ PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: repomed-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: repomed_dev
+      POSTGRES_USER: repomed
+      POSTGRES_PASSWORD: senha123
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=pt_BR.UTF-8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    networks:
+      - repomed-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U repomed -d repomed_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # 🗄️ PostgreSQL Test Database
+  postgres-test:
+    image: postgres:16-alpine
+    container_name: repomed-postgres-test
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: repomed_test
+      POSTGRES_USER: repomed
+      POSTGRES_PASSWORD: senha123
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=pt_BR.UTF-8"
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    networks:
+      - repomed-network
+    profiles:
+      - test
+
+  # ⚡ Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: repomed-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ""
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - repomed-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 📦 MinIO (S3-compatible storage)
+  minio:
+    image: minio/minio:latest
+    container_name: repomed-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+      MINIO_BROWSER_REDIRECT_URL: http://localhost:9001
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - repomed-network
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # 📧 MailHog (Email testing)
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: repomed-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - repomed-network
+    profiles:
+      - dev
+
+  # 📊 Prometheus (Metrics)
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    container_name: repomed-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - repomed-network
+    profiles:
+      - monitoring
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--storage.tsdb.retention.size=10GB'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+
+  # 📈 Grafana (Dashboard)
+  grafana:
+    image: grafana/grafana:10.0.3
+    container_name: repomed-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin123
+      GF_USERS_ALLOW_SIGN_UP: false
+      GF_INSTALL_PLUGINS: grafana-piechart-panel
+      GF_SECURITY_ALLOW_EMBEDDING: true
+      GF_AUTH_ANONYMOUS_ENABLED: true
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - repomed-network
+    profiles:
+      - monitoring
+    depends_on:
+      - prometheus
+
+  # 📊 Node Exporter (System Metrics)
+  node-exporter:
+    image: prom/node-exporter:v1.6.1
+    container_name: repomed-node-exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - repomed-network
+    profiles:
+      - monitoring
+
+  # 📊 PostgreSQL Exporter
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.13.2
+    container_name: repomed-postgres-exporter
+    restart: unless-stopped
+    ports:
+      - "9187:9187"
+    environment:
+      DATA_SOURCE_NAME: "postgresql://repomed:senha123@postgres:5432/repomed_dev?sslmode=disable"
+    networks:
+      - repomed-network
+    profiles:
+      - monitoring
+    depends_on:
+      - postgres
+
+  # 📊 Redis Exporter
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.52.0
+    container_name: repomed-redis-exporter
+    restart: unless-stopped
+    ports:
+      - "9121:9121"
+    environment:
+      REDIS_ADDR: "redis://redis:6379"
+    networks:
+      - repomed-network
+    profiles:
+      - monitoring
+    depends_on:
+      - redis
+
+  # 📊 cAdvisor (Container Metrics)
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    container_name: repomed-cadvisor
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    privileged: true
+    networks:
+      - repomed-network
+    profiles:
+      - monitoring
+
+  # 🔍 Jaeger (Tracing)
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: repomed-jaeger
+    restart: unless-stopped
+    environment:
+      COLLECTOR_OTLP_ENABLED: true
+    ports:
+      - "16686:16686"  # Web UI
+      - "14268:14268"  # HTTP collector
+      - "14250:14250"  # gRPC collector
+      - "6831:6831/udp" # Jaeger agent
+    networks:
+      - repomed-network
+    profiles:
+      - monitoring
+
+  # 🧹 Database Migration Service
+  db-migrate:
+    build:
+      context: ./repomed-api
+      dockerfile: Dockerfile.migrate
+    container_name: repomed-db-migrate
+    environment:
+      DATABASE_URL: postgresql://repomed:senha123@postgres:5432/repomed_dev
+    networks:
+      - repomed-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - migrate
+
+# 🌐 Networks
+networks:
+  repomed-network:
+    driver: bridge
+    name: repomed-network
+
+# 💾 Volumes
+volumes:
+  postgres_data:
+    name: repomed-postgres-data
+  postgres_test_data:
+    name: repomed-postgres-test-data
+  redis_data:
+    name: repomed-redis-data
+  minio_data:
+    name: repomed-minio-data
+  prometheus_data:
+    name: repomed-prometheus-data
+  grafana_data:
+    name: repomed-grafana-data
+
+# 🔧 Extension fields (para reutilização)
+x-common-variables: &common-variables
+  NODE_ENV: development
+  DATABASE_URL: postgresql://repomed:senha123@postgres:5432/repomed_dev
+  REDIS_URL: redis://redis:6379
+  MINIO_ENDPOINT: minio
+  MINIO_PORT: 9000
+  MINIO_ACCESS_KEY: minioadmin
+  MINIO_SECRET_KEY: minioadmin123
