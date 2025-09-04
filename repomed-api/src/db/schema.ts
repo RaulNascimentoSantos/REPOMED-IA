@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp, jsonb, boolean, serial } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, text, timestamp, jsonb, boolean, serial, date } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
 export const organizations = pgTable('organizations', {
@@ -13,9 +13,38 @@ export const users = pgTable('users', {
   name: varchar('name', { length: 255 }).notNull(),
   email: varchar('email', { length: 255 }).notNull().unique(),
   password: varchar('password', { length: 255 }).notNull(),
-  crm: varchar('crm', { length: 255 }),
+  crm: varchar('crm', { length: 20 }),
+  uf: varchar('uf', { length: 2 }),
   role: varchar('role', { length: 50 }).notNull().default('medico'),
+  isActive: boolean('is_active').default(true),
+  crmValidatedAt: timestamp('crm_validated_at'),
+  lastLoginAt: timestamp('last_login_at'),
   organizationId: uuid('organization_id').references(() => organizations.id),
+  createdAt: timestamp('created_at').default(sql`CURRENT_TIMESTAMP`).notNull(),
+  updatedAt: timestamp('updated_at').default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+// Pacientes
+export const patients = pgTable('patients', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  cpf: varchar('cpf', { length: 14 }),
+  rg: varchar('rg', { length: 20 }),
+  birthDate: date('birth_date'),
+  gender: varchar('gender', { length: 10 }),
+  phone: varchar('phone', { length: 20 }),
+  email: varchar('email', { length: 255 }),
+  address: text('address'),
+  city: varchar('city', { length: 100 }),
+  state: varchar('state', { length: 2 }),
+  zipCode: varchar('zip_code', { length: 10 }),
+  emergencyContactName: varchar('emergency_contact_name', { length: 255 }),
+  emergencyContactPhone: varchar('emergency_contact_phone', { length: 20 }),
+  medicalHistory: text('medical_history'),
+  allergies: text('allergies'),
+  medications: text('medications'),
+  organizationId: uuid('organization_id').references(() => organizations.id),
+  createdBy: uuid('created_by').references(() => users.id),
   createdAt: timestamp('created_at').default(sql`CURRENT_TIMESTAMP`).notNull(),
   updatedAt: timestamp('updated_at').default(sql`CURRENT_TIMESTAMP`).notNull(),
 });
@@ -79,6 +108,8 @@ export type Organization = typeof organizations.$inferSelect;
 export type NewOrganization = typeof organizations.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
+export type Patient = typeof patients.$inferSelect;
+export type NewPatient = typeof patients.$inferInsert;
 export type Template = typeof templates.$inferSelect;
 export type NewTemplate = typeof templates.$inferInsert;
 export type Document = typeof documents.$inferSelect;  

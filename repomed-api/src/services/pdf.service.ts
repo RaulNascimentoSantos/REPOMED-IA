@@ -106,7 +106,7 @@ export class PDFService {
    */
   async generateDeterministic(
     document: Document, 
-    options: PDFGenerationOptions = {}
+    options: Partial<PDFGenerationOptions> = {}
   ): Promise<{
     buffer: Buffer
     hash: string
@@ -135,11 +135,11 @@ export class PDFService {
           Title: document.title,
           Author: document.doctor?.name || 'RepoMed IA',
           Subject: `Documento Médico - ${document.template?.name}`,
-          Keywords: document.tags?.join(', '),
+          Keywords: (document as any).tags?.join(', '),
           Creator: deterministicConfig.producer,
           Producer: deterministicConfig.producer,
           CreationDate: new Date(deterministicConfig.createdAt),
-          ModDate: null // Sempre null para determinismo
+          ModDate: undefined // Sempre null para determinismo
         },
         // Configurações para determinismo
         compress: true,
@@ -152,7 +152,7 @@ export class PDFService {
       pdf.on('data', (chunk) => chunks.push(chunk))
 
       // Gerar conteúdo do PDF
-      await this.generatePDFContent(pdf, document, options, deterministicConfig)
+      await this.generatePDFContent(pdf, document, { documentId: document.id, ...options }, deterministicConfig)
 
       // Finalizar PDF
       pdf.end()
@@ -515,7 +515,7 @@ export class PDFService {
    * Valida se o PDF é determinístico
    * Gera o mesmo documento 3x e verifica se os hashes são iguais
    */
-  async validateDeterminism(document: Document, options: PDFGenerationOptions = {}): Promise<{
+  async validateDeterminism(document: Document, options: Partial<PDFGenerationOptions> = {}): Promise<{
     isDeterministic: boolean
     hashes: string[]
     iterations: number

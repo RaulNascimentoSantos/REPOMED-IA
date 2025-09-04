@@ -88,7 +88,7 @@ export class PerformanceService {
 
         // Manter apenas os últimos 10 queries lentas
         existing.slowQueries = existing.slowQueries
-          .sort((a, b) => b.timestamp - a.timestamp)
+          .sort((a: any, b: any) => b.timestamp - a.timestamp)
           .slice(0, 10)
       }
 
@@ -149,7 +149,7 @@ export class PerformanceService {
       invalidateOn?: string[]
     }
   ): Promise<T> {
-    let ttlType: 'short' | 'medium' | 'long' = 'default'
+    let ttlType: 'short' | 'medium' | 'long' = 'medium'
 
     // Estratégia de TTL baseada no tipo de dado
     switch (options.type) {

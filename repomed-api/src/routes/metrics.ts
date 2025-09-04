@@ -23,7 +23,7 @@ export default async function metricsRoutes(fastify: FastifyInstance) {
         .type('text/plain; version=0.0.4; charset=utf-8')
         .send(metrics)
     } catch (error) {
-      fastify.log.error('Error generating metrics:', error)
+      fastify.log.error(error)
       reply.code(500).send({ error: 'Failed to generate metrics' })
     }
   })
@@ -90,7 +90,7 @@ export default async function metricsRoutes(fastify: FastifyInstance) {
         // await fastify.db.query('SELECT 1')
         healthStatus.services.database = 'connected'
       } catch (error) {
-        fastify.log.warn('Database health check failed:', error)
+        fastify.log.warn(error)
         healthStatus.services.database = 'error'
         healthStatus.status = 'degraded'
       }
@@ -100,7 +100,7 @@ export default async function metricsRoutes(fastify: FastifyInstance) {
         // await fastify.cache.ping()
         healthStatus.services.cache = 'connected'
       } catch (error) {
-        fastify.log.warn('Cache health check failed:', error)
+        fastify.log.warn(error)
         healthStatus.services.cache = 'error'
         healthStatus.status = 'degraded'
       }
@@ -130,7 +130,7 @@ export default async function metricsRoutes(fastify: FastifyInstance) {
         healthStatus.metrics.documents_total = documentsMatch ? parseInt(documentsMatch[1]) : 0
         healthStatus.metrics.patients_total = patientsMatch ? parseInt(patientsMatch[1]) : 0
       } catch (error) {
-        fastify.log.warn('Failed to extract metrics for health check:', error)
+        fastify.log.warn(error)
       }
 
       // Determine overall status
@@ -141,16 +141,16 @@ export default async function metricsRoutes(fastify: FastifyInstance) {
       const duration = (Date.now() - startTime) / 1000
       
       // Track health check metrics
-      const { MetricsTracker } = await import('../metrics/prometheus')
+      const { MetricsTracker } = await import('../metrics/prometheus.js')
       MetricsTracker.trackHealthCheck('health_endpoint', duration, healthStatus.status === 'healthy')
 
       reply.send(healthStatus)
 
     } catch (error) {
-      fastify.log.error('Health check failed:', error)
+      fastify.log.error(error)
       
       const duration = (Date.now() - startTime) / 1000
-      const { MetricsTracker } = await import('../metrics/prometheus')
+      const { MetricsTracker } = await import('../metrics/prometheus.js')
       MetricsTracker.trackHealthCheck('health_endpoint', duration, false)
       
       reply.code(500).send({
@@ -261,7 +261,7 @@ export default async function metricsRoutes(fastify: FastifyInstance) {
       reply.send(summary)
 
     } catch (error) {
-      fastify.log.error('Error generating metrics summary:', error)
+      fastify.log.error(error)
       reply.code(500).send({ error: 'Failed to generate metrics summary' })
     }
   })

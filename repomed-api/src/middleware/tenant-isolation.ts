@@ -13,13 +13,15 @@ const PUBLIC_ROUTES = [
   '/api/verify'
 ];
 
-interface TenantRequest extends FastifyRequest {
+interface TenantRequest extends Omit<FastifyRequest, 'user'> {
   organizationId?: string;
   user?: {
     id: string;
     email: string;
-    organizationId: string;
+    organizationId?: string;
     role: string;
+    name?: string;
+    crm?: string;
   };
 }
 

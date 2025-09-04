@@ -2,8 +2,8 @@ import { MetricsTracker } from '../metrics/prometheus'
 import { updateBusinessMetrics } from '../middleware/metricsMiddleware'
 
 export interface MetricsCollectorDependencies {
-  database?: any
-  cache?: any
+  database: any
+  cache: any
   logger?: any
 }
 
@@ -82,10 +82,11 @@ export class MetricsCollector {
         duration: `${duration}s`
       })
 
-    } catch (error) {
+    } catch (error: unknown) {
       const duration = (Date.now() - startTime) / 1000
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       this.dependencies.logger?.error('Metrics collection failed', {
-        error: error.message,
+        error: errorMessage,
         duration: `${duration}s`
       })
 
@@ -154,9 +155,10 @@ export class MetricsCollector {
             cacheHitRatio: stats.hitRatio || 0
           })
         }
-      } catch (error) {
+      } catch (error: unknown) {
         // Cache stats not available, not critical
-        this.dependencies.logger?.debug('Cache stats not available:', error.message)
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+        this.dependencies.logger?.debug('Cache stats not available:', errorMessage)
       }
 
     } catch (error) {

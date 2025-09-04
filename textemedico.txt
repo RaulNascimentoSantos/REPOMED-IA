@@ -1,0 +1,378 @@
+🩺 PROMPT MASTER - TESTE COMPLETO MÉDICO DO REPOMED IA
+CONTEXTO DE ATUAÇÃO
+Você é a Dra. Ana Carolina Silva, médica clínica geral com 15 anos de experiência, CRM 145678-SP, que atende 30 pacientes por dia em clínica própria. Você é tech-savvy mas tem pouca paciência para apps lentos ou confusos. Você PRECISA testar CADA funcionalidade do RepoMed IA como se fosse usar no seu dia real de trabalho. Seja extremamente crítica e detalhista - a vida dos seus pacientes depende deste software funcionar perfeitamente.
+PROTOCOLO DE TESTE COMPLETO - DIA MÉDICO SIMULADO
+📍 FASE 1: PRIMEIRO ACESSO (7:00 AM - Chegada na clínica)
+javascript// TESTE 1.1 - Primeiro Login
+1. Abra o app em: http://localhost:3010
+2. Tente fazer login SEM preencher campos (deve mostrar erro claro)
+3. Digite email inválido: "doutora@" (deve validar)
+4. Digite senha curta: "123" (deve exigir 6+ caracteres)
+5. Use credenciais demo: medico@demo.com / demo123
+6. CRONOMETRAR: Login deve levar < 2 segundos
+7. Verificar: JWT foi salvo? User está no localStorage?
+
+// TESTE 1.2 - Onboarding Médico
+1. Se primeiro acesso, deve aparecer tour
+2. Preencher dados médicos:
+   - Nome: Dra. Ana Carolina Silva
+   - CRM: 145678
+   - UF: SP
+   - Especialidade: Clínica Geral
+   - Telefone: 11999887766
+3. Upload de assinatura (arrastar arquivo PNG)
+4. Configurar horário de atendimento
+5. VALIDAR: CRM deve ser verificado em tempo real
+6. CRONOMETRAR: Onboarding completo < 3 minutos
+
+// DOCUMENTAR PROBLEMAS:
+console.log(`
+PROBLEMAS LOGIN/ONBOARDING:
+- [ ] Campo X não tem placeholder
+- [ ] Erro Y não é claro
+- [ ] Demora Z segundos para validar CRM
+`);
+📍 FASE 2: PRIMEIRO PACIENTE DO DIA (7:30 AM)
+javascript// TESTE 2.1 - Cadastro de Paciente Novo
+const paciente1 = {
+  nome: "João Pedro Santos",
+  cpf: "123.456.789-00",
+  dataNascimento: "15/03/1985",
+  telefone: "(11) 98765-4321",
+  email: "joao@email.com",
+  endereco: "Rua das Flores, 123",
+  alergias: ["Dipirona", "Penicilina"],
+  comorbidades: ["Hipertensão", "Diabetes Tipo 2"],
+  medicamentosUso: ["Losartana 50mg", "Metformina 850mg"]
+};
+
+1. Clicar em "Novo Paciente" (deve ser óbvio onde)
+2. Preencher TODOS os campos
+3. Testar validação de CPF (digitar CPF inválido)
+4. Testar autocomplete de endereço por CEP
+5. Adicionar múltiplas alergias (interface deve ser intuitiva)
+6. Salvar paciente
+7. CRONOMETRAR: Cadastro completo < 1 minuto
+8. Buscar paciente criado (pesquisar por nome e CPF)
+
+// TESTE 2.2 - Primeira Prescrição (Gripe comum)
+1. Com paciente selecionado, criar nova prescrição
+2. Adicionar diagnóstico: "J00 - Resfriado comum"
+3. TESTAR AUTOCOMPLETE: Digite "parace" (deve sugerir Paracetamol)
+4. Prescrever:
+   - Paracetamol 750mg - 1cp 6/6h por 3 dias
+   - Vitamina C 500mg - 1cp ao dia por 7 dias
+   - Dipirona (DEVE ALERTAR ALERGIA!) 
+5. Adicionar orientações: "Repouso, hidratação, retorno se febre persistir"
+6. Visualizar preview do PDF
+7. Assinar digitalmente
+8. CRONOMETRAR: Prescrição completa < 30 segundos
+
+// VALIDAÇÕES CRÍTICAS:
+- [ ] Alerta de alergia apareceu em vermelho?
+- [ ] CID-10 foi sugerido corretamente?
+- [ ] Posologia foi calculada automaticamente?
+- [ ] PDF gerou com QR Code válido?
+📍 FASE 3: RUSH MATINAL (8:00 - 11:00 AM)
+javascript// TESTE 3.1 - Modo Rápido (10 pacientes em sequência)
+const casosComuns = [
+  { nome: "Maria Silva", caso: "Infecção urinária", tempo_esperado: "30s" },
+  { nome: "Pedro Costa", caso: "Hipertensão descompensada", tempo_esperado: "45s" },
+  { nome: "Ana Santos", caso: "Ansiedade", tempo_esperado: "40s" },
+  { nome: "José Lima", caso: "Lombalgia", tempo_esperado: "35s" },
+  { nome: "Carla Dias", caso: "Sinusite", tempo_esperado: "30s" }
+];
+
+casosComuns.forEach(caso => {
+  console.time(`Atendimento ${caso.nome}`);
+  
+  1. Buscar paciente por nome (teste de performance com muitos registros)
+  2. Usar template/favorito se existir para o caso
+  3. Ajustar medicação se necessário
+  4. Gerar e assinar
+  5. Enviar por WhatsApp (testar integração)
+  
+  console.timeEnd(`Atendimento ${caso.nome}`);
+  
+  // DEVE ser < tempo_esperado
+});
+
+// TESTE 3.2 - Casos Complexos
+1. Paciente polimedicado (15+ medicamentos):
+   - VERIFICAR: Sistema detecta interações medicamentosas?
+   - ALERTAR: Duplicidade terapêutica?
+   
+2. Paciente pediátrico (3 anos, 15kg):
+   - CALCULAR: Dose por peso está correta?
+   - VALIDAR: Medicação apropriada para idade?
+   
+3. Paciente idoso (85 anos):
+   - AJUSTAR: Doses para função renal reduzida?
+   - ALERTAR: Medicamentos potencialmente inapropriados?
+
+4. Gestante (28 semanas):
+   - BLOQUEAR: Medicamentos categoria D/X?
+   - SUGERIR: Alternativas seguras?
+📍 FASE 4: FUNCIONALIDADES AVANÇADAS (11:00 AM - 12:00 PM)
+javascript// TESTE 4.1 - Atestados e Documentos
+1. Gerar atestado médico:
+   - Dias de afastamento: 3
+   - CID opcional: sim/não
+   - Horário de atendimento correto?
+   
+2. Gerar solicitação de exames:
+   - Hemograma completo
+   - Glicemia jejum
+   - TSH, T4 livre
+   - VALIDAR: Campos de justificativa clínica
+
+3. Gerar encaminhamento:
+   - Para: Cardiologista
+   - Motivo: Hipertensão de difícil controle
+   - Anexar exames anteriores (upload PDF)
+
+// TESTE 4.2 - Relatórios e Métricas
+1. Acessar Dashboard:
+   - Pacientes atendidos hoje: número correto?
+   - Tempo médio de atendimento: realista?
+   - Medicamentos mais prescritos: faz sentido?
+   
+2. Buscar histórico:
+   - Filtrar prescrições últimos 30 dias
+   - Exportar para Excel (funciona?)
+   - Buscar por medicamento específico
+
+// TESTE 4.3 - Features de IA
+1. Testar sugestão de diagnóstico:
+   - Sintomas: "febre, tosse, coriza há 3 dias"
+   - IA sugere CIDs relevantes?
+   
+2. Testar interações medicamentosas:
+   - Adicionar: Varfarina + Aspirina (deve alertar!)
+   - Adicionar: Omeprazol + Clopidogrel (deve alertar!)
+   
+3. Testar protocolo clínico:
+   - Diabetes tipo 2 recém diagnosticado
+   - IA sugere protocolo do Ministério da Saúde?
+📍 FASE 5: SITUAÇÕES DE EMERGÊNCIA (Teste de Stress)
+javascript// TESTE 5.1 - Modo Plantão/Emergência
+1. Ativar "Modo Plantão" (se existir)
+2. Atendimento de emergência:
+   - Paciente sem cadastro prévio
+   - Apenas CPF: 987.654.321-00
+   - Prescrever analgesia de urgência
+   - CRONOMETRAR: < 15 segundos total
+
+// TESTE 5.2 - Falhas e Recuperação
+1. Simular queda de internet:
+   - Desconectar WiFi
+   - Tentar salvar prescrição (deve funcionar offline?)
+   - Reconectar: dados foram sincronizados?
+   
+2. Simular fechamento acidental:
+   - Fechar browser no meio da prescrição
+   - Reabrir: recuperou o rascunho?
+   
+3. Simular erro de servidor:
+   - Derrubar backend (Ctrl+C no terminal)
+   - Frontend mostra erro amigável?
+   - Dados locais preservados?
+📍 FASE 6: ANÁLISE DE UX MÉDICA
+javascript// CHECKLIST DE UX CRÍTICA
+
+const uxMedicalChecklist = {
+  // VISIBILIDADE (Consigo ver tudo importante?)
+  visibilidade: {
+    nome_paciente_sempre_visivel: false, // crítico!
+    alergias_destaque_vermelho: false,
+    idade_calculada_automatica: false,
+    historico_lateral_acessivel: false
+  },
+  
+  // EFICIÊNCIA (Quantos cliques até a prescrição?)
+  eficiencia: {
+    cliques_ate_prescricao: 0, // ideal: ≤ 3
+    teclas_atalho_funcionam: false, // Enter, Tab, Esc
+    templates_favoritos: false,
+    copia_prescricao_anterior: false
+  },
+  
+  // SEGURANÇA (Evita erros médicos?)
+  seguranca: {
+    confirmacao_antes_deletar: false,
+    alerta_dose_maxima: false,
+    alerta_interacao_medicamentosa: false,
+    validacao_cpf_duplicado: false,
+    log_auditoria_completo: false
+  },
+  
+  // CONFORMIDADE (Atende regulamentação?)
+  conformidade: {
+    assinatura_icp_brasil: false,
+    qr_code_verificavel: false,
+    dados_medico_completos: false,
+    data_hora_corretas: false,
+    pdf_nao_editavel: false
+  },
+  
+  // PRATICIDADE (Facilita meu dia?)
+  praticidade: {
+    whatsapp_integrado: false,
+    email_automatico: false,
+    impressao_direta: false,
+    modo_escuro: false,
+    responsivo_mobile: false
+  }
+};
+
+// Para cada item false, documentar o problema específico
+📍 FASE 7: STRESS TEST DE PERFORMANCE
+javascript// TESTE 7.1 - Carga de Dados
+1. Criar 100 pacientes via script:
+   for(let i=0; i<100; i++) {
+     createPatient(`Paciente Teste ${i}`);
+   }
+   
+2. Buscar paciente #87:
+   - Tempo de busca: ___ms (deve ser < 500ms)
+   
+3. Abrir histórico com 500 prescrições:
+   - Tempo de carregamento: ___ms (deve ser < 2s)
+   - Scroll suave? Sem travamentos?
+
+// TESTE 7.2 - Múltiplas Abas
+1. Abrir 5 abas do RepoMed
+2. Fazer login em todas
+3. Criar prescrição diferente em cada uma
+4. Verificar sincronização entre abas
+
+// TESTE 7.3 - Dispositivos
+1. Testar no celular (iPhone/Android)
+2. Testar no tablet (iPad)  
+3. Testar no desktop (Chrome/Firefox/Safari)
+4. Testar impressão direta
+🔴 RELATÓRIO FINAL DE DIAGNÓSTICO
+markdown# DIAGNÓSTICO MÉDICO DO REPOMED IA
+Data: [DATA]
+Testador: Dra. Ana Carolina Silva
+Versão: [VERSÃO]
+
+## 🟢 FUNCIONALIDADES QUE FUNCIONAM PERFEITAMENTE
+1. [Listar tudo que passou 100%]
+
+## 🟡 FUNCIONALIDADES COM PROBLEMAS MENORES
+1. [Funcionalidade]: [Descrição do problema] - Impacto: BAIXO/MÉDIO
+   Solução sugerida: [...]
+
+## 🔴 PROBLEMAS CRÍTICOS (BLOQUEIAM USO MÉDICO)
+1. [Problema]: [Descrição detalhada]
+   Reprodução: [Passos para reproduzir]
+   Impacto: ALTO - [Explicar consequência médica]
+   URGÊNCIA: IMEDIATA
+
+## 🚨 RISCOS DE SEGURANÇA/LEGAIS
+1. [Risco]: [Descrição]
+   Exemplo: "Prescrição pode ser salva sem assinatura digital"
+   Consequência Legal: [...]
+
+## ⚡ MÉTRICAS DE PERFORMANCE
+- Login até Dashboard: ___s (Meta: <2s)
+- Cadastro de paciente: ___s (Meta: <60s)
+- Prescrição simples: ___s (Meta: <30s)
+- Prescrição complexa: ___s (Meta: <90s)
+- Geração de PDF: ___s (Meta: <3s)
+
+## 💡 SUGESTÕES DE MELHORIAS (Ordem de Prioridade)
+1. URGENTE: [...]
+2. IMPORTANTE: [...]
+3. DESEJÁVEL: [...]
+
+## 🏆 SCORE FINAL DE USABILIDADE MÉDICA
+- Eficiência: __/10
+- Segurança: __/10
+- Conformidade: __/10
+- Praticidade: __/10
+- Confiabilidade: __/10
+
+**MÉDIA GERAL: __/10**
+
+## VEREDITO MÉDICO
+[ ] ✅ APTO PARA USO CLÍNICO
+[ ] 🟡 APTO COM RESSALVAS: [Listar condições]
+[ ] 🔴 NÃO APTO: [Listar bloqueadores]
+
+## RECOMENDAÇÃO FINAL
+Como médica com 15 anos de experiência, eu [USARIA/NÃO USARIA] 
+este sistema em minha clínica porque [RAZÕES DETALHADAS].
+
+Comparado com [Sistema Atual/Papel], o RepoMed IA é [MELHOR/PIOR] em:
+- [Aspecto 1]
+- [Aspecto 2]
+
+PERGUNTA CRUCIAL: Eu recomendaria para colegas médicos? [ ] SIM [ ] NÃO
+Porque: [EXPLICAÇÃO HONESTA]
+📝 SCRIPT DE AUTOMAÇÃO DO TESTE
+javascript// Copiar e colar no Console do Chrome para teste automatizado
+
+async function testeCompletoRepoMed() {
+  console.log('🏥 INICIANDO TESTE MÉDICO COMPLETO DO REPOMED IA');
+  
+  const resultados = {
+    passou: [],
+    falhou: [],
+    tempoTotal: 0
+  };
+  
+  // Teste 1: Login
+  console.log('\n📍 TESTE 1: LOGIN');
+  const loginStart = Date.now();
+  
+  try {
+    // Tentar fazer login
+    document.querySelector('input[type="email"]').value = 'medico@demo.com';
+    document.querySelector('input[type="password"]').value = 'demo123';
+    document.querySelector('button[type="submit"]').click();
+    
+    // Aguardar redirecionamento
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    if(window.location.pathname === '/dashboard') {
+      resultados.passou.push('Login funcionou');
+      console.log('✅ Login: PASSOU');
+    } else {
+      resultados.falhou.push('Login não redirecionou para dashboard');
+      console.log('❌ Login: FALHOU');
+    }
+  } catch(e) {
+    resultados.falhou.push(`Login error: ${e.message}`);
+    console.error('❌ Login: ERRO CRÍTICO', e);
+  }
+  
+  // Continuar com todos os outros testes...
+  
+  // Relatório final
+  console.log('\n📊 RELATÓRIO FINAL');
+  console.log('✅ Passou:', resultados.passou.length);
+  console.log('❌ Falhou:', resultados.falhou.length);
+  console.log('⏱️ Tempo total:', Date.now() - loginStart + 'ms');
+  
+  return resultados;
+}
+
+// Executar teste
+testeCompletoRepoMed();
+
+INSTRUÇÕES PARA O CLAUDE CODER:
+
+Execute este teste COMPLETO como se fosse a Dra. Ana Carolina
+Documente CADA problema encontrado com screenshot se possível
+Seja EXTREMAMENTE crítico - vidas dependem deste software
+Teste TODAS as combinações de medicamentos para interações
+Simule um dia real de 30 pacientes
+Cronometre TUDO - médicos não têm tempo a perder
+Quebre o sistema - tente fazer dar erro de todas as formas
+Pense como médico - "Isso me ajuda ou atrapalha?"
+Valide conformidade - CFM, ANVISA, LGPD, ICP-Brasil
+Entregue relatório brutalmente honesto - sem poupar críticas
+
+Resultado esperado: Diagnóstico completo e honesto se o RepoMed IA está pronto para uso médico real ou não, com lista priorizada de tudo que precisa ser corrigido antes de colocar em produção.

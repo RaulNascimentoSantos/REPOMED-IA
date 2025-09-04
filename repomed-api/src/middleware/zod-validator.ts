@@ -14,7 +14,7 @@ export function zodValidatorCompiler({ schema }: { schema: ZodSchema }) {
     } catch (error) {
       if (error instanceof ZodError) {
         // Converter ZodError para formato esperado pelo Fastify
-        const validationError: FastifySchemaValidationError = {
+        const validationError = {
           validation: error.issues.map(issue => ({
             instancePath: `/${issue.path.join('/')}`,
             schemaPath: `#/${issue.path.join('/')}`,
@@ -22,7 +22,7 @@ export function zodValidatorCompiler({ schema }: { schema: ZodSchema }) {
             params: issue,
             message: issue.message
           })),
-          validationContext: 'body' // ou 'querystring', 'params', etc.
+          validationContext: 'body'
         }
         return { error: validationError }
       }

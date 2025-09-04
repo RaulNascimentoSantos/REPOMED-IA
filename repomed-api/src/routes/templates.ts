@@ -31,7 +31,7 @@ export function registerTemplateRoutes(fastify: FastifyInstance) {
       }
     }
   }, async (request, reply) => {
-    const { category, specialty } = request.query;
+    const { category, specialty } = request.query as any;
     
     let filteredTemplates = medicalTemplates;
     
@@ -100,7 +100,7 @@ export function registerTemplateRoutes(fastify: FastifyInstance) {
       }
     }
   }, async (request, reply) => {
-    const { id } = request.params;
+    const { id } = request.params as any;
     
     const template = medicalTemplates.find(t => t.id === id);
     
@@ -147,7 +147,7 @@ export function registerTemplateRoutes(fastify: FastifyInstance) {
       }
     }
   }, async (request, reply) => {
-    const categories = {};
+    const categories: any = {};
     
     medicalTemplates.forEach(template => {
       if (!categories[template.category]) {
@@ -204,8 +204,8 @@ export function registerTemplateRoutes(fastify: FastifyInstance) {
       }
     }
   }, async (request, reply) => {
-    const { id } = request.params;
-    const { data = {}, doctor = {} } = request.body;
+    const { id } = request.params as any;
+    const { data = {}, doctor = {} } = request.body as any;
     
     const template = medicalTemplates.find(t => t.id === id);
     
@@ -241,7 +241,7 @@ export function registerTemplateRoutes(fastify: FastifyInstance) {
     // Handle arrays (medications, exams, etc.)
     if (data.medications && Array.isArray(data.medications)) {
       let medicationsText = '';
-      data.medications.forEach(med => {
+      data.medications.forEach((med: any) => {
         medicationsText += `• ${med.name || 'Nome do medicamento'} - ${med.dosage || 'Dosagem'}\n`;
         medicationsText += `  Posologia: ${med.frequency || 'Frequência'} - ${med.duration || 'Duração'}\n`;
         if (med.instructions) {

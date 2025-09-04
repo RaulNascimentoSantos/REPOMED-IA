@@ -53,7 +53,6 @@ export class CacheService {
       password: process.env.REDIS_PASSWORD,
       db: parseInt(process.env.REDIS_DB || '0'),
       maxRetriesPerRequest: this.config.maxRetries,
-      retryDelayOnFailover: this.config.retryDelayOnFailover,
       enableReadyCheck: true,
       lazyConnect: true,
       keepAlive: 30000,
@@ -62,7 +61,6 @@ export class CacheService {
       // Configurações de conexão
       family: 4,
       // Configurações de performance
-      maxLoadingTimeout: 10000
     })
 
     this.setupEventHandlers()
