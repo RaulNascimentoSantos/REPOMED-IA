@@ -1,0 +1,478 @@
+PROMPT MASTER - ESTABILIZAÇÃO REPOMED IA V5.0
+CONTEXTO CRÍTICO
+Você é o Claude Coder. Sistema RepoMed IA está 80% pronto mas completamente inoperante devido a 25+ erros TypeScript no backend que impedem compilação. Seu objetivo: fazer o sistema existente funcionar SEM reescrever, SEM criar features novas, SEM otimizações prematuras. Apenas estabilizar o que já foi desenvolvido.
+DIAGNÓSTICO CONFIRMADO
+Backend: 25 erros TypeScript em server.ts - NÃO COMPILA
+Banco: Todas tabelas vazias - SEM DADOS
+Redis: Configuração com parâmetros inexistentes
+Fastify: Propriedades authenticate/user não existem
+Duplicações: Código duplicado em server.ts
+Frontend: Funcional mas sem backend para conectar
+DIRETIVA PRINCIPAL
+Execute EXATAMENTE na ordem apresentada. Cada fase tem validação obrigatória. Se falhar, não prossiga.
+
+FASE 1: BACKUP E PREPARAÇÃO [5 minutos]
+1.1 Criar backup completo
+bash#!/bin/bash
+# backup-before-fix.sh
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+echo "🔒 Criando backup $TIMESTAMP..."
+
+# Git backup
+git add -A
+git commit -m "backup: pre-stabilization $TIMESTAMP" || true
+git tag "backup-$TIMESTAMP"
+
+# File backup
+tar -czf "../repomed_backup_$TIMESTAMP.tar.gz" . --exclude=node_modules --exclude=.git
+echo "✅ Backup criado: repomed_backup_$TIMESTAMP.tar.gz"
+1.2 Instalar dependências faltantes
+bashcd repomed-api
+npm install --save @fastify/jwt @fastify/cors @fastify/multipart @fastify/helmet
+npm install --save fastify-plugin bcrypt ioredis
+npm install --save-dev @types/node @types/bcrypt
+
+FASE 2: CORRIGIR BACKEND (CRÍTICO) [30 minutos]
+2.1 Criar tipos Fastify corretos
+typescript// repomed-api/src/types/fastify.d.ts
+import '@fastify/jwt'
+
+declare module 'fastify' {
+  interface FastifyRequest {
+    user?: {
+      id: string
+      email: string
+      tenantId?: string
+      role?: string
+    }
+  }
+  
+  interface FastifyInstance {
+    authenticate: any
+  }
+}
+
+declare module '@fastify/jwt' {
+  interface FastifyJWT {
+    user: {
+      id: string
+      email: string
+      tenantId?: string
+      role?: string
+    }
+  }
+}
+2.2 Remover duplicações em server.ts
+bash# Criar script de limpeza
+cat > fix-server-duplicates.js << 'EOF'
+const fs = require('fs');
+const content = fs.readFileSync('repomed-api/src/server.ts', 'utf8');
+
+// Remover duplicações conhecidas
+let fixed = content
+  .replace(/const start = async[\s\S]*?}\n\nconst start = async/g, 'const start = async')
+  .replace(/const fastify = Fastify[\s\S]*?}\n\nconst fastify = Fastify/g, 'const fastify = Fastify')
+  .replace(/const registerPlugins[\s\S]*?}\n\nconst registerPlugins/g, 'const registerPlugins')
+  .replace(/const registerRoutes[\s\S]*?}\n\nconst registerRoutes/g, 'const registerRoutes');
+
+// Salvar backup
+fs.writeFileSync('repomed-api/src/server.ts.backup', content);
+fs.writeFileSync('repomed-api/src/server.ts', fixed);
+console.log('✅ Duplicações removidas');
+EOF
+
+node fix-server-duplicates.js
+2.3 Corrigir Redis configuration
+typescript// repomed-api/src/services/cache.service.ts
+// LOCALIZAR E REMOVER: retryDelayOnFailover
+
+import Redis from 'ioredis';
+
+const redisConfig = {
+  host: process.env.REDIS_HOST || 'localhost',
+  port: parseInt(process.env.REDIS_PORT || '6379'),
+  password: process.env.REDIS_PASSWORD,
+  db: 0,
+  maxRetriesPerRequest: 3,
+  // REMOVER: retryDelayOnFailover: 100,
+  enableReadyCheck: true,
+  lazyConnect: false,
+  keepAlive: 5000,
+  connectTimeout: 10000,
+  commandTimeout: 5000,
+  family: 4
+};
+
+export const redis = new Redis(redisConfig);
+2.4 Implementar authenticate decorator
+typescript// repomed-api/src/plugins/auth.plugin.ts
+import fp from 'fastify-plugin';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+
+async function authPlugin(fastify: FastifyInstance) {
+  fastify.decorate('authenticate', async function(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const token = request.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return reply.code(401).send({ error: 'No token provided' });
+      }
+      
+      const decoded = await fastify.jwt.verify(token);
+      request.user = decoded as any;
+    } catch (err) {
+      reply.code(401).send({ error: 'Invalid token' });
+    }
+  });
+}
+
+export default fp(authPlugin);
+2.5 Compilar e validar
+bashcd repomed-api
+npx tsc --noEmit 2> compile-errors.log
+if [ $? -eq 0 ]; then
+  echo "✅ Backend compila sem erros!"
+else
+  echo "❌ Ainda há erros. Verificar compile-errors.log"
+  cat compile-errors.log
+fi
+
+FASE 3: CONFIGURAÇÃO AMBIENTE [10 minutos]
+3.1 Criar .env correto
+bashcat > .env << 'EOF'
+# Database
+DATABASE_URL=postgresql://postgres:postgres123@localhost:5432/repomed
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=repomed
+DB_USER=postgres
+DB_PASSWORD=postgres123
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
+REDIS_URL=redis://localhost:6379
+
+# Security
+JWT_SECRET=repomed_jwt_secret_2025_change_in_production
+JWT_EXPIRY=24h
+
+# Server
+NODE_ENV=development
+PORT=8081
+FRONTEND_URL=http://localhost:5173
+
+# Features
+ENABLE_METRICS=true
+ENABLE_SWAGGER=false
+EOF
+3.2 Docker compose mínimo
+yaml# docker-compose.minimal.yml
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: repomed
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+3.3 Iniciar serviços base
+bashdocker-compose -f docker-compose.minimal.yml down
+docker-compose -f docker-compose.minimal.yml up -d
+sleep 10
+docker-compose -f docker-compose.minimal.yml ps
+
+FASE 4: POPULAR BANCO DE DADOS [15 minutos]
+4.1 Criar estrutura de tabelas
+sql-- repomed-api/migrations/001_initial.sql
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE IF NOT EXISTS users (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  role VARCHAR(50) DEFAULT 'physician',
+  tenant_id VARCHAR(255) DEFAULT 'default',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS patients (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name VARCHAR(255) NOT NULL,
+  cpf VARCHAR(14) UNIQUE,
+  email VARCHAR(255),
+  phone VARCHAR(20),
+  birth_date DATE,
+  tenant_id VARCHAR(255) DEFAULT 'default',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS documents (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  patient_id UUID REFERENCES patients(id),
+  physician_id UUID REFERENCES users(id),
+  type VARCHAR(50),
+  content TEXT,
+  status VARCHAR(50) DEFAULT 'draft',
+  tenant_id VARCHAR(255) DEFAULT 'default',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS templates (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name VARCHAR(255) NOT NULL,
+  type VARCHAR(50),
+  content TEXT,
+  tenant_id VARCHAR(255) DEFAULT 'default',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS shares (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  document_id UUID REFERENCES documents(id),
+  token VARCHAR(255) UNIQUE NOT NULL,
+  expires_at TIMESTAMP,
+  access_count INTEGER DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS audit_logs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id),
+  action VARCHAR(255),
+  entity_type VARCHAR(50),
+  entity_id UUID,
+  metadata JSONB,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+4.2 Seed com dados de teste
+javascript// repomed-api/scripts/seed.js
+const { Client } = require('pg');
+const bcrypt = require('bcrypt');
+
+async function seed() {
+  const client = new Client({
+    connectionString: process.env.DATABASE_URL || 'postgresql://postgres:postgres123@localhost:5432/repomed'
+  });
+
+  try {
+    await client.connect();
+    console.log('🔗 Conectado ao banco');
+
+    // Hash senha padrão
+    const passwordHash = await bcrypt.hash('senha123', 10);
+
+    // Usuários
+    await client.query(`
+      INSERT INTO users (email, password, name, role) VALUES
+      ('admin@repomed.com', $1, 'Administrador', 'admin'),
+      ('medico@repomed.com', $1, 'Dr. João Silva', 'physician'),
+      ('medico2@repomed.com', $1, 'Dra. Maria Santos', 'physician')
+      ON CONFLICT (email) DO NOTHING
+    `, [passwordHash]);
+
+    // Pacientes
+    await client.query(`
+      INSERT INTO patients (name, cpf, email, phone, birth_date) VALUES
+      ('José da Silva', '12345678900', 'jose@email.com', '11999998888', '1980-05-15'),
+      ('Maria Oliveira', '98765432100', 'maria@email.com', '11888887777', '1975-10-20'),
+      ('Ana Costa', '45678912300', 'ana@email.com', '11777776666', '1990-03-25')
+      ON CONFLICT (cpf) DO NOTHING
+    `);
+
+    // Templates
+    await client.query(`
+      INSERT INTO templates (name, type, content) VALUES
+      ('Atestado Médico Padrão', 'certificate', 'Atesto para os devidos fins que o(a) paciente {{nome}} esteve sob meus cuidados...'),
+      ('Prescrição Simples', 'prescription', 'Prescrição médica para {{nome}}...'),
+      ('Laudo de Exame', 'report', 'Laudo médico do paciente {{nome}}...')
+      ON CONFLICT DO NOTHING
+    `);
+
+    console.log('✅ Banco populado com sucesso!');
+    console.log('📧 Login: medico@repomed.com');
+    console.log('🔑 Senha: senha123');
+
+  } catch (error) {
+    console.error('❌ Erro no seed:', error);
+    process.exit(1);
+  } finally {
+    await client.end();
+  }
+}
+
+seed();
+4.3 Executar migration e seed
+bash# Executar migration
+docker exec -i repomed-postgres psql -U postgres repomed < repomed-api/migrations/001_initial.sql
+
+# Executar seed
+cd repomed-api
+node scripts/seed.js
+
+FASE 5: VALIDAÇÃO INTEGRADA [10 minutos]
+5.1 Teste de integração
+javascript// test-integration.js
+const axios = require('axios');
+
+async function testAll() {
+  const tests = [
+    { name: 'Backend Health', test: () => axios.get('http://localhost:8081/health') },
+    { name: 'Frontend', test: () => axios.get('http://localhost:5173') },
+    { name: 'Login', test: () => axios.post('http://localhost:8081/api/auth/login', {
+      email: 'medico@repomed.com',
+      password: 'senha123'
+    })},
+    { name: 'Database', test: async () => {
+      const { Client } = require('pg');
+      const client = new Client({ connectionString: 'postgresql://postgres:postgres123@localhost:5432/repomed' });
+      await client.connect();
+      const res = await client.query('SELECT COUNT(*) FROM users');
+      client.end();
+      return res.rows[0].count > 0;
+    }}
+  ];
+
+  for (const { name, test } of tests) {
+    try {
+      await test();
+      console.log(`✅ ${name}: OK`);
+    } catch (error) {
+      console.log(`❌ ${name}: FALHOU - ${error.message}`);
+      process.exit(1);
+    }
+  }
+  console.log('\n🎉 TODOS OS TESTES PASSARAM!');
+}
+
+testAll();
+5.2 Script de inicialização completa
+bash#!/bin/bash
+# start-system.sh
+set -e
+
+echo "🚀 INICIANDO REPOMED IA..."
+
+# 1. Serviços base
+docker-compose -f docker-compose.minimal.yml up -d
+sleep 10
+
+# 2. Backend
+cd repomed-api
+npm run build
+npm start &
+BACKEND_PID=$!
+cd ..
+sleep 5
+
+# 3. Frontend
+cd repomed-web
+npm run dev &
+FRONTEND_PID=$!
+cd ..
+sleep 5
+
+# 4. Validação
+node test-integration.js
+
+echo "
+================================
+✅ SISTEMA OPERACIONAL
+================================
+Frontend: http://localhost:5173
+Backend:  http://localhost:8081
+Login:    medico@repomed.com
+Senha:    senha123
+================================
+"
+
+wait $BACKEND_PID $FRONTEND_PID
+
+CHECKPOINTS DE VALIDAÇÃO
+✅ FASE 1 - Backup
+
+ Backup criado com timestamp
+ Dependências instaladas
+
+✅ FASE 2 - Backend
+
+ Tipos Fastify criados
+ Duplicações removidas
+ Redis corrigido
+ Compila sem erros
+
+✅ FASE 3 - Ambiente
+
+ .env configurado
+ Docker rodando
+ Postgres/Redis healthy
+
+✅ FASE 4 - Banco
+
+ Tabelas criadas
+ Dados inseridos
+ Login funciona
+
+✅ FASE 5 - Sistema
+
+ Backend responde
+ Frontend carrega
+ Login autentica
+ CRUD funciona
+
+
+COMANDOS RESUMIDOS
+bash# Executar tudo de uma vez
+bash backup-before-fix.sh
+cd repomed-api && npm install
+node fix-server-duplicates.js
+docker-compose -f docker-compose.minimal.yml up -d
+node scripts/seed.js
+bash start-system.sh
+RESULTADO ESPERADO
+Sistema 100% funcional em localhost com:
+
+Login funcionando
+CRUD de pacientes operacional
+Geração de documentos
+Zero erros de compilação
+Dados de teste disponíveis
+
+NÃO FAZER
+
+NÃO refatorar código funcionando
+NÃO adicionar features novas
+NÃO otimizar prematuramente
+NÃO mudar arquitetura
+NÃO atualizar dependências desnecessariamente
+
+SUCESSO =
+Backend compilando + Login funcionando + CRUD básico operacional
+
+FIM DO PROMPT - EXECUTE NA ORDEM EXATA

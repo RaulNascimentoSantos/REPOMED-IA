@@ -124,4 +124,49 @@
 **/.claude/
 
 # System files
-NUL
+NUL# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+
+# Uploads
+uploads/
+
+# Backups
+backups/
+*.backup
+*.dump
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/settings.json
+*.swp
+*.swo
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build
+dist/
+build/
+.next/
+out/
+
+# Test
+coverage/
+.nyc_output/
+test-results/
+
+# Misc
+*.pem
+*.key
+*.crt

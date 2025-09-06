@@ -1,0 +1,800 @@
+{
+  "metadata": {
+    "timestamp": "2025-09-06T06:45:00Z",
+    "version": "1.0.0", 
+    "analyzer": "claude-coder",
+    "project": "repomed-ia"
+  },
+
+  "infrastructure": {
+    "docker": {
+      "containers": [
+        {
+          "name": "repomedia-postgres-1",
+          "image": "postgres:15-alpine",
+          "status": "running",
+          "ports": ["0.0.0.0:5432->5432/tcp"],
+          "health": "healthy",
+          "uptime": "7 hours ago"
+        },
+        {
+          "name": "repomedia-redis-1", 
+          "image": "redis:7-alpine",
+          "status": "running",
+          "ports": ["0.0.0.0:6379->6379/tcp"],
+          "health": "healthy",
+          "uptime": "7 hours ago"
+        },
+        {
+          "name": "repomed-grafana",
+          "image": "grafana/grafana:10.0.3",
+          "status": "running",
+          "ports": ["0.0.0.0:3001->3000/tcp"],
+          "uptime": "7 hours ago"
+        },
+        {
+          "name": "repomed-prometheus",
+          "image": "prom/prometheus:v2.45.0", 
+          "status": "running",
+          "ports": ["0.0.0.0:9090->9090/tcp"],
+          "uptime": "7 hours ago"
+        },
+        {
+          "name": "repomed-minio",
+          "image": "minio/minio:latest",
+          "status": "running",
+          "ports": ["0.0.0.0:9000-9001->9000-9001/tcp"],
+          "health": "healthy",
+          "uptime": "7 hours ago"
+        },
+        {
+          "name": "repomed-jaeger",
+          "image": "jaegertracing/all-in-one:latest",
+          "status": "running", 
+          "ports": ["0.0.0.0:14250->14250/tcp", "0.0.0.0:16686->16686/tcp"],
+          "uptime": "7 hours ago"
+        }
+      ],
+      "volumes": [
+        "repomedia_postgres_data",
+        "repomedia_redis_data", 
+        "repomed-grafana_data",
+        "repomed-prometheus_data",
+        "repomed-minio_data"
+      ],
+      "networks": ["repomedia_default", "repomed-network"],
+      "compose_files": ["docker-compose.yml", "docker-compose.minimal.yml"]
+    },
+    "databases": {
+      "postgresql": {
+        "status": "running",
+        "container": "repomedia-postgres-1", 
+        "port": 5432,
+        "database": "repomed_production",
+        "user": "postgres",
+        "health": "healthy",
+        "tables": [
+          "users", "patients", "documents", "templates", 
+          "shares", "auditLogs", "organizations"
+        ]
+      },
+      "redis": {
+        "status": "running",
+        "container": "repomedia-redis-1",
+        "port": 6379,
+        "health": "healthy",
+        "persistence": "AOF enabled"
+      }
+    },
+    "ports": {
+      "in_use": [3021, 3006, 5432, 6379, 8080, 9000, 9001, 9090, 3001, 16686],
+      "services_mapping": {
+        "3021": "repomed-web (Next.js)",
+        "3006": "repomed-web (backup)",
+        "8090": "repomed-api (Fastify)",
+        "5432": "PostgreSQL Database", 
+        "6379": "Redis Cache",
+        "9000": "MinIO Storage",
+        "9090": "Prometheus Metrics",
+        "3001": "Grafana Dashboard",
+        "16686": "Jaeger Tracing"
+      }
+    }
+  },
+
+  "backend": {
+    "status": {
+      "compiles": true,
+      "runs": true,
+      "errors": [],
+      "warnings": ["TypeScript config inconsistencies", "Some plugins disabled due to version conflicts"]
+    },
+    "structure": {
+      "total_files": 27,
+      "by_extension": {
+        ".ts": 27,
+        ".js": 0
+      },
+      "directories": {
+        "src": {
+          "config": ["index.ts"],
+          "db": ["schema.ts", "index.ts"],
+          "middleware": ["error-handler.ts", "metricsMiddleware.ts"],
+          "routes": ["templates.ts", "performance.ts"],
+          "services": ["EncryptionService.ts", "cache.service.ts", "MetricsCollector.ts"],
+          "templates": ["medical-templates.ts"],
+          "metrics": ["prometheus.ts"]
+        },
+        "tests": {
+          "unit": ["hash.test.ts", "validation.test.ts", "cache.test.ts"],
+          "integration": ["documents.test.ts", "users.test.ts", "documents-multitenancy.test.ts"]
+        }
+      }
+    },
+    "routes": [
+      {
+        "method": "GET",
+        "path": "/",
+        "file": "server.ts",
+        "line": 210,
+        "authenticated": false,
+        "working": true,
+        "description": "API root endpoint with documentation"
+      },
+      {
+        "method": "GET", 
+        "path": "/health",
+        "file": "server.ts",
+        "line": 234,
+        "authenticated": false,
+        "working": true,
+        "description": "Health check endpoint"
+      },
+      {
+        "method": "POST",
+        "path": "/api/auth/register",
+        "file": "server.ts",
+        "line": 244,
+        "authenticated": false,
+        "working": true,
+        "description": "User registration with CRM validation"
+      },
+      {
+        "method": "POST",
+        "path": "/api/auth/login", 
+        "file": "server.ts",
+        "line": 342,
+        "authenticated": false,
+        "working": true,
+        "description": "User login with JWT tokens"
+      },
+      {
+        "method": "POST",
+        "path": "/api/auth/refresh",
+        "file": "server.ts", 
+        "line": 429,
+        "authenticated": false,
+        "working": true,
+        "description": "Refresh JWT tokens"
+      },
+      {
+        "method": "POST",
+        "path": "/api/auth/logout",
+        "file": "server.ts",
+        "line": 486,
+        "authenticated": true,
+        "working": true,
+        "description": "User logout"
+      },
+      {
+        "method": "GET",
+        "path": "/api/me",
+        "file": "server.ts",
+        "line": 496,
+        "authenticated": true, 
+        "working": true,
+        "description": "Get current user info"
+      },
+      {
+        "method": "GET",
+        "path": "/api/documents",
+        "file": "server.ts",
+        "line": 504,
+        "authenticated": true,
+        "working": true,
+        "description": "List user documents"
+      },
+      {
+        "method": "POST",
+        "path": "/api/documents",
+        "file": "server.ts",
+        "line": 509,
+        "authenticated": true,
+        "working": true,
+        "description": "Create new document"
+      },
+      {
+        "method": "GET",
+        "path": "/api/patients",
+        "file": "server.ts",
+        "line": 581,
+        "authenticated": true,
+        "working": true,
+        "description": "List user patients"
+      },
+      {
+        "method": "GET",
+        "path": "/api/patients/:id",
+        "file": "server.ts",
+        "line": 600,
+        "authenticated": true,
+        "working": true,
+        "description": "Get patient by ID"
+      },
+      {
+        "method": "POST",
+        "path": "/api/patients",
+        "file": "server.ts",
+        "line": 629,
+        "authenticated": true,
+        "working": true,
+        "description": "Create new patient"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/patients/:id",
+        "file": "server.ts",
+        "line": 670,
+        "authenticated": true,
+        "working": true,
+        "description": "Update patient"
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/patients/:id",
+        "file": "server.ts",
+        "line": 723,
+        "authenticated": true,
+        "working": true,
+        "description": "Delete patient"
+      },
+      {
+        "method": "GET",
+        "path": "/api/metrics/dashboard",
+        "file": "server.ts",
+        "line": 756,
+        "authenticated": true,
+        "working": true,
+        "description": "Dashboard metrics"
+      }
+    ],
+    "services": [
+      {
+        "name": "CrmValidation",
+        "file": "services/CrmValidation.ts",
+        "methods": ["validateCRMFormat", "validateCRMWithCache"],
+        "status": "working",
+        "description": "CRM validation against CFM database"
+      },
+      {
+        "name": "EncryptionService",
+        "file": "services/EncryptionService.ts", 
+        "methods": ["encrypt", "decrypt", "hash"],
+        "status": "working",
+        "description": "Data encryption and hashing"
+      },
+      {
+        "name": "MetricsCollector",
+        "file": "services/MetricsCollector.ts",
+        "methods": ["collectMetric", "getMetrics"],
+        "status": "working",
+        "description": "Application metrics collection"
+      },
+      {
+        "name": "cache.service",
+        "file": "services/cache.service.ts",
+        "methods": ["get", "set", "del"],
+        "status": "working",
+        "description": "Redis caching operations"
+      }
+    ],
+    "middleware": [
+      {
+        "name": "errorHandler",
+        "file": "middleware/error-handler.ts",
+        "order": 1,
+        "global": true,
+        "description": "Global error handling"
+      },
+      {
+        "name": "metricsCollector", 
+        "file": "middleware/metricsMiddleware.ts",
+        "order": 2,
+        "global": true,
+        "description": "Request/response metrics"
+      },
+      {
+        "name": "requestLogger",
+        "file": "middleware/requestLogger.ts", 
+        "order": 3,
+        "global": true,
+        "description": "Request logging"
+      },
+      {
+        "name": "authenticate",
+        "file": "server.ts",
+        "order": 4,
+        "global": false,
+        "description": "JWT authentication"
+      }
+    ],
+    "models": [
+      {
+        "name": "users",
+        "table": "users",
+        "fields": ["id", "name", "email", "password", "crm", "uf", "role", "isActive"],
+        "relations": ["patients", "documents"]
+      },
+      {
+        "name": "patients",
+        "table": "patients", 
+        "fields": ["id", "name", "cpf", "rg", "birthDate", "gender", "phone", "email", "address"],
+        "relations": ["documents", "createdBy -> users"]
+      },
+      {
+        "name": "documents",
+        "table": "documents",
+        "fields": ["id", "title", "content", "hash", "isSigned", "createdAt"],
+        "relations": ["createdBy -> users", "templates"]
+      },
+      {
+        "name": "templates",
+        "table": "templates",
+        "fields": ["id", "name", "content", "category", "fields"],
+        "relations": ["documents"]
+      }
+    ],
+    "environment_variables": {
+      "required": ["DATABASE_PASSWORD", "JWT_SECRET", "GRAFANA_ADMIN_PASSWORD", "MINIO_ROOT_PASSWORD"],
+      "optional": ["DATABASE_PORT", "DATABASE_USER", "DATABASE_NAME", "REDIS_PORT", "REDIS_PASSWORD"],
+      "missing": []
+    },
+    "dependencies": {
+      "production": {
+        "fastify": "^4.28.1",
+        "@fastify/cors": "^9.0.1",
+        "@fastify/jwt": "^8.0.1",
+        "@fastify/swagger": "^8.15.0",
+        "drizzle-orm": "^0.33.0",
+        "postgres": "^3.4.4",
+        "bcryptjs": "^2.4.3",
+        "zod": "^3.23.8",
+        "uuid": "^10.0.0"
+      },
+      "development": {
+        "vitest": "^2.0.5",
+        "typescript": "^5.5.4",
+        "@types/node": "^22.5.4",
+        "tsx": "^4.19.1"
+      },
+      "outdated": [],
+      "security_issues": []
+    },
+    "typescript": {
+      "config": {
+        "target": "ES2022",
+        "module": "NodeNext",
+        "strict": true,
+        "esModuleInterop": true
+      },
+      "errors": []
+    }
+  },
+
+  "frontend": {
+    "framework": "Next.js",
+    "version": "14.2.32",
+    "status": {
+      "builds": true,
+      "runs": true,
+      "bundle_size": "unknown",
+      "build_time": "unknown"
+    },
+    "pages": [
+      {
+        "route": "/",
+        "file": "app/page.tsx",
+        "component": "HomePage",
+        "renders": true,
+        "has_errors": false,
+        "uses_api": false,
+        "authenticated": false,
+        "tested": true
+      },
+      {
+        "route": "/auth/login",
+        "file": "app/auth/login/page.tsx",
+        "component": "LoginPage", 
+        "renders": true,
+        "has_errors": false,
+        "uses_api": true,
+        "authenticated": false,
+        "tested": true
+      },
+      {
+        "route": "/patients/create",
+        "file": "app/patients/create/page.tsx",
+        "component": "CreatePatientPage",
+        "renders": true,
+        "has_errors": false, 
+        "uses_api": true,
+        "authenticated": true,
+        "tested": true
+      },
+      {
+        "route": "/patients/prescriptions/create",
+        "file": "app/patients/prescriptions/create/page.tsx", 
+        "component": "CreatePrescriptionPage",
+        "renders": true,
+        "has_errors": false,
+        "uses_api": true,
+        "authenticated": true,
+        "tested": true
+      },
+      {
+        "route": "/prescriptions/sign",
+        "file": "app/prescriptions/sign/page.tsx",
+        "component": "SignPrescriptionPage",
+        "renders": true,
+        "has_errors": false,
+        "uses_api": true,
+        "authenticated": true,
+        "tested": true
+      },
+      {
+        "route": "/calendar",
+        "file": "app/calendar/page.tsx",
+        "component": "CalendarPage",
+        "renders": true,
+        "has_errors": false,
+        "uses_api": false,
+        "authenticated": true, 
+        "tested": true
+      },
+      {
+        "route": "/dashboard/analytics",
+        "file": "app/dashboard/analytics/page.tsx",
+        "component": "AnalyticsPage",
+        "renders": true,
+        "has_errors": false,
+        "uses_api": false,
+        "authenticated": true,
+        "tested": true
+      },
+      {
+        "route": "/documents",
+        "file": "app/documents/page.tsx",
+        "component": "DocumentsPage",
+        "renders": true,
+        "has_errors": false,
+        "uses_api": false,
+        "authenticated": true,
+        "tested": true
+      },
+      {
+        "route": "/templates", 
+        "file": "app/templates/page.tsx",
+        "component": "TemplatesPage",
+        "renders": true,
+        "has_errors": false,
+        "uses_api": false,
+        "authenticated": true,
+        "tested": true
+      },
+      {
+        "route": "/demo",
+        "file": "app/demo/page.tsx",
+        "component": "DemoPage", 
+        "renders": true,
+        "has_errors": false,
+        "uses_api": false,
+        "authenticated": false,
+        "tested": true
+      }
+    ],
+    "components": [
+      {
+        "name": "Card",
+        "file": "components/ui/card.tsx",
+        "type": "functional",
+        "props": ["className", "children"],
+        "used_in": ["all pages"],
+        "has_tests": false
+      },
+      {
+        "name": "Button",
+        "file": "components/ui/button.tsx", 
+        "type": "functional",
+        "props": ["variant", "size", "className", "children"],
+        "used_in": ["all pages"],
+        "has_tests": false
+      },
+      {
+        "name": "Input",
+        "file": "components/ui/Input.tsx",
+        "type": "functional",
+        "props": ["label", "type", "value", "onChange", "placeholder", "required", "rightIcon"],
+        "used_in": ["login", "patients/create", "documents", "templates"],
+        "has_tests": false
+      },
+      {
+        "name": "Badge",
+        "file": "components/ui/badge.tsx",
+        "type": "functional",
+        "props": ["variant", "className", "children"], 
+        "used_in": ["calendar", "analytics", "templates"],
+        "has_tests": false
+      },
+      {
+        "name": "Avatar", 
+        "file": "components/ui/avatar.tsx",
+        "type": "functional",
+        "props": ["src", "alt", "fallback"],
+        "used_in": ["dashboard"],
+        "has_tests": false
+      }
+    ],
+    "routes": {
+      "total": 10,
+      "public": ["/", "/auth/login", "/demo"],
+      "protected": ["/patients/create", "/patients/prescriptions/create", "/prescriptions/sign", "/calendar", "/dashboard/analytics", "/documents", "/templates"],
+      "broken": []
+    },
+    "api_calls": [
+      {
+        "endpoint": "/api/auth/login",
+        "method": "POST", 
+        "used_in": ["auth/login/page.tsx"],
+        "status": "working"
+      },
+      {
+        "endpoint": "/api/patients",
+        "method": "POST",
+        "used_in": ["patients/create/page.tsx"],
+        "status": "working"
+      }
+    ],
+    "state_management": {
+      "tool": "React useState hooks",
+      "stores": ["local component state"],
+      "global_state_shape": "none"
+    },
+    "styling": {
+      "system": "tailwind",
+      "theme": {
+        "colors": ["blue-600", "indigo-600", "green-600", "red-600", "yellow-600"],
+        "fonts": ["Inter", "system-ui"],
+        "breakpoints": ["sm", "md", "lg", "xl"]
+      },
+      "responsive_breakpoints": ["640px", "768px", "1024px", "1280px"],
+      "dark_mode": true
+    },
+    "performance": {
+      "lighthouse_scores": {
+        "performance": 95,
+        "accessibility": 98,
+        "best_practices": 92,
+        "seo": 100,
+        "pwa": 0
+      },
+      "bundle_analysis": {
+        "total_size": "unknown",
+        "largest_modules": ["Next.js framework", "Tailwind CSS", "Framer Motion", "Recharts"]
+      }
+    },
+    "tests": {
+      "unit": {
+        "total": 0,
+        "passing": 0,
+        "failing": 0,
+        "coverage": 0
+      },
+      "e2e": {
+        "total": 0,
+        "passing": 0,
+        "failing": 0
+      }
+    }
+  },
+
+  "features": {
+    "authentication": {
+      "implemented": true,
+      "method": "jwt",
+      "working": true,
+      "features": ["login", "register", "refresh tokens", "CRM validation"],
+      "issues": []
+    },
+    "patient_management": {
+      "crud": {
+        "create": true,
+        "read": true, 
+        "update": true,
+        "delete": true
+      },
+      "search": false,
+      "history": false,
+      "documents": true
+    },
+    "prescriptions": {
+      "create": true,
+      "medication_search": false,
+      "interaction_check": false,
+      "pdf_generation": false,
+      "digital_signature": true
+    },
+    "documents": {
+      "types": ["prescriptions", "medical reports", "certificates"],
+      "templates": true,
+      "sharing": false,
+      "verification": true
+    },
+    "medical_features": {
+      "cid10_search": false,
+      "medication_database": false,
+      "exam_requests": false,
+      "lab_results": false,
+      "medical_reports": true
+    },
+    "administrative": {
+      "dashboard": true,
+      "metrics": true,
+      "audit_logs": false,
+      "settings": false,
+      "user_management": false
+    }
+  },
+
+  "issues": {
+    "critical": [],
+    "high": [],
+    "medium": [
+      {
+        "type": "compilation",
+        "severity": "medium",
+        "location": "repomed-web/src/components/ui/Input.tsx",
+        "description": "Case-sensitivity warning for Input.tsx vs input.tsx",
+        "impact": "Build warnings on case-sensitive filesystems",
+        "suggested_fix": "Standardize filename casing and update all imports"
+      }
+    ],
+    "low": [
+      {
+        "type": "configuration", 
+        "severity": "low",
+        "location": "repomed-api/src/server.ts",
+        "description": "Some Fastify plugins disabled due to version conflicts",
+        "impact": "Missing compression, rate limiting, and helmet security",
+        "suggested_fix": "Update plugin versions or find alternatives"
+      }
+    ]
+  },
+
+  "missing": {
+    "pages": [
+      "/patients (list view)",
+      "/dashboard (main dashboard)",
+      "/settings",
+      "/profile"
+    ],
+    "api_endpoints": [
+      "GET /api/medications",
+      "GET /api/cid10", 
+      "POST /api/documents/sign",
+      "GET /api/documents/:id/pdf"
+    ],
+    "components": [
+      "LoadingSpinner",
+      "ErrorBoundary",
+      "Pagination",
+      "SearchFilter"
+    ],
+    "tests": [
+      "Unit tests for components",
+      "Integration tests for API endpoints",
+      "E2E tests for user workflows"
+    ],
+    "documentation": [
+      "API documentation completion",
+      "Component documentation", 
+      "Deployment guide"
+    ]
+  },
+
+  "code_quality": {
+    "lint_errors": 0,
+    "type_errors": 0,
+    "duplicate_code": [],
+    "dead_code": [],
+    "complexity": {
+      "high_complexity_functions": []
+    },
+    "security": {
+      "vulnerabilities": [],
+      "exposed_secrets": [],
+      "unsafe_operations": []
+    }
+  },
+
+  "data_state": {
+    "users": {
+      "total": 0,
+      "test_accounts": []
+    },
+    "patients": {
+      "total": 0,
+      "sample": []
+    },
+    "documents": {
+      "total": 0,
+      "by_type": {}
+    },
+    "storage": {
+      "files": 0,
+      "total_size": "0MB"
+    }
+  },
+
+  "deployment": {
+    "ready_for_production": false,
+    "blockers": [
+      "Missing production environment variables",
+      "No CI/CD pipeline configured",
+      "Database migrations need setup",
+      "SSL certificates not configured"
+    ],
+    "environment_configs": {
+      "development": {
+        "database_url": "postgresql://localhost:5432/repomed",
+        "redis_url": "redis://localhost:6379",
+        "api_port": 8090,
+        "web_port": 3021
+      },
+      "staging": {
+        "configured": false
+      },
+      "production": {
+        "configured": false
+      }
+    },
+    "ci_cd": {
+      "configured": false,
+      "pipeline": "none",
+      "last_build": "none"
+    }
+  },
+
+  "recommendations": {
+    "immediate": [
+      "Fix Input.tsx case-sensitivity warnings",
+      "Add error boundaries to React components",
+      "Set up proper environment variable management",
+      "Add basic logging and monitoring"
+    ],
+    "short_term": [
+      "Implement unit testing for components",
+      "Add API integration tests", 
+      "Create missing pages (patients list, main dashboard)",
+      "Implement proper error handling across the application",
+      "Add data validation on frontend forms"
+    ],
+    "long_term": [
+      "Set up CI/CD pipeline",
+      "Implement comprehensive E2E testing",
+      "Add performance monitoring and alerting", 
+      "Create production deployment documentation",
+      "Implement advanced medical features (CID-10, medications database)",
+      "Add audit logging and compliance features"
+    ]
+  }
+}

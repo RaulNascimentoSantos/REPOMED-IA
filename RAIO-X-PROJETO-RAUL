@@ -1,0 +1,745 @@
+================================================================================
+PROMPT DE RAIO-X COMPLETO - REPOMED IA - ANÁLISE PROFUNDA SEM MODIFICAÇÕES
+================================================================================
+DATA: 2025-01-04
+OBJETIVO: Documentar EXATAMENTE o estado atual de TUDO na aplicação
+IMPORTANTE: NÃO MODIFICAR NADA, APENAS DOCUMENTAR
+================================================================================
+
+[INSTRUÇÕES CRÍTICAS]
+- NÃO corrigir nenhum erro encontrado
+- NÃO implementar nada que esteja faltando
+- NÃO otimizar código
+- NÃO adicionar comentários no código
+- APENAS documentar o que existe e o que não funciona
+- Ser extremamente detalhado e minucioso
+- Testar CADA botão, CADA link, CADA campo
+- Documentar TODOS os erros no console
+- Verificar TODAS as rotas (frontend e backend)
+- Analisar TODO o código fonte
+
+================================================================================
+PARTE 1: ANÁLISE COMPLETA DA INFRAESTRUTURA
+================================================================================
+
+#!/bin/bash
+# 01-infrastructure-xray.sh
+
+echo "════════════════════════════════════════════════════════════════"
+echo "          RAIO-X INFRAESTRUTURA - REPOMED IA"
+echo "════════════════════════════════════════════════════════════════"
+echo ""
+
+# Criar arquivo de relatório
+REPORT_FILE="XRAY_REPORT_$(date +%Y%m%d_%H%M%S).md"
+
+cat > "$REPORT_FILE" << 'EOF'
+# RELATÓRIO RAIO-X COMPLETO - REPOMED IA
+Data: $(date '+%Y-%m-%d %H:%M:%S')
+Versão: Análise Profunda v1.0
+
+## 1. INFRAESTRUTURA E AMBIENTE
+
+### 1.1 Estrutura de Diretórios
+EOF
+
+# Documentar estrutura completa de arquivos
+echo "```" >> "$REPORT_FILE"
+tree -I 'node_modules|dist|.git' -L 4 >> "$REPORT_FILE" 2>/dev/null || find . -type f -not -path "*/node_modules/*" -not -path "*/.git/*" -not -path "*/dist/*" | head -500 >> "$REPORT_FILE"
+echo "```" >> "$REPORT_FILE"
+
+# Contar arquivos por tipo
+echo "### 1.2 Estatísticas de Arquivos" >> "$REPORT_FILE"
+echo "- Total de arquivos TypeScript: $(find . -name "*.ts" -o -name "*.tsx" | grep -v node_modules | wc -l)" >> "$REPORT_FILE"
+echo "- Total de arquivos JavaScript: $(find . -name "*.js" -o -name "*.jsx" | grep -v node_modules | wc -l)" >> "$REPORT_FILE"
+echo "- Total de arquivos CSS: $(find . -name "*.css" -o -name "*.scss" | grep -v node_modules | wc -l)" >> "$REPORT_FILE"
+echo "- Total de arquivos de teste: $(find . -name "*.test.*" -o -name "*.spec.*" | grep -v node_modules | wc -l)" >> "$REPORT_FILE"
+echo "- Total de linhas de código: $(find . -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" | grep -v node_modules | xargs wc -l | tail -1 | awk '{print $1}')" >> "$REPORT_FILE"
+
+# Verificar arquivos de configuração
+echo "### 1.3 Arquivos de Configuração Presentes" >> "$REPORT_FILE"
+CONFIG_FILES=(
+    ".env"
+    ".env.example"
+    "docker-compose.yml"
+    "ecosystem.config.js"
+    "package.json"
+    "tsconfig.json"
+    ".gitignore"
+    ".eslintrc.json"
+    ".prettierrc"
+    "vite.config.ts"
+    "playwright.config.ts"
+    "jest.config.js"
+    "vitest.config.ts"
+)
+
+for file in "${CONFIG_FILES[@]}"; do
+    if [ -f "$file" ]; then
+        echo "- ✅ $file ($(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null) bytes)" >> "$REPORT_FILE"
+    else
+        echo "- ❌ $file (NÃO EXISTE)" >> "$REPORT_FILE"
+    fi
+done
+
+# Docker containers status
+echo "### 1.4 Status dos Containers Docker" >> "$REPORT_FILE"
+echo '```' >> "$REPORT_FILE"
+docker ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" >> "$REPORT_FILE" 2>&1
+echo '```' >> "$REPORT_FILE"
+
+# Portas em uso
+echo "### 1.5 Portas em Uso no Sistema" >> "$REPORT_FILE"
+echo '```' >> "$REPORT_FILE"
+netstat -tuln 2>/dev/null | grep LISTEN | grep -E ':(3000|3010|5173|8080|8081|5432|6379|9000|9090)' >> "$REPORT_FILE" 2>&1 || lsof -iTCP -sTCP:LISTEN -n -P 2>/dev/null | grep -E ':(3000|3010|5173|8080|8081|5432|6379|9000|9090)' >> "$REPORT_FILE" 2>&1
+echo '```' >> "$REPORT_FILE"
+
+# Processos Node rodando
+echo "### 1.6 Processos Node.js em Execução" >> "$REPORT_FILE"
+echo '```' >> "$REPORT_FILE"
+ps aux | grep -E 'node|npm|pnpm|yarn' | grep -v grep >> "$REPORT_FILE" 2>&1
+echo '```' >> "$REPORT_FILE"
+
+# Variáveis de ambiente carregadas
+echo "### 1.7 Variáveis de Ambiente Configuradas" >> "$REPORT_FILE"
+if [ -f .env ]; then
+    echo "Arquivo .env existe com $(wc -l < .env) linhas" >> "$REPORT_FILE"
+    echo "Variáveis definidas (sem valores):" >> "$REPORT_FILE"
+    echo '```' >> "$REPORT_FILE"
+    grep -E '^[A-Z_]+=' .env | cut -d'=' -f1 | sort >> "$REPORT_FILE"
+    echo '```' >> "$REPORT_FILE"
+else
+    echo "❌ Arquivo .env NÃO existe" >> "$REPORT_FILE"
+fi
+
+# Dependências npm instaladas
+echo "### 1.8 Dependências NPM" >> "$REPORT_FILE"
+
+echo "#### Root package.json:" >> "$REPORT_FILE"
+if [ -f package.json ]; then
+    echo '```json' >> "$REPORT_FILE"
+    cat package.json | jq '.dependencies, .devDependencies' 2>/dev/null >> "$REPORT_FILE" || echo "Erro ao ler package.json" >> "$REPORT_FILE"
+    echo '```' >> "$REPORT_FILE"
+fi
+
+echo "#### Backend (repomed-api):" >> "$REPORT_FILE"
+if [ -f repomed-api/package.json ]; then
+    echo "Total de dependências: $(cat repomed-api/package.json | jq '.dependencies | length' 2>/dev/null)" >> "$REPORT_FILE"
+    echo "Total de devDependencies: $(cat repomed-api/package.json | jq '.devDependencies | length' 2>/dev/null)" >> "$REPORT_FILE"
+fi
+
+echo "#### Frontend (repomed-web):" >> "$REPORT_FILE"
+if [ -f repomed-web/package.json ]; then
+    echo "Total de dependências: $(cat repomed-web/package.json | jq '.dependencies | length' 2>/dev/null)" >> "$REPORT_FILE"
+    echo "Total de devDependencies: $(cat repomed-web/package.json | jq '.devDependencies | length' 2>/dev/null)" >> "$REPORT_FILE"
+fi
+
+================================================================================
+PARTE 2: ANÁLISE DO BACKEND
+================================================================================
+
+echo "## 2. BACKEND (repomed-api)" >> "$REPORT_FILE"
+
+# Estrutura do backend
+echo "### 2.1 Estrutura de Arquivos do Backend" >> "$REPORT_FILE"
+echo '```' >> "$REPORT_FILE"
+find repomed-api/src -type f -name "*.ts" -o -name "*.js" | head -100 >> "$REPORT_FILE"
+echo '```' >> "$REPORT_FILE"
+
+# Verificar compilação TypeScript
+echo "### 2.2 Status de Compilação TypeScript" >> "$REPORT_FILE"
+cd repomed-api
+echo '```' >> "$REPORT_FILE"
+npx tsc --noEmit 2>&1 | head -50 >> "../$REPORT_FILE"
+echo '```' >> "$REPORT_FILE"
+TYPESCRIPT_ERRORS=$(npx tsc --noEmit 2>&1 | grep -c "error TS")
+echo "Total de erros TypeScript: $TYPESCRIPT_ERRORS" >> "../$REPORT_FILE"
+cd ..
+
+# Rotas disponíveis no backend
+echo "### 2.3 Rotas Backend Implementadas" >> "$REPORT_FILE"
+echo "Analisando arquivos de rotas..." >> "$REPORT_FILE"
+
+for route_file in repomed-api/src/routes/*.ts; do
+    if [ -f "$route_file" ]; then
+        echo "#### $(basename $route_file)" >> "$REPORT_FILE"
+        echo '```typescript' >> "$REPORT_FILE"
+        # Extrair métodos HTTP e paths
+        grep -E "(GET|POST|PUT|DELETE|PATCH|router\.|server\.|fastify\.)" "$route_file" | head -20 >> "$REPORT_FILE"
+        echo '```' >> "$REPORT_FILE"
+    fi
+done
+
+# Verificar servidor principal
+echo "### 2.4 Configuração do Servidor (server.ts)" >> "$REPORT_FILE"
+if [ -f repomed-api/src/server.ts ]; then
+    echo "Plugins registrados:" >> "$REPORT_FILE"
+    echo '```' >> "$REPORT_FILE"
+    grep -E "register\(|import.*from" repomed-api/src/server.ts | head -30 >> "$REPORT_FILE"
+    echo '```' >> "$REPORT_FILE"
+fi
+
+# Testar endpoints da API
+echo "### 2.5 Teste de Endpoints da API" >> "$REPORT_FILE"
+
+test_endpoint() {
+    local method=$1
+    local url=$2
+    local data=$3
+    local description=$4
+    
+    echo "#### $description" >> "$REPORT_FILE"
+    echo "Método: $method" >> "$REPORT_FILE"
+    echo "URL: $url" >> "$REPORT_FILE"
+    
+    if [ "$method" = "GET" ]; then
+        response=$(curl -s -w "\nHTTP_STATUS:%{http_code}" "$url" 2>/dev/null)
+    else
+        response=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X "$method" -H "Content-Type: application/json" -d "$data" "$url" 2>/dev/null)
+    fi
+    
+    http_status=$(echo "$response" | grep "HTTP_STATUS" | cut -d':' -f2)
+    body=$(echo "$response" | sed '/HTTP_STATUS/d')
+    
+    echo "Status HTTP: $http_status" >> "$REPORT_FILE"
+    echo "Resposta (primeiros 200 chars):" >> "$REPORT_FILE"
+    echo '```json' >> "$REPORT_FILE"
+    echo "$body" | head -c 200 >> "$REPORT_FILE"
+    echo "" >> "$REPORT_FILE"
+    echo '```' >> "$REPORT_FILE"
+    echo "" >> "$REPORT_FILE"
+}
+
+BASE_URL="http://localhost:8081"
+
+test_endpoint "GET" "$BASE_URL/health" "" "Health Check"
+test_endpoint "GET" "$BASE_URL/ready" "" "Ready Check"
+test_endpoint "GET" "$BASE_URL/metrics" "" "Metrics (Prometheus)"
+test_endpoint "POST" "$BASE_URL/api/auth/login" '{"email":"test@test.com","password":"test"}' "Login Test"
+test_endpoint "GET" "$BASE_URL/api/patients" "" "Listar Pacientes (sem auth)"
+test_endpoint "GET" "$BASE_URL/api/prescriptions" "" "Listar Prescrições (sem auth)"
+test_endpoint "GET" "$BASE_URL/api/documents" "" "Listar Documentos (sem auth)"
+test_endpoint "GET" "$BASE_URL/api/templates" "" "Listar Templates (sem auth)"
+test_endpoint "GET" "$BASE_URL/api/users" "" "Listar Usuários (sem auth)"
+
+# Verificar modelos/schemas do banco
+echo "### 2.6 Schemas/Models do Banco de Dados" >> "$REPORT_FILE"
+echo "Arquivos de schema encontrados:" >> "$REPORT_FILE"
+echo '```' >> "$REPORT_FILE"
+find repomed-api -name "*schema*" -o -name "*model*" | grep -v node_modules >> "$REPORT_FILE"
+echo '```' >> "$REPORT_FILE"
+
+# Verificar migrations
+echo "### 2.7 Migrations do Banco de Dados" >> "$REPORT_FILE"
+if [ -d repomed-api/migrations ]; then
+    echo '```' >> "$REPORT_FILE"
+    ls -la repomed-api/migrations/*.sql 2>/dev/null >> "$REPORT_FILE" || echo "Nenhuma migration SQL encontrada" >> "$REPORT_FILE"
+    echo '```' >> "$REPORT_FILE"
+fi
+
+# Verificar conexão com banco
+echo "### 2.8 Teste de Conexão com Banco de Dados" >> "$REPORT_FILE"
+if command -v psql &> /dev/null; then
+    echo '```' >> "$REPORT_FILE"
+    PGPASSWORD="${DATABASE_PASSWORD:-postgres}" psql -h localhost -U postgres -d repomed_production -c "\dt" 2>&1 | head -20 >> "$REPORT_FILE" || echo "Erro ao conectar no PostgreSQL" >> "$REPORT_FILE"
+    echo '```' >> "$REPORT_FILE"
+else
+    echo "psql não instalado - não foi possível testar conexão" >> "$REPORT_FILE"
+fi
+
+================================================================================
+PARTE 3: ANÁLISE DO FRONTEND
+================================================================================
+
+echo "## 3. FRONTEND (repomed-web)" >> "$REPORT_FILE"
+
+# Estrutura do frontend
+echo "### 3.1 Estrutura de Páginas e Componentes" >> "$REPORT_FILE"
+
+echo "#### Páginas encontradas:" >> "$REPORT_FILE"
+echo '```' >> "$REPORT_FILE"
+find repomed-web/src/pages -name "*.tsx" -o -name "*.jsx" 2>/dev/null | while read file; do
+    echo "- $(basename $file)" >> "$REPORT_FILE"
+done
+echo '```' >> "$REPORT_FILE"
+
+echo "#### Componentes encontrados:" >> "$REPORT_FILE"
+echo '```' >> "$REPORT_FILE"
+find repomed-web/src/components -name "*.tsx" -o -name "*.jsx" 2>/dev/null | head -50 >> "$REPORT_FILE"
+echo '```' >> "$REPORT_FILE"
+
+# Analisar router
+echo "### 3.2 Análise do Router (Rotas Frontend)" >> "$REPORT_FILE"
+if [ -f repomed-web/src/router.tsx ] || [ -f repomed-web/src/App.tsx ]; then
+    echo "Rotas definidas:" >> "$REPORT_FILE"
+    echo '```typescript' >> "$REPORT_FILE"
+    grep -E "Route|path=|element=|import.*from.*pages" repomed-web/src/router.tsx 2>/dev/null | head -50 >> "$REPORT_FILE" || \
+    grep -E "Route|path=|element=|import.*from.*pages" repomed-web/src/App.tsx 2>/dev/null | head -50 >> "$REPORT_FILE"
+    echo '```' >> "$REPORT_FILE"
+fi
+
+# Verificar compilação frontend
+echo "### 3.3 Status de Compilação Frontend" >> "$REPORT_FILE"
+cd repomed-web
+echo '```' >> "$REPORT_FILE"
+npx tsc --noEmit 2>&1 | head -30 >> "../$REPORT_FILE" 2>/dev/null || echo "TypeScript check não disponível" >> "../$REPORT_FILE"
+echo '```' >> "$REPORT_FILE"
+cd ..
+
+# Testar acesso ao frontend
+echo "### 3.4 Teste de Acesso ao Frontend" >> "$REPORT_FILE"
+
+test_frontend_route() {
+    local route=$1
+    local description=$2
+    
+    echo "#### $description ($route)" >> "$REPORT_FILE"
+    
+    response=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:3010$route" 2>/dev/null)
+    echo "Status HTTP: $response" >> "$REPORT_FILE"
+    
+    if [ "$response" = "200" ]; then
+        echo "✅ Rota acessível" >> "$REPORT_FILE"
+    elif [ "$response" = "404" ]; then
+        echo "❌ Rota retorna 404" >> "$REPORT_FILE"
+    else
+        echo "⚠️ Status inesperado: $response" >> "$REPORT_FILE"
+    fi
+}
+
+test_frontend_route "/" "Home"
+test_frontend_route "/login" "Login"
+test_frontend_route "/register" "Registro"
+test_frontend_route "/dashboard" "Dashboard"
+test_frontend_route "/patients" "Pacientes"
+test_frontend_route "/patients/new" "Novo Paciente"
+test_frontend_route "/prescriptions" "Prescrições"
+test_frontend_route "/prescriptions/new" "Nova Prescrição"
+test_frontend_route "/documents" "Documentos"
+test_frontend_route "/templates" "Templates"
+test_frontend_route "/settings" "Configurações"
+test_frontend_route "/not-found-route-test" "Teste 404"
+
+# Verificar assets e build
+echo "### 3.5 Build e Assets" >> "$REPORT_FILE"
+if [ -d repomed-web/dist ]; then
+    echo "Build de produção existe:" >> "$REPORT_FILE"
+    echo '```' >> "$REPORT_FILE"
+    ls -lah repomed-web/dist/ | head -10 >> "$REPORT_FILE"
+    echo "Tamanho total do build: $(du -sh repomed-web/dist | cut -f1)" >> "$REPORT_FILE"
+    echo '```' >> "$REPORT_FILE"
+else
+    echo "❌ Build de produção NÃO existe (dist/)" >> "$REPORT_FILE"
+fi
+
+================================================================================
+PARTE 4: TESTE FUNCIONAL DETALHADO VIA NAVEGADOR
+================================================================================
+
+cat > test-browser-detailed.js << 'BROWSER_TEST'
+const puppeteer = require('puppeteer');
+
+async function detailedBrowserTest() {
+    const results = {
+        pages: {},
+        forms: {},
+        buttons: {},
+        links: {},
+        errors: [],
+        warnings: [],
+        apiCalls: []
+    };
+    
+    let browser;
+    try {
+        browser = await puppeteer.launch({
+            headless: false,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+        
+        const page = await browser.newPage();
+        
+        // Capturar console logs
+        page.on('console', msg => {
+            if (msg.type() === 'error') {
+                results.errors.push(msg.text());
+            } else if (msg.type() === 'warning') {
+                results.warnings.push(msg.text());
+            }
+        });
+        
+        // Capturar requisições de rede
+        page.on('request', request => {
+            if (request.url().includes('/api/')) {
+                results.apiCalls.push({
+                    method: request.method(),
+                    url: request.url()
+                });
+            }
+        });
+        
+        // Teste 1: Página de Login
+        console.log('Testando página de Login...');
+        await page.goto('http://localhost:3010/login', { waitUntil: 'networkidle2' });
+        
+        results.pages.login = {
+            loaded: true,
+            title: await page.title(),
+            url: page.url()
+        };
+        
+        // Encontrar todos os inputs
+        const inputs = await page.$$eval('input', elements => 
+            elements.map(el => ({
+                type: el.type,
+                name: el.name,
+                id: el.id,
+                placeholder: el.placeholder,
+                required: el.required,
+                value: el.value
+            }))
+        );
+        results.forms.loginInputs = inputs;
+        
+        // Encontrar todos os botões
+        const buttons = await page.$$eval('button', elements =>
+            elements.map(el => ({
+                text: el.textContent,
+                type: el.type,
+                disabled: el.disabled,
+                className: el.className
+            }))
+        );
+        results.buttons.loginButtons = buttons;
+        
+        // Tentar fazer login com credenciais vazias
+        const submitButton = await page.$('button[type="submit"]');
+        if (submitButton) {
+            await submitButton.click();
+            await page.waitForTimeout(1000);
+            
+            // Verificar se apareceu erro
+            const errorMessage = await page.$eval('.error, .text-red-500, [role="alert"]', el => el.textContent).catch(() => null);
+            results.forms.emptyLoginError = errorMessage;
+        }
+        
+        // Tentar fazer login com credenciais demo
+        await page.type('input[type="email"]', 'medico@demo.com');
+        await page.type('input[type="password"]', 'demo123');
+        
+        if (submitButton) {
+            await submitButton.click();
+            await page.waitForTimeout(3000);
+            
+            results.forms.loginResult = {
+                success: !page.url().includes('/login'),
+                redirectedTo: page.url()
+            };
+        }
+        
+        // Se login bem-sucedido, testar outras páginas
+        if (!page.url().includes('/login')) {
+            // Dashboard
+            console.log('Testando Dashboard...');
+            results.pages.dashboard = {
+                url: page.url(),
+                title: await page.title()
+            };
+            
+            // Coletar todos os links do menu
+            const menuLinks = await page.$$eval('a', links =>
+                links.map(link => ({
+                    text: link.textContent.trim(),
+                    href: link.href,
+                    className: link.className
+                }))
+            );
+            results.links.menuLinks = menuLinks;
+            
+            // Testar navegação para cada página principal
+            const pagesToTest = [
+                '/patients',
+                '/prescriptions',
+                '/documents',
+                '/templates',
+                '/settings'
+            ];
+            
+            for (const pageUrl of pagesToTest) {
+                console.log(`Testando página ${pageUrl}...`);
+                await page.goto(`http://localhost:3010${pageUrl}`, { waitUntil: 'networkidle2' });
+                
+                const pageName = pageUrl.substring(1);
+                results.pages[pageName] = {
+                    loaded: true,
+                    url: page.url(),
+                    title: await page.title(),
+                    hasContent: await page.$eval('body', el => el.textContent.length > 100)
+                };
+                
+                // Contar elementos interativos
+                const interactiveElements = await page.evaluate(() => ({
+                    buttons: document.querySelectorAll('button').length,
+                    links: document.querySelectorAll('a').length,
+                    inputs: document.querySelectorAll('input').length,
+                    selects: document.querySelectorAll('select').length,
+                    textareas: document.querySelectorAll('textarea').length
+                }));
+                
+                results.pages[pageName].elements = interactiveElements;
+            }
+        }
+        
+    } catch (error) {
+        console.error('Erro no teste:', error);
+        results.errors.push(error.toString());
+    } finally {
+        if (browser) {
+            await browser.close();
+        }
+    }
+    
+    // Salvar resultados
+    require('fs').writeFileSync('browser-test-results.json', JSON.stringify(results, null, 2));
+    console.log('Resultados salvos em browser-test-results.json');
+}
+
+// Executar se Puppeteer estiver instalado
+try {
+    detailedBrowserTest();
+} catch (e) {
+    console.log('Puppeteer não instalado - pulando teste de navegador');
+}
+BROWSER_TEST
+
+# Executar teste de navegador se possível
+if command -v node &> /dev/null && [ -d "node_modules/puppeteer" ]; then
+    echo "### 3.6 Teste Automatizado via Navegador" >> "$REPORT_FILE"
+    node test-browser-detailed.js
+    if [ -f browser-test-results.json ]; then
+        echo '```json' >> "$REPORT_FILE"
+        cat browser-test-results.json >> "$REPORT_FILE"
+        echo '```' >> "$REPORT_FILE"
+    fi
+else
+    echo "### 3.6 Teste Automatizado via Navegador" >> "$REPORT_FILE"
+    echo "❌ Puppeteer não instalado - teste de navegador não executado" >> "$REPORT_FILE"
+fi
+
+================================================================================
+PARTE 5: ANÁLISE DE BANCO DE DADOS DETALHADA
+================================================================================
+
+echo "## 4. BANCO DE DADOS" >> "$REPORT_FILE"
+
+# Listar todas as tabelas
+echo "### 4.1 Tabelas Existentes" >> "$REPORT_FILE"
+echo '```sql' >> "$REPORT_FILE"
+PGPASSWORD="${DATABASE_PASSWORD:-postgres}" psql -h localhost -U postgres -d repomed_production -c "\dt *.*" 2>/dev/null >> "$REPORT_FILE" || echo "Erro ao listar tabelas" >> "$REPORT_FILE"
+echo '```' >> "$REPORT_FILE"
+
+# Contar registros em cada tabela
+echo "### 4.2 Contagem de Registros por Tabela" >> "$REPORT_FILE"
+echo '```' >> "$REPORT_FILE"
+PGPASSWORD="${DATABASE_PASSWORD:-postgres}" psql -h localhost -U postgres -d repomed_production -c "
+SELECT schemaname, tablename, n_live_tup as row_count 
+FROM pg_stat_user_tables 
+ORDER BY n_live_tup DESC;" 2>/dev/null >> "$REPORT_FILE" || echo "Erro ao contar registros" >> "$REPORT_FILE"
+echo '```' >> "$REPORT_FILE"
+
+# Verificar índices
+echo "### 4.3 Índices Criados" >> "$REPORT_FILE"
+echo '```sql' >> "$REPORT_FILE"
+PGPASSWORD="${DATABASE_PASSWORD:-postgres}" psql -h localhost -U postgres -d repomed_production -c "\di" 2>/dev/null | head -30 >> "$REPORT_FILE" || echo "Erro ao listar índices" >> "$REPORT_FILE"
+echo '```' >> "$REPORT_FILE"
+
+================================================================================
+PARTE 6: ANÁLISE DE LOGS E ERROS
+================================================================================
+
+echo "## 5. LOGS E ERROS" >> "$REPORT_FILE"
+
+# Logs do PM2
+echo "### 5.1 Logs do PM2" >> "$REPORT_FILE"
+if command -v pm2 &> /dev/null; then
+    echo '```' >> "$REPORT_FILE"
+    pm2 list >> "$REPORT_FILE" 2>&1
+    echo "" >> "$REPORT_FILE"
+    echo "Últimas 50 linhas de log:" >> "$REPORT_FILE"
+    pm2 logs --nostream --lines 50 >> "$REPORT_FILE" 2>&1
+    echo '```' >> "$REPORT_FILE"
+else
+    echo "PM2 não instalado" >> "$REPORT_FILE"
+fi
+
+# Logs de erro se existirem
+echo "### 5.2 Arquivos de Log" >> "$REPORT_FILE"
+if [ -d logs ]; then
+    echo "Arquivos de log encontrados:" >> "$REPORT_FILE"
+    echo '```' >> "$REPORT_FILE"
+    ls -la logs/ >> "$REPORT_FILE" 2>&1
+    echo '```' >> "$REPORT_FILE"
+    
+    # Últimas linhas de cada log
+    for logfile in logs/*.log; do
+        if [ -f "$logfile" ]; then
+            echo "#### $(basename $logfile)" >> "$REPORT_FILE"
+            echo '```' >> "$REPORT_FILE"
+            tail -20 "$logfile" >> "$REPORT_FILE" 2>&1
+            echo '```' >> "$REPORT_FILE"
+        fi
+    done
+else
+    echo "Diretório logs/ não existe" >> "$REPORT_FILE"
+fi
+
+================================================================================
+PARTE 7: ANÁLISE DE SEGURANÇA E PERFORMANCE
+================================================================================
+
+echo "## 6. SEGURANÇA E PERFORMANCE" >> "$REPORT_FILE"
+
+# Verificar HTTPS
+echo "### 6.1 Configuração de Segurança" >> "$REPORT_FILE"
+echo "- HTTPS configurado: $([ -f nginx/ssl/cert.pem ] && echo 'Sim' || echo 'Não')" >> "$REPORT_FILE"
+echo "- Helmet.js no backend: $(grep -q 'helmet' repomed-api/src/server.ts 2>/dev/null && echo 'Sim' || echo 'Não')" >> "$REPORT_FILE"
+echo "- CORS configurado: $(grep -q 'cors' repomed-api/src/server.ts 2>/dev/null && echo 'Sim' || echo 'Não')" >> "$REPORT_FILE"
+echo "- Rate limiting: $(grep -q 'rate-limit' repomed-api/src/server.ts 2>/dev/null && echo 'Sim' || echo 'Não')" >> "$REPORT_FILE"
+echo "- JWT implementado: $(grep -q 'jwt' repomed-api/src/server.ts 2>/dev/null && echo 'Sim' || echo 'Não')" >> "$REPORT_FILE"
+
+# Bundle size
+echo "### 6.2 Tamanho dos Bundles" >> "$REPORT_FILE"
+if [ -d repomed-web/dist ]; then
+    echo '```' >> "$REPORT_FILE"
+    find repomed-web/dist -name "*.js" -o -name "*.css" -exec ls -lh {} \; | awk '{print $9 ": " $5}' >> "$REPORT_FILE"
+    echo "Total: $(du -sh repomed-web/dist | cut -f1)" >> "$REPORT_FILE"
+    echo '```' >> "$REPORT_FILE"
+fi
+
+================================================================================
+PARTE 8: FEATURES E FUNCIONALIDADES
+================================================================================
+
+echo "## 7. FUNCIONALIDADES IMPLEMENTADAS VS PLANEJADAS" >> "$REPORT_FILE"
+
+echo "### 7.1 Checklist de Features Core" >> "$REPORT_FILE"
+
+check_feature() {
+    local feature=$1
+    local check_command=$2
+    
+    if eval "$check_command"; then
+        echo "- ✅ $feature" >> "$REPORT_FILE"
+    else
+        echo "- ❌ $feature" >> "$REPORT_FILE"
+    fi
+}
+
+check_feature "Login/Logout" "grep -q 'login' repomed-web/src/pages/AuthLoginPage* 2>/dev/null"
+check_feature "Cadastro de usuários" "grep -q 'register' repomed-web/src/pages/AuthRegisterPage* 2>/dev/null"
+check_feature "CRUD Pacientes" "[ -f repomed-web/src/pages/Patients.tsx ]"
+check_feature "CRUD Prescrições" "[ -f repomed-web/src/pages/Prescriptions.tsx ]"
+check_feature "Templates médicos" "[ -f repomed-web/src/pages/Templates.tsx ]"
+check_feature "Geração de PDF" "grep -q 'pdf' repomed-api/package.json 2>/dev/null"
+check_feature "Assinatura digital" "grep -q 'signature\\|certificado' repomed-api/src -r 2>/dev/null"
+check_feature "Busca de pacientes" "grep -q 'search' repomed-web/src/pages/Patients* 2>/dev/null"
+check_feature "Dashboard com métricas" "[ -f repomed-web/src/pages/Dashboard.tsx ]"
+check_feature "Modo escuro" "grep -q 'dark\\|theme' repomed-web/src -r 2>/dev/null"
+check_feature "Multi-idioma" "grep -q 'i18n\\|translation' repomed-web/package.json 2>/dev/null"
+check_feature "Notificações" "grep -q 'notification\\|toast' repomed-web/src -r 2>/dev/null"
+check_feature "WebSocket" "grep -q 'websocket\\|ws' repomed-api/src/server.ts 2>/dev/null"
+check_feature "Cache Redis" "grep -q 'redis' repomed-api/src -r 2>/dev/null"
+check_feature "Upload de arquivos" "grep -q 'multipart\\|upload' repomed-api/src -r 2>/dev/null"
+check_feature "Exportação Excel/CSV" "grep -q 'xlsx\\|csv' repomed-web/package.json 2>/dev/null"
+check_feature "Gráficos/Charts" "grep -q 'chart\\|recharts\\|chartjs' repomed-web/package.json 2>/dev/null"
+check_feature "Integração WhatsApp" "grep -q 'whatsapp' repomed-api/src -r 2>/dev/null"
+check_feature "Sistema de roles" "grep -q 'role\\|permission' repomed-api/src -r 2>/dev/null"
+check_feature "Audit log" "grep -q 'audit' repomed-api/src -r 2>/dev/null"
+
+echo "### 7.2 Botões e Ações por Página" >> "$REPORT_FILE"
+echo "Análise manual necessária - verificar cada página no navegador" >> "$REPORT_FILE"
+
+================================================================================
+PARTE 9: PROBLEMAS CONHECIDOS
+================================================================================
+
+echo "## 8. PROBLEMAS E INCONSISTÊNCIAS DETECTADOS" >> "$REPORT_FILE"
+
+echo "### 8.1 Erros de Compilação" >> "$REPORT_FILE"
+echo "- TypeScript Backend: $TYPESCRIPT_ERRORS erros" >> "$REPORT_FILE"
+echo "- TypeScript Frontend: $(cd repomed-web && npx tsc --noEmit 2>&1 | grep -c 'error TS' || echo '0') erros" >> "$REPORT_FILE"
+
+echo "### 8.2 Dependências Desatualizadas" >> "$REPORT_FILE"
+echo '```' >> "$REPORT_FILE"
+npm outdated 2>/dev/null | head -20 >> "$REPORT_FILE"
+echo '```' >> "$REPORT_FILE"
+
+echo "### 8.3 Vulnerabilidades de Segurança" >> "$REPORT_FILE"
+echo '```' >> "$REPORT_FILE"
+npm audit 2>/dev/null | head -30 >> "$REPORT_FILE"
+echo '```' >> "$REPORT_FILE"
+
+echo "### 8.4 TODOs e FIXMEs no Código" >> "$REPORT_FILE"
+echo "TODOs encontrados:" >> "$REPORT_FILE"
+echo '```' >> "$REPORT_FILE"
+grep -r "TODO" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" . 2>/dev/null | grep -v node_modules | head -20 >> "$REPORT_FILE"
+echo '```' >> "$REPORT_FILE"
+
+echo "FIXMEs encontrados:" >> "$REPORT_FILE"
+echo '```' >> "$REPORT_FILE"
+grep -r "FIXME" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" . 2>/dev/null | grep -v node_modules | head -20 >> "$REPORT_FILE"
+echo '```' >> "$REPORT_FILE"
+
+================================================================================
+PARTE 10: RESUMO EXECUTIVO
+================================================================================
+
+echo "## 9. RESUMO EXECUTIVO" >> "$REPORT_FILE"
+echo "" >> "$REPORT_FILE"
+echo "### Estatísticas Gerais" >> "$REPORT_FILE"
+echo "- Data da análise: $(date '+%Y-%m-%d %H:%M:%S')" >> "$REPORT_FILE"
+echo "- Duração da análise: $SECONDS segundos" >> "$REPORT_FILE"
+echo "- Tamanho do relatório: $(wc -l < "$REPORT_FILE") linhas" >> "$REPORT_FILE"
+echo "" >> "$REPORT_FILE"
+
+echo "### Estado Geral da Aplicação" >> "$REPORT_FILE"
+echo "**ANÁLISE COMPLETA FINALIZADA**" >> "$REPORT_FILE"
+echo "" >> "$REPORT_FILE"
+echo "Este relatório contém o estado exato da aplicação RepoMed IA no momento da análise." >> "$REPORT_FILE"
+echo "Nenhuma modificação foi feita durante esta análise." >> "$REPORT_FILE"
+echo "Use este documento para planejar melhorias e correções." >> "$REPORT_FILE"
+
+# Finalizar
+echo "" >> "$REPORT_FILE"
+echo "---" >> "$REPORT_FILE"
+echo "FIM DO RELATÓRIO RAIO-X" >> "$REPORT_FILE"
+
+# Exibir localização do relatório
+echo ""
+echo "════════════════════════════════════════════════════════════════"
+echo "    ANÁLISE RAIO-X COMPLETA!"
+echo "════════════════════════════════════════════════════════════════"
+echo ""
+echo "📄 Relatório salvo em: $REPORT_FILE"
+echo "📊 Tamanho do relatório: $(wc -l < "$REPORT_FILE") linhas"
+echo "⏱️ Tempo de execução: $SECONDS segundos"
+echo ""
+echo "Para visualizar o relatório:"
+echo "  cat $REPORT_FILE"
+echo "  less $REPORT_FILE"
+echo "  code $REPORT_FILE"
+echo ""
+echo "Este relatório documenta:"
+echo "  ✓ Estrutura completa de arquivos"
+echo "  ✓ Status de todos os serviços"
+echo "  ✓ Todas as rotas (frontend e backend)"
+echo "  ✓ Todos os erros de compilação"
+echo "  ✓ Estado do banco de dados"
+echo "  ✓ Funcionalidades implementadas vs planejadas"
+echo "  ✓ Problemas e inconsistências"
+echo "  ✓ Logs e mensagens de erro"
+echo "  ✓ Performance e segurança"
+echo ""
+echo "IMPORTANTE: Nenhuma correção foi aplicada."
+echo "Este é apenas um diagnóstico completo."
+echo ""

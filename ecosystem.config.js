@@ -1,0 +1,55 @@
+module.exports = {
+  apps: [
+    {
+      name: 'repomed-api',
+      cwd: './repomed-api',
+      script: 'dist/server.js',
+      instances: process.env.PM2_INSTANCES || 1,
+      exec_mode: 'cluster',
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '1G',
+      error_file: '../logs/api-error.log',
+      out_file: '../logs/api-out.log',
+      log_file: '../logs/api-combined.log',
+      time: true,
+      merge_logs: true,
+      env: {
+        NODE_ENV: 'production',
+      },
+      env_development: {
+        NODE_ENV: 'development',
+      },
+      min_uptime: '10s',
+      max_restarts: 10,
+      restart_delay: 4000,
+      kill_timeout: 5000,
+    },
+    {
+      name: 'repomed-web',
+      cwd: './repomed-web',
+      script: 'npm',
+      args: 'run preview',
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      error_file: '../logs/web-error.log',
+      out_file: '../logs/web-out.log',
+      log_file: '../logs/web-combined.log',
+      time: true,
+      env: {
+        NODE_ENV: 'production',
+      },
+    },
+  ],
+  deploy: {
+    production: {
+      user: 'deploy',
+      host: 'your-server.com',
+      ref: 'origin/main',
+      repo: 'git@github.com:yourusername/repomed-ia.git',
+      path: '/var/www/repomed',
+      'post-deploy': 'npm install && npm run build && pm2 reload ecosystem.config.js --env production',
+    },
+  },
+};

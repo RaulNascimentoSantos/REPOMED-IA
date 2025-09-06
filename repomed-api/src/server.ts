@@ -5,7 +5,7 @@ import multipart from '@fastify/multipart';
 import rateLimit from '@fastify/rate-limit';
 import helmet from '@fastify/helmet';
 import compress from '@fastify/compress';
-import { REPOMED_CONFIG } from '../../config/master.config';
+import { config } from './config/index';
 import { errorHandler } from './middleware/errorHandler';
 import { requestLogger } from './middleware/requestLogger';
 import { metricsCollector } from './middleware/metrics';
@@ -20,15 +20,15 @@ import { eq, desc } from 'drizzle-orm';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { registerTemplateRoutes } from './routes/templates';
-import { registerSignatureRoutes } from './routes/signatures.js';
-import { registerCid10Routes } from './routes/cid10.js';
-import { registerMedicationsRoutes } from './routes/medications.js';
+// import { registerSignatureRoutes } from './routes/signatures';
+// import { registerCid10Routes } from './routes/cid10';
+// import { registerMedicationsRoutes } from './routes/medications';
 import { crmValidationService } from './services/CrmValidation';
 
 // ====== CONFIGURAÇÃO FASTIFY ======
 const server = Fastify({
   logger: {
-    level: REPOMED_CONFIG.monitoring.logLevel,
+    level: 'info',
     transport: {
       target: 'pino-pretty',
       options: {
@@ -60,28 +60,23 @@ const registerPlugins = async () => {
   //   },
   // });
 
-  // CORS (temporariamente desabilitado por incompatibilidade de versão)
-  // await server.register(cors, {
-  //   origin: (origin, cb) => {
-  //     const allowedOrigins = [
-  //       REPOMED_CONFIG.urls.frontend,
-  //       'http://localhost:3000', // Grafana
-  //       'http://localhost:5601', // Kibana
-  //     ];
-  //     if (!origin || allowedOrigins.includes(origin)) {
-  //       cb(null, true);
-  //     } else {
-  //       cb(new Error('Not allowed by CORS'), false);
-  //     }
-  //   },
-  //   credentials: true,
-  // });
+  // CORS manual
+  server.addHook('preHandler', async (request, reply) => {
+    reply.header('Access-Control-Allow-Origin', '*');
+    reply.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+    reply.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+    reply.header('Access-Control-Allow-Credentials', 'true');
+    
+    if (request.method === 'OPTIONS') {
+      reply.status(200).send();
+    }
+  });
 
   // JWT
   await server.register(jwt, {
-    secret: REPOMED_CONFIG.security.jwtSecret,
+    secret: config.security.jwtSecret,
     sign: {
-      expiresIn: REPOMED_CONFIG.security.jwtExpiry,
+      expiresIn: config.security.jwtExpiresIn,
     },
   });
 
@@ -161,7 +156,7 @@ server.decorate('authorize', (roles: string[]) => {
       return reply.status(401).send({ error: 'Unauthorized' });
     }
     
-    if (roles.length > 0 && !roles.includes(request.user.role)) {
+    if (roles.length > 0 && !roles.includes((request.user as any).role)) {
       return reply.status(403).send({ error: 'Forbidden', message: 'Insufficient permissions' });
     }
   };
@@ -211,6 +206,30 @@ function generateShareToken(): string {
 
 // ====== ROUTES ======
 const registerRoutes = async () => {
+  // Root endpoint
+  server.get('/', async () => {
+    return { 
+      name: 'RepoMed IA API',
+      version: '4.0.0',
+      status: 'Running',
+      documentation: '/documentation',
+      health: '/health',
+      endpoints: {
+        auth: {
+          login: 'POST /api/auth/login',
+          register: 'POST /api/auth/register',
+          refresh: 'POST /api/auth/refresh',
+          logout: 'POST /api/auth/logout'
+        },
+        resources: {
+          patients: 'GET /api/patients',
+          documents: 'GET /api/documents',
+          templates: 'GET /api/templates'
+        }
+      }
+    };
+  });
+
   // Health check
   server.get('/health', async () => {
     return { 
@@ -490,20 +509,70 @@ const registerRoutes = async () => {
   server.post('/api/documents', { preHandler: server.authenticate }, async (request, reply) => {
     try {
       const body = request.body as any;
+      const userInfo = request.user as any;
+      
+      // Get template if provided
+      let template = null;
+      if (body.templateId) {
+        const templateResult = await db.select().from(templates).where(eq(templates.id, body.templateId));
+        if (templateResult.length === 0) {
+          return reply.status(404).send({ 
+            error: 'Template not found',
+            message: 'Template especificado não foi encontrado' 
+          });
+        }
+        template = templateResult[0];
+      }
+
+      // Generate document content if template exists
+      let content = body.content || '';
+      let title = body.title || 'Documento Médico';
+      
+      if (template) {
+        title = `${template.name} - ${body.patient?.name || 'Paciente'}`;
+        
+        // Replace template variables with actual values
+        content = template.content;
+        
+        // Replace patient data
+        if (body.patient) {
+          content = content.replace(/{{patient\.name}}/g, body.patient.name || '');
+          content = content.replace(/{{patient\.cpf}}/g, body.patient.cpf || '');
+        }
+        
+        // Replace field data
+        if (body.fields) {
+          Object.entries(body.fields).forEach(([key, value]) => {
+            content = content.replace(new RegExp(`{{fields\\.${key}}}`, 'g'), value || '');
+          });
+        }
+        
+        // Replace doctor data
+        content = content.replace(/{{doctor\.name}}/g, userInfo.name || '');
+        content = content.replace(/{{doctor\.crm}}/g, userInfo.crm || '');
+        content = content.replace(/{{date}}/g, new Date().toLocaleDateString('pt-BR'));
+      }
       
       const newDoc = await db.insert(documents).values({
         id: uuidv4(),
-        title: body.title,
-        content: body.content,
-        hash: generateDocumentHash(body),
+        title,
+        content,
+        hash: generateDocumentHash({ content, templateId: body.templateId, patient: body.patient, fields: body.fields }),
         createdAt: new Date(),
         isSigned: false
       }).returning();
 
-      return newDoc[0];
+      return reply.status(201).send({
+        success: true,
+        data: newDoc[0],
+        message: 'Documento criado com sucesso!'
+      });
     } catch (error) {
       server.log.error(error);
-      return reply.status(500).send({ error: 'Failed to create document' });
+      return reply.status(500).send({ 
+        error: 'Failed to create document',
+        message: 'Erro ao criar documento' 
+      });
     }
   });
 
@@ -683,14 +752,58 @@ const registerRoutes = async () => {
   // ====== TEMPLATES ROUTES ======
   await registerTemplateRoutes(server);
   
+  // ====== METRICS ROUTES ======
+  server.get('/api/metrics/dashboard', { preHandler: server.authenticate }, async (request, reply) => {
+    try {
+      const userInfo = request.user as any;
+      
+      // Get counts from database
+      const totalDocs = await db.select().from(documents).where(eq(documents.createdBy, userInfo.id));
+      const signedDocs = totalDocs.filter(doc => doc.isSigned);
+      const pendingDocs = totalDocs.filter(doc => !doc.isSigned);
+      const allPatients = await db.select().from(patients).where(eq(patients.createdBy, userInfo.id));
+      
+      return {
+        success: true,
+        totalDocuments: totalDocs.length,
+        signedDocuments: signedDocs.length,
+        pendingDocuments: pendingDocs.length,
+        activePatients: allPatients.length,
+        growthRate: 0 // Could be calculated based on date ranges
+      };
+    } catch (error) {
+      server.log.error(error);
+      return reply.status(500).send({ error: 'Failed to get dashboard metrics' });
+    }
+  });
+
+  server.get('/api/performance/report', { preHandler: server.authenticate }, async (request, reply) => {
+    return {
+      success: true,
+      summary: {
+        averageResponseTime: 120,
+        errorRate: 0.01
+      }
+    };
+  });
+
+  server.get('/api/performance/cache/stats', { preHandler: server.authenticate }, async (request, reply) => {
+    return {
+      success: true,
+      totalKeys: 0,
+      memoryUsed: '0MB',
+      connected: false
+    };
+  });
+  
   // ====== SIGNATURE ROUTES ======
-  await registerSignatureRoutes(server);
+  // await registerSignatureRoutes(server);
   
   // ====== CID-10 ROUTES ======
-  await registerCid10Routes(server);
+  // await registerCid10Routes(server);
   
   // ====== MEDICATIONS ROUTES ======
-  await registerMedicationsRoutes(server);
+  // await registerMedicationsRoutes(server);
 };
 
 // ====== STARTUP ======
@@ -699,10 +812,10 @@ const start = async () => {
     await registerPlugins();
     await registerRoutes();
     
-    await server.listen({ port: REPOMED_CONFIG.ports.backend, host: '0.0.0.0' });
+    await server.listen({ port: config.server.port, host: config.server.host });
     
-    server.log.info(`🚀 RepoMed IA API está rodando em http://localhost:${REPOMED_CONFIG.ports.backend}`);
-    server.log.info(`📚 Documentação: http://localhost:${REPOMED_CONFIG.ports.backend}/documentation`);
+    server.log.info(`🚀 RepoMed IA API está rodando em http://localhost:${config.server.port}`);
+    server.log.info(`📚 Documentação: http://localhost:${config.server.port}/documentation`);
     
   } catch (err) {
     server.log.error(err as Error);

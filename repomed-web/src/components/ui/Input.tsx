@@ -72,8 +72,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(function Inp
     warning: 'border-yellow-500 focus:border-yellow-500 focus:ring-yellow-500'
   };
   
-  // Base classes
-  const baseClasses = 'w-full rounded-xl border bg-white shadow-sm transition-colors focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-slate-900 dark:border-slate-700';
+  // Base classes with Design System 2025
+  const baseClasses = 'input-modern animate-fade-up';
   
   // Apply mask formatting
   const applyMask = (value: string, maskType: string) => {
