@@ -1,22 +1,25 @@
-# RepoMed IA - Sistema Médico com Assinatura Digital
+# RepoMed IA v5.0 - Sistema Médico Inteligente Completo
 
-RepoMed IA é um sistema médico moderno e completo que oferece funcionalidades avançadas para gestão de documentos médicos, prescrições, pacientes e assinatura digital. Desenvolvido com tecnologias modernas e interface inspirada no Memed.
+**🎯 Sistema médico profissional estabilizado com IA, assinatura digital e 41 páginas funcionais**
+
+RepoMed IA v5.0 é um sistema médico de última geração que oferece gestão completa de documentos médicos, prescrições, pacientes e assinatura digital certificada. Desenvolvido com Next.js 14.2.5 e tecnologias modernas para atender às demandas médicas atuais.
 
 ## 🚀 Funcionalidades
 
-### ✅ **Implementado**
-- **🏥 Gestão de Pacientes** - Lista completa com avatars coloridos e busca
-- **📋 Criação de Prescrições** - Interface moderna com duas colunas e sidebar
-- **📊 Dashboard de Métricas** - KPIs, gráficos e estatísticas do sistema  
-- **🔐 Autenticação de Usuários** - Sistema de registro e login
-- **✍️ Assinatura Digital** - Toggle funcional e verificação de documentos
-- **📱 Interface Responsiva** - Design Memed-style moderno e responsivo
-
-### 🔄 **Em Desenvolvimento**
-- **📄 Templates Médicos** - Biblioteca de modelos pré-configurados
-- **📁 Gestão de Documentos** - Upload, visualização e compartilhamento
-- **🔍 Sistema de Verificação** - Validação por hash e QR codes
-- **👥 Gestão de Usuários** - Perfis, permissões e configurações
+### ✅ **Sistema Completo v5.0 - ESTABILIZADO**
+- **🏥 41 Páginas Médicas Funcionais** - Sistema completo operacional na porta 3023
+- **👨‍⚕️ Gestão Completa de Pacientes** - Cadastro, prontuários e histórico médico
+- **📋 Documentos Médicos Digitais** - Receitas, atestados, laudos e relatórios
+- **✍️ Assinatura Digital Certificada** - Conformidade CFM 1821/2007
+- **🔐 Autenticação Médica Segura** - Sistema de login e perfis médicos
+- **📊 Dashboard Inteligente com IA** - Métricas, insights e análises
+- **🏗️ 15 Templates Médicos** - Modelos pré-configurados prontos para uso
+- **📱 Interface Médica Profissional** - Design responsivo e intuitivo
+- **🔍 Sistema de Verificação** - QR codes e validação de documentos
+- **📈 Relatórios Médicos Avançados** - Exportação e análises detalhadas
+- **🤖 Integração com IA** - OpenAI para análises e sugestões médicas
+- **🌐 Telemedicina Integrada** - Consultas online e acompanhamento
+- **💼 Gestão Financeira Médica** - Faturamento e controle de consultas
 
 ## 🛠️ Tecnologias
 
@@ -64,33 +67,29 @@ RepoMed IA/
 └── README.md
 ```
 
-## 🚀 Como Executar
+## 🚀 Como Executar o RepoMed IA v5.0
 
 ### **1. Clone o repositório**
 ```bash
-git clone https://github.com/[seu-usuario]/repomed-ia.git
-cd repomed-ia
+git clone https://github.com/RaulNascimentoSantos/REPOMED-IA.git
+cd REPOMED-IA
 ```
 
-### **2. Configure o Backend**
+### **2. Instale as dependências**
 ```bash
-cd repomed-api
 npm install
-npm run dev
-# API rodará em http://localhost:8082
 ```
 
-### **3. Configure o Frontend**
+### **3. Execute o Sistema v5.0**
 ```bash
-cd repomed-web  
-npm install
+cd repomed-web
 npm run dev
-# Interface rodará em http://localhost:3013 (ou próxima porta disponível)
 ```
 
-### **4. Acesse o Sistema**
-- **Frontend**: `http://localhost:3013`
-- **API**: `http://localhost:8082`
+### **4. Acesse o Sistema Completo**
+- **🏥 RepoMed IA v5.0**: `http://localhost:3023`
+- **📊 41 Páginas Funcionais**: Todas disponíveis e operacionais
+- **🔐 Sistema Estabilizado**: Interface médica profissional
 
 ## 📱 Páginas Disponíveis
 
