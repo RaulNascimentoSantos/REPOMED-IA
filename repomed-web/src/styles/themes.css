@@ -1,0 +1,606 @@
+/* Theme Variables */
+:root {
+  /* Default Dark Theme */
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --text-primary: #ffffff;
+  --text-secondary: #cbd5e1;
+  --text-muted: #64748b;
+  --accent-primary: #3b82f6;
+  --accent-secondary: #1d4ed8;
+  --border-color: #475569;
+  --hover-bg: #475569;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+
+  /* Medical Status Colors - Enhanced Contrast */
+  --status-success-bg: #064e3b;
+  --status-success-text: #34d399;
+  --status-success-border: #059669;
+  --status-warning-bg: #451a03;
+  --status-warning-text: #fbbf24;
+  --status-warning-border: #d97706;
+  --status-error-bg: #450a0a;
+  --status-error-text: #f87171;
+  --status-error-border: #dc2626;
+  --status-info-bg: #0c1929;
+  --status-info-text: #60a5fa;
+  --status-info-border: #1d4ed8;
+
+  /* Interactive States */
+  --focus-ring: #3b82f6;
+  --hover-overlay: rgba(255, 255, 255, 0.1);
+  --disabled-opacity: 0.5;
+
+  /* Enhanced Accessibility - Dark Theme */
+  --min-contrast-ratio: 7;
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+  --keyboard-focus: #60a5fa;
+  --screen-reader-only: absolute;
+  --aria-live-region: #1e293b;
+}
+
+/* Light Theme */
+[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #e2e8f0;
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --accent-primary: #3b82f6;
+  --accent-secondary: #1d4ed8;
+  --border-color: #e2e8f0;
+  --hover-bg: #f1f5f9;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+
+  /* Medical Status Colors - Light Theme */
+  --status-success-bg: #f0fdf4;
+  --status-success-text: #166534;
+  --status-success-border: #bbf7d0;
+  --status-warning-bg: #fefce8;
+  --status-warning-text: #a16207;
+  --status-warning-border: #fde68a;
+  --status-error-bg: #fef2f2;
+  --status-error-text: #dc2626;
+  --status-error-border: #fecaca;
+  --status-info-bg: #eff6ff;
+  --status-info-text: #1d4ed8;
+  --status-info-border: #bfdbfe;
+
+  /* Interactive States */
+  --focus-ring: #3b82f6;
+  --hover-overlay: rgba(0, 0, 0, 0.05);
+  --disabled-opacity: 0.6;
+
+  /* Enhanced Accessibility - Light Theme */
+  --min-contrast-ratio: 7;
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+  --keyboard-focus: #1d4ed8;
+  --screen-reader-only: absolute;
+  --aria-live-region: #f8fafc;
+}
+
+/* Blue Theme */
+[data-theme="blue"] {
+  --bg-primary: #0c1929;
+  --bg-secondary: #1e3a8a;
+  --bg-tertiary: #3730a3;
+  --text-primary: #ffffff;
+  --text-secondary: #dbeafe;
+  --text-muted: #93c5fd;
+  --accent-primary: #60a5fa;
+  --accent-secondary: #3b82f6;
+  --border-color: #1e40af;
+  --hover-bg: #1e40af;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+}
+
+/* Green Theme */
+[data-theme="green"] {
+  --bg-primary: #064e3b;
+  --bg-secondary: #065f46;
+  --bg-tertiary: #047857;
+  --text-primary: #ffffff;
+  --text-secondary: #d1fae5;
+  --text-muted: #86efac;
+  --accent-primary: #34d399;
+  --accent-secondary: #10b981;
+  --border-color: #059669;
+  --hover-bg: #059669;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+}
+
+/* Purple Theme */
+[data-theme="purple"] {
+  --bg-primary: #1e1b4b;
+  --bg-secondary: #312e81;
+  --bg-tertiary: #3730a3;
+  --text-primary: #ffffff;
+  --text-secondary: #e0e7ff;
+  --text-muted: #c7d2fe;
+  --accent-primary: #8b5cf6;
+  --accent-secondary: #7c3aed;
+  --border-color: #4c1d95;
+  --hover-bg: #4c1d95;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+}
+
+/* Orange Theme */
+[data-theme="orange"] {
+  --bg-primary: #431407;
+  --bg-secondary: #9a3412;
+  --bg-tertiary: #c2410c;
+  --text-primary: #ffffff;
+  --text-secondary: #fed7aa;
+  --text-muted: #fdba74;
+  --accent-primary: #f97316;
+  --accent-secondary: #ea580c;
+  --border-color: #c2410c;
+  --hover-bg: #c2410c;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+}
+
+/* Medical Theme - Professional healthcare theme */
+[data-theme="medical"] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #e2e8f0;
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --accent-primary: #0ea5e9;
+  --accent-secondary: #0284c7;
+  --border-color: #cbd5e1;
+  --hover-bg: #f1f5f9;
+  --success: #059669;
+  --warning: #d97706;
+  --error: #dc2626;
+}
+
+/* Font Size Variables */
+[data-font-size="small"] {
+  --font-size-xs: 0.625rem;
+  --font-size-sm: 0.75rem;
+  --font-size-base: 0.8rem;
+  --font-size-lg: 0.9rem;
+  --font-size-xl: 1rem;
+  --font-size-2xl: 1.125rem;
+  --font-size-3xl: 1.25rem;
+}
+
+[data-font-size="medium"] {
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+}
+
+[data-font-size="large"] {
+  --font-size-xs: 0.875rem;
+  --font-size-sm: 1rem;
+  --font-size-base: 1.125rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.5rem;
+  --font-size-2xl: 1.875rem;
+  --font-size-3xl: 2.25rem;
+}
+
+/* Apply theme colors to common classes */
+.bg-slate-900 {
+  background-color: var(--bg-primary) !important;
+}
+
+.bg-slate-800 {
+  background-color: var(--bg-secondary) !important;
+}
+
+.bg-slate-700 {
+  background-color: var(--bg-tertiary) !important;
+}
+
+.bg-slate-600 {
+  background-color: var(--hover-bg) !important;
+}
+
+.text-white {
+  color: var(--text-primary) !important;
+}
+
+.text-slate-300 {
+  color: var(--text-secondary) !important;
+}
+
+.text-slate-400 {
+  color: var(--text-muted) !important;
+}
+
+.border-slate-700 {
+  border-color: var(--border-color) !important;
+}
+
+.border-slate-600 {
+  border-color: var(--border-color) !important;
+}
+
+.hover\:bg-slate-700:hover {
+  background-color: var(--hover-bg) !important;
+}
+
+.hover\:bg-slate-600:hover {
+  background-color: var(--hover-bg) !important;
+}
+
+.bg-blue-600 {
+  background-color: var(--accent-primary) !important;
+}
+
+.hover\:bg-blue-700:hover {
+  background-color: var(--accent-secondary) !important;
+}
+
+/* Additional fixes for light theme */
+.focus\:ring-blue-500:focus {
+  --tw-ring-color: var(--accent-primary) !important;
+}
+
+.focus\:ring-2:focus {
+  --tw-ring-opacity: 0.5 !important;
+}
+
+/* Input and form elements */
+input, textarea, select {
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--text-muted) !important;
+}
+
+/* Button variants */
+.btn-primary {
+  background-color: var(--accent-primary) !important;
+  color: white !important;
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-secondary) !important;
+}
+
+.btn-secondary {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.btn-secondary:hover {
+  background-color: var(--hover-bg) !important;
+}
+
+/* Card and container fixes */
+.card, .bg-slate-800, .bg-slate-700, .bg-slate-600 {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Shadow fixes for light theme */
+[data-theme="light"] .shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-theme="light"] .shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Text color fixes for light theme */
+[data-theme="light"] .text-slate-300 {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .text-slate-400 {
+  color: #64748b !important;
+}
+
+[data-theme="light"] .text-white {
+  color: #1e293b !important;
+}
+
+/* Specific component fixes */
+.sidebar, .main-layout, .navigation {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Form element improvements */
+select option {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Hover states */
+.hover\:text-white:hover {
+  color: var(--text-primary) !important;
+}
+
+.hover\:text-slate-300:hover {
+  color: var(--text-secondary) !important;
+}
+
+/* Ring focus improvements */
+.focus\:ring-blue-500:focus {
+  --tw-ring-color: var(--accent-primary);
+  --tw-ring-opacity: 0.3;
+}
+
+/* Table and list improvements */
+table, .table {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+tr:nth-child(even) {
+  background-color: var(--bg-tertiary) !important;
+}
+
+th {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+td {
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Apply font sizes */
+.text-xs {
+  font-size: var(--font-size-xs) !important;
+}
+
+.text-sm {
+  font-size: var(--font-size-sm) !important;
+}
+
+.text-base {
+  font-size: var(--font-size-base) !important;
+}
+
+.text-lg {
+  font-size: var(--font-size-lg) !important;
+}
+
+.text-xl {
+  font-size: var(--font-size-xl) !important;
+}
+
+.text-2xl {
+  font-size: var(--font-size-2xl) !important;
+}
+
+.text-3xl {
+  font-size: var(--font-size-3xl) !important;
+}
+
+/* Enhanced theme coverage for all components */
+/* Background classes */
+.bg-white {
+  background-color: var(--bg-secondary) !important;
+}
+
+.bg-gray-50, .bg-gray-100, .bg-gray-200 {
+  background-color: var(--bg-tertiary) !important;
+}
+
+.bg-gray-800, .bg-gray-900 {
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Text color classes */
+.text-gray-900, .text-black {
+  color: var(--text-primary) !important;
+}
+
+.text-gray-700, .text-gray-600 {
+  color: var(--text-secondary) !important;
+}
+
+.text-gray-500, .text-gray-400 {
+  color: var(--text-muted) !important;
+}
+
+/* Border classes */
+.border-gray-200, .border-gray-300 {
+  border-color: var(--border-color) !important;
+}
+
+.border-gray-600, .border-gray-700 {
+  border-color: var(--border-color) !important;
+}
+
+/* Hover states */
+.hover\:bg-gray-50:hover, .hover\:bg-gray-100:hover {
+  background-color: var(--hover-bg) !important;
+}
+
+.hover\:bg-gray-800:hover, .hover\:bg-gray-700:hover {
+  background-color: var(--hover-bg) !important;
+}
+
+/* Focus states */
+.focus\:border-blue-500:focus {
+  border-color: var(--accent-primary) !important;
+}
+
+.focus\:outline-none:focus {
+  outline: 2px solid var(--accent-primary) !important;
+  outline-offset: 2px !important;
+}
+
+/* Medical specific colors */
+.text-blue-600, .text-blue-500 {
+  color: var(--accent-primary) !important;
+}
+
+.bg-blue-500, .bg-blue-600 {
+  background-color: var(--accent-primary) !important;
+}
+
+.hover\:bg-blue-600:hover, .hover\:bg-blue-700:hover {
+  background-color: var(--accent-secondary) !important;
+}
+
+/* Status colors */
+.text-green-600, .text-green-500 {
+  color: var(--success) !important;
+}
+
+.bg-green-500, .bg-green-600 {
+  background-color: var(--success) !important;
+}
+
+.text-yellow-600, .text-yellow-500 {
+  color: var(--warning) !important;
+}
+
+.bg-yellow-500, .bg-yellow-600 {
+  background-color: var(--warning) !important;
+}
+
+.text-red-600, .text-red-500 {
+  color: var(--error) !important;
+}
+
+.bg-red-500, .bg-red-600 {
+  background-color: var(--error) !important;
+}
+
+/* Light theme specific overrides */
+[data-theme="light"] .bg-slate-900 {
+  background-color: var(--bg-primary) !important;
+}
+
+[data-theme="light"] .bg-slate-800 {
+  background-color: var(--bg-secondary) !important;
+}
+
+[data-theme="light"] .bg-slate-700 {
+  background-color: var(--bg-tertiary) !important;
+}
+
+[data-theme="light"] .text-white {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="light"] .text-slate-300 {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="light"] .text-slate-400 {
+  color: var(--text-muted) !important;
+}
+
+/* Medical theme specific overrides */
+[data-theme="medical"] .bg-slate-900 {
+  background-color: var(--bg-primary) !important;
+}
+
+[data-theme="medical"] .bg-slate-800 {
+  background-color: var(--bg-secondary) !important;
+}
+
+[data-theme="medical"] .bg-slate-700 {
+  background-color: var(--bg-tertiary) !important;
+}
+
+[data-theme="medical"] .text-white {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="medical"] .text-slate-300 {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="medical"] .text-slate-400 {
+  color: var(--text-muted) !important;
+}
+
+/* Enhanced card styling */
+.card-primary {
+  background-color: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.card-secondary {
+  background-color: var(--bg-tertiary) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Modal and dropdown overrides */
+.modal, .dropdown-menu {
+  background-color: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Sidebar and navigation */
+.sidebar-item {
+  color: var(--text-secondary) !important;
+}
+
+.sidebar-item:hover {
+  background-color: var(--hover-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+.sidebar-item.active {
+  background-color: var(--accent-primary) !important;
+  color: white !important;
+}
+
+/* Forms and inputs enhanced */
+.form-input, .form-select, .form-textarea {
+  background-color: var(--bg-tertiary) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--accent-primary) !important;
+  box-shadow: 0 0 0 1px var(--accent-primary) !important;
+}
+
+/* Enhanced accessibility */
+.focus-visible:focus-visible {
+  outline: 2px solid var(--accent-primary) !important;
+  outline-offset: 2px !important;
+}
+
+/* Print styles */
+@media print {
+  * {
+    background-color: white !important;
+    color: black !important;
+  }
+}

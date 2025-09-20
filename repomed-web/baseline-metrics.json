@@ -1,0 +1,145 @@
+{
+  "timestamp": "2025-09-20T04:46:58.092Z",
+  "version": "5.1-baseline",
+  "environment": {
+    "node": "v22.18.0",
+    "platform": "win32",
+    "arch": "x64"
+  },
+  "routes": {
+    "/home": {
+      "responseTime": 37,
+      "httpStatus": "200",
+      "timestamp": "2025-09-20T04:47:11.837Z",
+      "performanceScore": 79,
+      "fcp": 1210,
+      "lcp": 2707,
+      "ttfb": 61,
+      "cls": "0.065",
+      "tti": 10152,
+      "route": "/home",
+      "url": "http://localhost:3023/home"
+    },
+    "/prescricoes": {
+      "responseTime": 405,
+      "httpStatus": "200",
+      "timestamp": "2025-09-20T04:47:28.046Z",
+      "performanceScore": 79,
+      "fcp": 1211,
+      "lcp": 2857,
+      "ttfb": 75,
+      "cls": "0.030",
+      "tti": 10450,
+      "route": "/prescricoes",
+      "url": "http://localhost:3023/prescricoes"
+    },
+    "/prescricoes/nova": {
+      "responseTime": 219,
+      "httpStatus": "200",
+      "timestamp": "2025-09-20T04:47:44.332Z",
+      "performanceScore": 80,
+      "fcp": 1209,
+      "lcp": 2781,
+      "ttfb": 83,
+      "cls": "0.041",
+      "tti": 10272,
+      "route": "/prescricoes/nova",
+      "url": "http://localhost:3023/prescricoes/nova"
+    },
+    "/documentos": {
+      "responseTime": 48,
+      "httpStatus": "200",
+      "timestamp": "2025-09-20T04:47:58.032Z",
+      "performanceScore": 81,
+      "fcp": 1210,
+      "lcp": 2707,
+      "ttfb": 62,
+      "cls": "0.014",
+      "tti": 9957,
+      "route": "/documentos",
+      "url": "http://localhost:3023/documentos"
+    },
+    "/pacientes": {
+      "responseTime": 47,
+      "httpStatus": "200",
+      "timestamp": "2025-09-20T04:48:15.306Z",
+      "performanceScore": 77,
+      "fcp": 1209,
+      "lcp": 2706,
+      "ttfb": 72,
+      "cls": "0.119",
+      "tti": 10131,
+      "route": "/pacientes",
+      "url": "http://localhost:3023/pacientes"
+    },
+    "/pacientes/novo": {
+      "responseTime": 242,
+      "httpStatus": "200",
+      "timestamp": "2025-09-20T04:48:29.293Z",
+      "performanceScore": 81,
+      "fcp": 1212,
+      "lcp": 2633,
+      "ttfb": 91,
+      "cls": "0.056",
+      "tti": 9962,
+      "route": "/pacientes/novo",
+      "url": "http://localhost:3023/pacientes/novo"
+    },
+    "/configuracoes": {
+      "responseTime": 192,
+      "httpStatus": "200",
+      "timestamp": "2025-09-20T04:48:42.903Z",
+      "performanceScore": 81,
+      "fcp": 1208,
+      "lcp": 2706,
+      "ttfb": 69,
+      "cls": "0.017",
+      "tti": 10124,
+      "route": "/configuracoes",
+      "url": "http://localhost:3023/configuracoes"
+    }
+  },
+  "summary": {
+    "totalRoutes": 7,
+    "averageMetrics": {
+      "responseTime": 170,
+      "performanceScore": 80,
+      "fcp": 1210,
+      "lcp": 2728,
+      "ttfb": 73
+    },
+    "slowestRoute": {
+      "responseTime": 405,
+      "httpStatus": "200",
+      "timestamp": "2025-09-20T04:47:28.046Z",
+      "performanceScore": 79,
+      "fcp": 1211,
+      "lcp": 2857,
+      "ttfb": 75,
+      "cls": "0.030",
+      "tti": 10450,
+      "route": "/prescricoes",
+      "url": "http://localhost:3023/prescricoes"
+    },
+    "fastestRoute": {
+      "responseTime": 37,
+      "httpStatus": "200",
+      "timestamp": "2025-09-20T04:47:11.837Z",
+      "performanceScore": 79,
+      "fcp": 1210,
+      "lcp": 2707,
+      "ttfb": 61,
+      "cls": "0.065",
+      "tti": 10152,
+      "route": "/home",
+      "url": "http://localhost:3023/home"
+    }
+  },
+  "recommendations": [
+    {
+      "type": "web-vitals",
+      "priority": "critical",
+      "message": "LCP is above 2.5s - critical for medical applications"
+    }
+  ]
+}

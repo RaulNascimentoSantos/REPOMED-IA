@@ -1,0 +1,246 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e4]:
+      - generic [ref=e6]:
+        - img [ref=e8]
+        - generic [ref=e12]:
+          - heading "RepoMed IA" [level=1] [ref=e13]
+          - paragraph [ref=e14]: Sistema Médico v4.0
+      - navigation [ref=e15]:
+        - list [ref=e16]:
+          - listitem [ref=e17]:
+            - list [ref=e18]:
+              - listitem [ref=e19]:
+                - button "Dashboard" [ref=e20] [cursor=pointer]:
+                  - img [ref=e21] [cursor=pointer]
+                  - text: Dashboard
+              - listitem [ref=e24]:
+                - button "Pacientes" [ref=e25] [cursor=pointer]:
+                  - img [ref=e26] [cursor=pointer]
+                  - text: Pacientes
+                  - img [ref=e31] [cursor=pointer]
+              - listitem [ref=e33]:
+                - button "Documentos" [ref=e34] [cursor=pointer]:
+                  - img [ref=e35] [cursor=pointer]
+                  - text: Documentos
+                  - img [ref=e38] [cursor=pointer]
+                - list [ref=e40]:
+                  - listitem [ref=e41]:
+                    - button "Todos os Documentos" [ref=e42] [cursor=pointer]
+                  - listitem [ref=e43]:
+                    - button "Receitas" [ref=e44] [cursor=pointer]
+                  - listitem [ref=e45]:
+                    - button "Atestados" [ref=e46] [cursor=pointer]
+                  - listitem [ref=e47]:
+                    - button "Relatórios" [ref=e48] [cursor=pointer]
+              - listitem [ref=e49]:
+                - button "Consultas" [ref=e50] [cursor=pointer]:
+                  - img [ref=e51] [cursor=pointer]
+                  - text: Consultas
+                  - img [ref=e53] [cursor=pointer]
+              - listitem [ref=e55]:
+                - button "Assinatura Digital" [ref=e56] [cursor=pointer]:
+                  - img [ref=e57] [cursor=pointer]
+                  - text: Assinatura Digital
+              - listitem [ref=e59]:
+                - button "Templates" [ref=e60] [cursor=pointer]:
+                  - img [ref=e61] [cursor=pointer]
+                  - text: Templates
+                  - img [ref=e64] [cursor=pointer]
+              - listitem [ref=e66]:
+                - button "Agendamento" [ref=e67] [cursor=pointer]:
+                  - img [ref=e68] [cursor=pointer]
+                  - text: Agendamento
+              - listitem [ref=e70]:
+                - button "Telemedicina" [ref=e71] [cursor=pointer]:
+                  - img [ref=e72] [cursor=pointer]
+                  - text: Telemedicina
+              - listitem [ref=e75]:
+                - button "Histórico" [ref=e76] [cursor=pointer]:
+                  - img [ref=e77] [cursor=pointer]
+                  - text: Histórico
+              - listitem [ref=e81]:
+                - button "Notificações" [ref=e82] [cursor=pointer]:
+                  - img [ref=e83] [cursor=pointer]
+                  - text: Notificações
+              - listitem [ref=e86]:
+                - button "Prescrições" [ref=e87] [cursor=pointer]:
+                  - img [ref=e88] [cursor=pointer]
+                  - text: Prescrições
+              - listitem [ref=e91]:
+                - button "Exames" [ref=e92] [cursor=pointer]:
+                  - img [ref=e93] [cursor=pointer]
+                  - text: Exames
+              - listitem [ref=e97]:
+                - button "Relatórios" [ref=e98] [cursor=pointer]:
+                  - img [ref=e99] [cursor=pointer]
+                  - text: Relatórios
+              - listitem [ref=e101]:
+                - button "Financeiro" [ref=e102] [cursor=pointer]:
+                  - img [ref=e103] [cursor=pointer]
+                  - text: Financeiro
+              - listitem [ref=e105]:
+                - button "Sistema" [ref=e106] [cursor=pointer]:
+                  - img [ref=e107] [cursor=pointer]
+                  - text: Sistema
+                  - img [ref=e109] [cursor=pointer]
+          - listitem [ref=e111]:
+            - generic [ref=e113]:
+              - generic [ref=e115]: JS
+              - generic [ref=e116]:
+                - paragraph [ref=e117]: Dr. João Silva
+                - paragraph [ref=e118]: CRM SP 123456
+    - generic [ref=e119]:
+      - generic [ref=e121]:
+        - generic [ref=e122]:
+          - generic [ref=e123]: Buscar
+          - img
+          - searchbox "Buscar" [ref=e124]
+        - generic [ref=e125]:
+          - generic [ref=e126]:
+            - img [ref=e127]
+            - generic [ref=e131]: Online
+          - button "3" [ref=e132] [cursor=pointer]:
+            - img [ref=e133] [cursor=pointer]
+            - generic [ref=e136] [cursor=pointer]: "3"
+          - button "JS" [ref=e138] [cursor=pointer]:
+            - generic [ref=e140] [cursor=pointer]: JS
+            - img [ref=e141] [cursor=pointer]
+      - main [ref=e143]:
+        - generic [ref=e144]:
+          - generic [ref=e146]:
+            - button "Voltar" [ref=e147] [cursor=pointer]:
+              - img [ref=e148] [cursor=pointer]
+              - text: Voltar
+            - generic [ref=e150]:
+              - heading "👤 Novo Paciente IA" [level=1] [ref=e151]:
+                - text: 👤 Novo Paciente
+                - generic [ref=e152]: IA
+              - paragraph [ref=e153]: Cadastre um novo paciente no sistema
+          - generic [ref=e154]:
+            - generic [ref=e155]:
+              - generic [ref=e156]:
+                - heading "Dados Pessoais" [level=2] [ref=e157]:
+                  - img [ref=e158]
+                  - text: Dados Pessoais
+                - generic [ref=e161]:
+                  - generic [ref=e162]:
+                    - generic [ref=e163]: Nome Completo *
+                    - textbox "Digite o nome completo" [ref=e164]
+                  - generic [ref=e165]:
+                    - generic [ref=e166]:
+                      - generic [ref=e167]: CPF *
+                      - textbox "000.000.000-00" [ref=e168]
+                    - generic [ref=e169]:
+                      - generic [ref=e170]: RG
+                      - textbox "00.000.000-0" [ref=e171]
+                  - generic [ref=e172]:
+                    - generic [ref=e173]:
+                      - generic [ref=e174]: Data de Nascimento *
+                      - textbox [ref=e175]
+                    - generic [ref=e176]:
+                      - generic [ref=e177]: Sexo *
+                      - combobox [ref=e178]:
+                        - option "Selecione" [selected]
+                        - option "Masculino"
+                        - option "Feminino"
+                        - option "Outro"
+                  - generic [ref=e179]:
+                    - generic [ref=e180]:
+                      - generic [ref=e181]: Estado Civil
+                      - combobox [ref=e182]:
+                        - option "Selecione" [selected]
+                        - option "Solteiro(a)"
+                        - option "Casado(a)"
+                        - option "Divorciado(a)"
+                        - option "Viúvo(a)"
+                        - option "União Estável"
+                    - generic [ref=e183]:
+                      - generic [ref=e184]: Profissão
+                      - textbox "Digite a profissão" [ref=e185]
+              - generic [ref=e186]:
+                - heading "Contato" [level=2] [ref=e187]:
+                  - img [ref=e188]
+                  - text: Contato
+                - generic [ref=e190]:
+                  - generic [ref=e191]:
+                    - generic [ref=e192]:
+                      - generic [ref=e193]: Telefone
+                      - textbox "(11) 0000-0000" [ref=e194]
+                    - generic [ref=e195]:
+                      - generic [ref=e196]: Celular *
+                      - textbox "(11) 90000-0000" [ref=e197]
+                  - generic [ref=e198]:
+                    - generic [ref=e199]: Email
+                    - textbox "email@exemplo.com" [ref=e200]
+                  - generic [ref=e201]:
+                    - generic [ref=e202]: Endereço *
+                    - textbox "Rua, Número, Bairro" [ref=e203]
+                  - generic [ref=e204]:
+                    - generic [ref=e205]:
+                      - generic [ref=e206]: Cidade *
+                      - textbox "Cidade" [ref=e207]
+                    - generic [ref=e208]:
+                      - generic [ref=e209]: Estado *
+                      - combobox [ref=e210]:
+                        - option "UF" [selected]
+                        - option "SP"
+                        - option "RJ"
+                        - option "MG"
+                        - option "RS"
+                        - option "PR"
+                        - option "SC"
+                    - generic [ref=e211]:
+                      - generic [ref=e212]: CEP
+                      - textbox "00000-000" [ref=e213]
+                  - generic [ref=e214]:
+                    - generic [ref=e215]:
+                      - generic [ref=e216]: Contato de Emergência
+                      - textbox "Nome do contato" [ref=e217]
+                    - generic [ref=e218]:
+                      - generic [ref=e219]: Telefone de Emergência
+                      - textbox "(11) 90000-0000" [ref=e220]
+            - generic [ref=e221]:
+              - heading "Convênio e Observações" [level=2] [ref=e222]:
+                - img [ref=e223]
+                - text: Convênio e Observações
+              - generic [ref=e225]:
+                - generic [ref=e226]:
+                  - generic [ref=e227]:
+                    - generic [ref=e228]: Convênio
+                    - combobox [ref=e229]:
+                      - option "Selecione o convênio" [selected]
+                      - option "Particular"
+                      - option "Unimed"
+                      - option "Bradesco Saúde"
+                      - option "Amil"
+                      - option "Porto Seguro"
+                      - option "SantéMed"
+                      - option "Outros"
+                  - generic [ref=e230]:
+                    - generic [ref=e231]: Número da Carteira
+                    - textbox "Número da carteirinha" [ref=e232]
+                - generic [ref=e233]:
+                  - generic [ref=e234]: Observações
+                  - textbox "Observações importantes sobre o paciente..." [ref=e235]
+            - generic [ref=e236]:
+              - button "Cancelar" [ref=e237] [cursor=pointer]:
+                - img [ref=e238] [cursor=pointer]
+                - text: Cancelar
+              - button "Salvar Paciente" [ref=e241] [cursor=pointer]:
+                - img [ref=e242] [cursor=pointer]
+                - text: Salvar Paciente
+    - generic [ref=e246]:
+      - button "Abrir ações rápidas" [ref=e247] [cursor=pointer]:
+        - img [ref=e248] [cursor=pointer]
+      - generic [ref=e252]: "3"
+    - status "Informação:" [ref=e254]:
+      - img [ref=e255]
+      - generic [ref=e258]:
+        - img [ref=e259]
+        - text: Reconectando...
+  - alert [ref=e264]
+```

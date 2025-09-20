@@ -1,0 +1,182 @@
+/* =============== DESIGN TOKENS 2025 - RepoMed IA Enterprise =============== */
+
+:root {
+  /* ========== ADVANCED COLOR PALETTE ========== */
+  /* Primary Medical Brand */
+  --medical-primary: #0066cc;
+  --medical-primary-50: #e6f3ff;
+  --medical-primary-100: #b3d9ff;
+  --medical-primary-200: #80bfff;
+  --medical-primary-300: #4da6ff;
+  --medical-primary-400: #1a8cff;
+  --medical-primary-500: #0066cc;
+  --medical-primary-600: #0052a3;
+  --medical-primary-700: #003d7a;
+  --medical-primary-800: #002952;
+  --medical-primary-900: #001429;
+
+  /* Medical Accent Colors */
+  --medical-success: #00c851;
+  --medical-warning: #ffbb33;
+  --medical-error: #ff4444;
+  --medical-info: #33b5e5;
+  
+  /* Gradient System */
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-medical: linear-gradient(135deg, #00c9ff 0%, #92fe9d 100%);
+  --gradient-hero: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+  
+  /* ========== ADVANCED TYPOGRAPHY ========== */
+  --font-primary: 'Inter Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-medical: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  
+  /* Type Scale */
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.875rem;   /* 14px */
+  --text-base: 1rem;     /* 16px */
+  --text-lg: 1.125rem;   /* 18px */
+  --text-xl: 1.25rem;    /* 20px */
+  --text-2xl: 1.5rem;    /* 24px */
+  --text-3xl: 1.875rem;  /* 30px */
+  --text-4xl: 2.25rem;   /* 36px */
+  --text-5xl: 3rem;      /* 48px */
+  --text-6xl: 3.75rem;   /* 60px */
+  
+  /* Font Weights */
+  --font-thin: 100;
+  --font-light: 300;
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+  --font-black: 900;
+  
+  /* ========== SPACING SYSTEM ========== */
+  --space-0: 0px;
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+  --space-20: 5rem;     /* 80px */
+  --space-24: 6rem;     /* 96px */
+  --space-32: 8rem;     /* 128px */
+  
+  /* ========== BORDER RADIUS ========== */
+  --radius-none: 0px;
+  --radius-sm: 0.375rem;   /* 6px */
+  --radius-base: 0.5rem;   /* 8px */
+  --radius-md: 0.75rem;    /* 12px */
+  --radius-lg: 1rem;       /* 16px */
+  --radius-xl: 1.5rem;     /* 24px */
+  --radius-2xl: 2rem;      /* 32px */
+  --radius-full: 9999px;
+  
+  /* ========== SHADOWS & ELEVATIONS ========== */
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-base: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-2xl: 0 50px 100px -20px rgba(0, 0, 0, 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+  
+  /* Medical Specific Shadows */
+  --shadow-medical: 0 8px 32px rgba(0, 102, 204, 0.12);
+  --shadow-card-hover: 0 12px 40px rgba(0, 0, 0, 0.15);
+  --shadow-floating: 0 16px 70px rgba(0, 0, 0, 0.12);
+  
+  /* ========== GLASS MORPHISM ========== */
+  --glass-background: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.16);
+  --glass-backdrop: blur(20px);
+  
+  /* ========== ANIMATIONS & TRANSITIONS ========== */
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  
+  /* Spring Animations */
+  --spring-gentle: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --spring-wobbly: cubic-bezier(0.68, -0.6, 0.32, 1.6);
+  --spring-bouncy: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  
+  /* ========== Z-INDEX SYSTEM ========== */
+  --z-hide: -1;
+  --z-auto: auto;
+  --z-base: 0;
+  --z-docked: 10;
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-banner: 1200;
+  --z-overlay: 1300;
+  --z-modal: 1400;
+  --z-popover: 1500;
+  --z-skipLink: 1600;
+  --z-toast: 1700;
+  --z-tooltip: 1800;
+  
+  /* ========== MEDICAL UX PATTERNS ========== */
+  --medical-success-bg: #f0fff4;
+  --medical-success-border: #68d391;
+  --medical-warning-bg: #fffbeb;
+  --medical-warning-border: #f6ad55;
+  --medical-error-bg: #fed7d7;
+  --medical-error-border: #fc8181;
+  --medical-info-bg: #ebf8ff;
+  --medical-info-border: #63b3ed;
+  
+  /* ========== RESPONSIVE BREAKPOINTS ========== */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+  
+  /* ========== COMPONENT SIZES ========== */
+  --btn-height-sm: 2rem;
+  --btn-height-base: 2.5rem;
+  --btn-height-lg: 3rem;
+  --btn-height-xl: 3.5rem;
+  
+  --input-height-sm: 2rem;
+  --input-height-base: 2.5rem;
+  --input-height-lg: 3rem;
+  --input-height-xl: 3.5rem;
+  
+  /* ========== MEDICAL DASHBOARD METRICS ========== */
+  --metric-card-min-height: 120px;
+  --metric-card-padding: var(--space-6);
+  --chart-height-sm: 200px;
+  --chart-height-base: 300px;
+  --chart-height-lg: 400px;
+}
+
+/* ========== DARK MODE SUPPORT ========== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --glass-background: rgba(0, 0, 0, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --shadow-medical: 0 8px 32px rgba(0, 102, 204, 0.2);
+  }
+}
+
+/* ========== REDUCED MOTION SUPPORT ========== */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-fast: 0s;
+    --transition-base: 0s;
+    --transition-slow: 0s;
+    --transition-bounce: 0s;
+  }
+}

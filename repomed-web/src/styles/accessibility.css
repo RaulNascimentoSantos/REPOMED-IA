@@ -1,0 +1,239 @@
+/* Enhanced Medical Accessibility Styles */
+
+/* Screen Reader Only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Enhanced Focus Styles for Medical Forms */
+.focus\:ring-medical:focus {
+  outline: none;
+  box-shadow:
+    0 0 0 var(--focus-ring-offset, 2px) var(--bg-primary),
+    0 0 0 calc(var(--focus-ring-width, 2px) + var(--focus-ring-offset, 2px)) var(--keyboard-focus);
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  :root {
+    --status-success-bg: #000000;
+    --status-success-text: #00ff00;
+    --status-success-border: #00ff00;
+    --status-warning-bg: #000000;
+    --status-warning-text: #ffff00;
+    --status-warning-border: #ffff00;
+    --status-error-bg: #000000;
+    --status-error-text: #ff0000;
+    --status-error-border: #ff0000;
+    --status-info-bg: #000000;
+    --status-info-text: #00ffff;
+    --status-info-border: #00ffff;
+  }
+
+  .bg-slate-900 {
+    background-color: #000000 !important;
+  }
+
+  .text-white {
+    color: #ffffff !important;
+  }
+
+  .border-slate-700 {
+    border-color: #ffffff !important;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin {
+    animation: none;
+  }
+
+  .transition-all,
+  .transition-colors,
+  .duration-200 {
+    transition: none !important;
+  }
+
+  .animate-in,
+  .fade-in-0,
+  .zoom-in-95 {
+    animation: none !important;
+  }
+}
+
+/* Enhanced Keyboard Navigation */
+.keyboard-navigation button:focus,
+.keyboard-navigation input:focus,
+.keyboard-navigation select:focus,
+.keyboard-navigation textarea:focus,
+.keyboard-navigation [tabindex]:focus {
+  outline: var(--focus-ring-width) solid var(--keyboard-focus);
+  outline-offset: var(--focus-ring-offset);
+  box-shadow: 0 0 0 calc(var(--focus-ring-width) + 1px) rgba(59, 130, 246, 0.3);
+}
+
+/* Skip to Main Content Link */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  padding: 8px;
+  text-decoration: none;
+  border-radius: 4px;
+  border: 2px solid var(--keyboard-focus);
+  z-index: 1000;
+  font-weight: 600;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* ARIA Live Regions */
+.aria-live-region {
+  background: var(--aria-live-region);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 8px;
+  margin: 4px 0;
+}
+
+/* Medical Form Validation States */
+.medical-input[aria-invalid="true"] {
+  border-color: var(--status-error-border);
+  background-color: var(--status-error-bg);
+}
+
+.medical-input[aria-invalid="true"]:focus {
+  box-shadow:
+    0 0 0 2px var(--bg-primary),
+    0 0 0 4px var(--status-error-border);
+}
+
+/* Required Field Indicators */
+.required-field::after {
+  content: " *";
+  color: var(--status-error-text);
+  font-weight: bold;
+  margin-left: 2px;
+}
+
+/* Status Announcements */
+.status-announcement {
+  position: relative;
+}
+
+.status-announcement::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -4px;
+  width: 4px;
+  height: 100%;
+  background: var(--keyboard-focus);
+  border-radius: 2px;
+}
+
+/* Medical Critical Alerts */
+.medical-critical {
+  border: 3px solid var(--status-error-border);
+  background: var(--status-error-bg);
+  color: var(--status-error-text);
+  padding: 16px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.medical-critical::before {
+  content: "⚠️ ";
+  margin-right: 8px;
+}
+
+/* Prescription Form Accessibility */
+.prescription-form input[required],
+.prescription-form select[required],
+.prescription-form textarea[required] {
+  position: relative;
+}
+
+.prescription-form input[required]:invalid,
+.prescription-form select[required]:invalid,
+.prescription-form textarea[required]:invalid {
+  border-color: var(--status-warning-border);
+  background-color: var(--status-warning-bg);
+}
+
+/* Touch Target Sizes for Medical Interface */
+@media (pointer: coarse) {
+  button,
+  input,
+  select,
+  textarea,
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .medical-form button {
+    min-height: 48px;
+    padding: 12px 24px;
+  }
+}
+
+/* Medical Theme Specific Adjustments */
+[data-theme="medical"] {
+  --keyboard-focus: #059669;
+  --focus-ring: #059669;
+}
+
+[data-theme="medical"] .medical-input:focus {
+  border-color: #059669;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
+}
+
+/* Error States for Medical Data */
+.medical-error-summary {
+  background: var(--status-error-bg);
+  border: 2px solid var(--status-error-border);
+  color: var(--status-error-text);
+  padding: 16px;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+.medical-error-summary h3 {
+  margin: 0 0 8px 0;
+  font-weight: 700;
+}
+
+.medical-error-summary ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+/* Success States for Medical Confirmations */
+.medical-success {
+  background: var(--status-success-bg);
+  border: 2px solid var(--status-success-border);
+  color: var(--status-success-text);
+  padding: 16px;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+.medical-success::before {
+  content: "✓ ";
+  margin-right: 8px;
+  font-weight: bold;
+}

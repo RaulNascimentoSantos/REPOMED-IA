@@ -1,0 +1,72 @@
+/* RepoMed IA — Design Tokens (CSS Variables)
+   Paleta clínica neutra com suporte a dark theme e contraste AA.
+   Use via Tailwind mapeado para var(). */
+:root {
+  /* Cores OKLCH (preferência), com fallback HEX para navegadores antigos */
+  --brand-50: oklch(0.97 0.02 240);      /* #eef2ff aprox */
+  --brand-100: oklch(0.92 0.04 240);
+  --brand-200: oklch(0.86 0.06 240);
+  --brand-300: oklch(0.80 0.08 240);
+  --brand-400: oklch(0.74 0.10 240);
+  --brand-500: oklch(0.68 0.12 240);     /* primária padrão */
+  --brand-600: oklch(0.62 0.12 240);
+  --brand-700: oklch(0.56 0.10 240);
+  --brand-800: oklch(0.50 0.08 240);
+  --brand-900: oklch(0.44 0.06 240);
+
+  
+  --teal-500: oklch(0.72 0.11 180);
+  --green-500: oklch(0.72 0.12 160);
+  --yellow-500: oklch(0.88 0.12 95);
+  --red-500: oklch(0.62 0.15 25);
+
+  
+  --bg: #0b1020;           /* usado em dark */
+  --bg-elev: #0f152a;      
+  --surface: #101827;      
+  --text: #0b1220;         /* usado em light */
+  --text-muted: #475569;
+
+  
+  /* Tipografia */
+  --font-sans: ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Cascadia Code", monospace;
+
+  
+  /* Espaçamento (8px grid) */
+  --space-1: 0.25rem; /* 4px */
+  --space-2: 0.5rem;  /* 8px */
+  --space-3: 0.75rem; /* 12px */
+  --space-4: 1rem;    /* 16px */
+  --space-6: 1.5rem;  /* 24px */
+  --space-8: 2rem;    /* 32px */
+  --space-12: 3rem;   /* 48px */
+
+  
+  /* Radius e sombras */
+  --radius-sm: 0.5rem;     /* 8px */
+  --radius-md: 0.75rem;    /* 12px */
+  --radius-lg: 1rem;       /* 16px */
+  --shadow-1: 0 1px 2px rgba(0,0,0,.08);
+  --shadow-2: 0 6px 20px rgba(0,0,0,.12);
+}
+
+  
+/**** Tema Light (default) ****/
+:root {
+  --bg-app: #f7fafc;
+  --fg-app: #0f172a;
+  --panel: #ffffff;
+  --border: rgba(2,6,23,.08);
+  --brand: var(--brand-500);
+}
+
+  
+/**** Tema Dark ****/
+[data-theme="dark"] {
+  --bg-app: var(--bg);
+  --fg-app: #e5edff;
+  --panel: var(--bg-elev);
+  --border: rgba(148,163,184,.18);
+  --brand: var(--brand-500);
+}

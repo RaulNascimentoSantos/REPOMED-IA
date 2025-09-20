@@ -1,0 +1,192 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e4]:
+      - generic [ref=e6]:
+        - img [ref=e8]
+        - generic [ref=e12]:
+          - heading "RepoMed IA" [level=1] [ref=e13]
+          - paragraph [ref=e14]: Sistema Médico v4.0
+      - navigation [ref=e15]:
+        - list [ref=e16]:
+          - listitem [ref=e17]:
+            - list [ref=e18]:
+              - listitem [ref=e19]:
+                - button "Dashboard" [ref=e20] [cursor=pointer]:
+                  - img [ref=e21] [cursor=pointer]
+                  - text: Dashboard
+              - listitem [ref=e24]:
+                - button "Pacientes" [ref=e25] [cursor=pointer]:
+                  - img [ref=e26] [cursor=pointer]
+                  - text: Pacientes
+                  - img [ref=e31] [cursor=pointer]
+              - listitem [ref=e33]:
+                - button "Documentos" [ref=e34] [cursor=pointer]:
+                  - img [ref=e35] [cursor=pointer]
+                  - text: Documentos
+                  - img [ref=e38] [cursor=pointer]
+                - list [ref=e40]:
+                  - listitem [ref=e41]:
+                    - button "Todos os Documentos" [ref=e42] [cursor=pointer]
+                  - listitem [ref=e43]:
+                    - button "Receitas" [ref=e44] [cursor=pointer]
+                  - listitem [ref=e45]:
+                    - button "Atestados" [ref=e46] [cursor=pointer]
+                  - listitem [ref=e47]:
+                    - button "Relatórios" [ref=e48] [cursor=pointer]
+              - listitem [ref=e49]:
+                - button "Consultas" [ref=e50] [cursor=pointer]:
+                  - img [ref=e51] [cursor=pointer]
+                  - text: Consultas
+                  - img [ref=e53] [cursor=pointer]
+              - listitem [ref=e55]:
+                - button "Assinatura Digital" [ref=e56] [cursor=pointer]:
+                  - img [ref=e57] [cursor=pointer]
+                  - text: Assinatura Digital
+              - listitem [ref=e59]:
+                - button "Templates" [ref=e60] [cursor=pointer]:
+                  - img [ref=e61] [cursor=pointer]
+                  - text: Templates
+                  - img [ref=e64] [cursor=pointer]
+              - listitem [ref=e66]:
+                - button "Agendamento" [ref=e67] [cursor=pointer]:
+                  - img [ref=e68] [cursor=pointer]
+                  - text: Agendamento
+              - listitem [ref=e70]:
+                - button "Telemedicina" [ref=e71] [cursor=pointer]:
+                  - img [ref=e72] [cursor=pointer]
+                  - text: Telemedicina
+              - listitem [ref=e75]:
+                - button "Histórico" [ref=e76] [cursor=pointer]:
+                  - img [ref=e77] [cursor=pointer]
+                  - text: Histórico
+              - listitem [ref=e81]:
+                - button "Notificações" [ref=e82] [cursor=pointer]:
+                  - img [ref=e83] [cursor=pointer]
+                  - text: Notificações
+              - listitem [ref=e86]:
+                - button "Prescrições" [ref=e87] [cursor=pointer]:
+                  - img [ref=e88] [cursor=pointer]
+                  - text: Prescrições
+              - listitem [ref=e91]:
+                - button "Exames" [ref=e92] [cursor=pointer]:
+                  - img [ref=e93] [cursor=pointer]
+                  - text: Exames
+              - listitem [ref=e97]:
+                - button "Relatórios" [ref=e98] [cursor=pointer]:
+                  - img [ref=e99] [cursor=pointer]
+                  - text: Relatórios
+              - listitem [ref=e101]:
+                - button "Financeiro" [ref=e102] [cursor=pointer]:
+                  - img [ref=e103] [cursor=pointer]
+                  - text: Financeiro
+              - listitem [ref=e105]:
+                - button "Sistema" [ref=e106] [cursor=pointer]:
+                  - img [ref=e107] [cursor=pointer]
+                  - text: Sistema
+                  - img [ref=e109] [cursor=pointer]
+          - listitem [ref=e111]:
+            - generic [ref=e113]:
+              - generic [ref=e115]: JS
+              - generic [ref=e116]:
+                - paragraph [ref=e117]: Dr. João Silva
+                - paragraph [ref=e118]: CRM SP 123456
+    - generic [ref=e119]:
+      - generic [ref=e121]:
+        - generic [ref=e122]:
+          - generic [ref=e123]: Buscar
+          - img
+          - searchbox "Buscar" [ref=e124]
+        - generic [ref=e125]:
+          - generic [ref=e126]:
+            - img [ref=e127]
+            - generic [ref=e131]: Online
+          - button "3" [ref=e132] [cursor=pointer]:
+            - img [ref=e133] [cursor=pointer]
+            - generic [ref=e136] [cursor=pointer]: "3"
+          - button "JS" [ref=e138] [cursor=pointer]:
+            - generic [ref=e140] [cursor=pointer]: JS
+            - img [ref=e141] [cursor=pointer]
+      - main [ref=e143]:
+        - generic [ref=e145]:
+          - generic [ref=e146]:
+            - generic [ref=e147]:
+              - button "Voltar" [ref=e148] [cursor=pointer]:
+                - img [ref=e149] [cursor=pointer]
+                - text: Voltar
+              - generic [ref=e151]:
+                - heading "Configurações" [level=1] [ref=e152]
+                - paragraph [ref=e153]: Gerencie as configurações do sistema
+            - generic [ref=e154]:
+              - button "Redefinir" [ref=e155] [cursor=pointer]:
+                - img [ref=e156] [cursor=pointer]
+                - generic [ref=e161] [cursor=pointer]: Redefinir
+              - button "Salvar Tudo" [ref=e162] [cursor=pointer]:
+                - img [ref=e163] [cursor=pointer]
+                - generic [ref=e167] [cursor=pointer]: Salvar Tudo
+          - generic [ref=e168]:
+            - complementary [ref=e169]:
+              - generic [ref=e170]:
+                - button "Perfil" [ref=e171] [cursor=pointer]:
+                  - img [ref=e172] [cursor=pointer]
+                  - generic [ref=e175] [cursor=pointer]: Perfil
+                - button "Segurança" [ref=e176] [cursor=pointer]:
+                  - img [ref=e177] [cursor=pointer]
+                  - generic [ref=e179] [cursor=pointer]: Segurança
+                - button "Notificações" [ref=e180] [cursor=pointer]:
+                  - img [ref=e181] [cursor=pointer]
+                  - generic [ref=e184] [cursor=pointer]: Notificações
+                - button "Aparência" [ref=e185] [cursor=pointer]:
+                  - img [ref=e186] [cursor=pointer]
+                  - generic [ref=e192] [cursor=pointer]: Aparência
+                - button "Sistema" [ref=e193] [cursor=pointer]:
+                  - img [ref=e194] [cursor=pointer]
+                  - generic [ref=e198] [cursor=pointer]: Sistema
+                - button "Integração" [ref=e199] [cursor=pointer]:
+                  - img [ref=e200] [cursor=pointer]
+                  - generic [ref=e203] [cursor=pointer]: Integração
+                - button "Backup" [ref=e204] [cursor=pointer]:
+                  - img [ref=e205] [cursor=pointer]
+                  - generic [ref=e208] [cursor=pointer]: Backup
+            - main [ref=e209]:
+              - generic [ref=e210]:
+                - heading "Informações do Perfil" [level=2] [ref=e211]
+                - generic [ref=e212]:
+                  - generic [ref=e213]:
+                    - generic [ref=e214]: Nome Completo
+                    - textbox [ref=e215]: Dr. João Silva
+                  - generic [ref=e216]:
+                    - generic [ref=e217]: Email
+                    - textbox [ref=e218]: dr.silva@repomed.com.br
+                  - generic [ref=e219]:
+                    - generic [ref=e220]: CRM
+                    - textbox [ref=e221]: CRM SP 123456
+                  - generic [ref=e222]:
+                    - generic [ref=e223]: Especialidade
+                    - combobox [ref=e224]:
+                      - option "Clínica Geral" [selected]
+                      - option "Cardiologia"
+                      - option "Neurologia"
+                      - option "Pediatria"
+                  - generic [ref=e225]:
+                    - generic [ref=e226]: Telefone
+                    - textbox [ref=e227]: (11) 99999-9999
+                  - generic [ref=e228]:
+                    - generic [ref=e229]: Endereço
+                    - textbox [ref=e230]: São Paulo, SP
+                - generic [ref=e231]:
+                  - generic [ref=e232]: Bio
+                  - textbox [ref=e233]: Médico especialista em clínica geral com mais de 10 anos de experiência.
+    - generic [ref=e234]:
+      - button "Abrir ações rápidas" [ref=e235] [cursor=pointer]:
+        - img [ref=e236] [cursor=pointer]
+      - generic [ref=e240]: "3"
+    - status "Informação:" [ref=e242]:
+      - img [ref=e243]
+      - generic [ref=e246]:
+        - img [ref=e247]
+        - text: Reconectando...
+  - alert [ref=e252]
+```

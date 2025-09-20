@@ -1,0 +1,273 @@
+{
+  "timestamp": "2025-09-20T04:48:50.698Z",
+  "summary": {
+    "totalRoutes": 7,
+    "totalViolations": 7,
+    "criticalViolations": 7,
+    "performanceScore": 79
+  },
+  "routeResults": {
+    "/prescricoes/nova": {
+      "category": "critical",
+      "metrics": {
+        "ttfb": 55.449999999999996,
+        "lcp": 2780.1622,
+        "inp": 10268.162199999999,
+        "cls": 0.041445378678191654,
+        "fcp": 1207.7433,
+        "performanceScore": 80
+      },
+      "violations": [
+        {
+          "route": "/prescricoes/nova",
+          "metric": "lcp",
+          "value": 2780,
+          "threshold": 2500,
+          "unit": "ms",
+          "severity": "error",
+          "category": "critical"
+        },
+        {
+          "route": "/prescricoes/nova",
+          "metric": "inp",
+          "value": 10268,
+          "threshold": 200,
+          "unit": "ms",
+          "severity": "error",
+          "category": "critical"
+        }
+      ],
+      "performanceScore": 80
+    },
+    "/home": {
+      "category": "important",
+      "metrics": {
+        "ttfb": 90.93,
+        "lcp": 2705.732,
+        "inp": 10129.732,
+        "cls": 0.17276660428045987,
+        "fcp": 1208.598,
+        "performanceScore": 73
+      },
+      "violations": [
+        {
+          "route": "/home",
+          "metric": "inp",
+          "value": 10130,
+          "threshold": 300,
+          "unit": "ms",
+          "severity": "error",
+          "category": "important"
+        },
+        {
+          "route": "/home",
+          "metric": "cls",
+          "value": 0,
+          "threshold": 0.15,
+          "unit": "",
+          "severity": "error",
+          "category": "important"
+        }
+      ],
+      "performanceScore": 73
+    },
+    "/pacientes": {
+      "category": "important",
+      "metrics": {
+        "ttfb": 80.179,
+        "lcp": 2706.366,
+        "inp": 10104.366000000002,
+        "cls": 0.1192931268091748,
+        "fcp": 1209.549,
+        "performanceScore": 77
+      },
+      "violations": [
+        {
+          "route": "/pacientes",
+          "metric": "inp",
+          "value": 10104,
+          "threshold": 300,
+          "unit": "ms",
+          "severity": "error",
+          "category": "important"
+        }
+      ],
+      "performanceScore": 77
+    },
+    "/prescricoes": {
+      "category": "important",
+      "metrics": {
+        "ttfb": 63.494,
+        "lcp": 2858.0640000000003,
+        "inp": 10459.064000000002,
+        "cls": 0.029844870242533326,
+        "fcp": 1212.096,
+        "performanceScore": 79
+      },
+      "violations": [
+        {
+          "route": "/prescricoes",
+          "metric": "inp",
+          "value": 10459,
+          "threshold": 300,
+          "unit": "ms",
+          "severity": "error",
+          "category": "important"
+        }
+      ],
+      "performanceScore": 79
+    },
+    "/documentos": {
+      "category": "important",
+      "metrics": {
+        "ttfb": 80.98200000000001,
+        "lcp": 2707.1930999999995,
+        "inp": 9960.1931,
+        "cls": 0.013594613628396618,
+        "fcp": 1210.78965,
+        "performanceScore": 81
+      },
+      "violations": [
+        {
+          "route": "/documentos",
+          "metric": "inp",
+          "value": 9960,
+          "threshold": 300,
+          "unit": "ms",
+          "severity": "error",
+          "category": "important"
+        }
+      ],
+      "performanceScore": 81
+    },
+    "/configuracoes": {
+      "category": "standard",
+      "metrics": {
+        "ttfb": 24.706999999999997,
+        "lcp": 2706.4195999999997,
+        "inp": 10126.419600000001,
+        "cls": 0.017151666653419793,
+        "fcp": 1209.6293999999998,
+        "performanceScore": 81
+      },
+      "violations": [
+        {
+          "route": "/configuracoes",
+          "metric": "inp",
+          "value": 10126,
+          "threshold": 500,
+          "unit": "ms",
+          "severity": "warning",
+          "category": "standard"
+        }
+      ],
+      "performanceScore": 81
+    },
+    "/assinatura": {
+      "category": "standard",
+      "metrics": {
+        "ttfb": 56.21,
+        "lcp": 2705.4353,
+        "inp": 10127.435300000001,
+        "cls": 0.06546373353484038,
+        "fcp": 1208.1529500000001,
+        "performanceScore": 80
+      },
+      "violations": [
+        {
+          "route": "/assinatura",
+          "metric": "inp",
+          "value": 10127,
+          "threshold": 500,
+          "unit": "ms",
+          "severity": "warning",
+          "category": "standard"
+        }
+      ],
+      "performanceScore": 80
+    }
+  },
+  "budgetViolations": [
+    {
+      "route": "/prescricoes/nova",
+      "metric": "lcp",
+      "value": 2780,
+      "threshold": 2500,
+      "unit": "ms",
+      "severity": "error",
+      "category": "critical"
+    },
+    {
+      "route": "/prescricoes/nova",
+      "metric": "inp",
+      "value": 10268,
+      "threshold": 200,
+      "unit": "ms",
+      "severity": "error",
+      "category": "critical"
+    },
+    {
+      "route": "/home",
+      "metric": "inp",
+      "value": 10130,
+      "threshold": 300,
+      "unit": "ms",
+      "severity": "error",
+      "category": "important"
+    },
+    {
+      "route": "/home",
+      "metric": "cls",
+      "value": 0,
+      "threshold": 0.15,
+      "unit": "",
+      "severity": "error",
+      "category": "important"
+    },
+    {
+      "route": "/pacientes",
+      "metric": "inp",
+      "value": 10104,
+      "threshold": 300,
+      "unit": "ms",
+      "severity": "error",
+      "category": "important"
+    },
+    {
+      "route": "/prescricoes",
+      "metric": "inp",
+      "value": 10459,
+      "threshold": 300,
+      "unit": "ms",
+      "severity": "error",
+      "category": "important"
+    },
+    {
+      "route": "/documentos",
+      "metric": "inp",
+      "value": 9960,
+      "threshold": 300,
+      "unit": "ms",
+      "severity": "error",
+      "category": "important"
+    },
+    {
+      "route": "/configuracoes",
+      "metric": "inp",
+      "value": 10126,
+      "threshold": 500,
+      "unit": "ms",
+      "severity": "warning",
+      "category": "standard"
+    },
+    {
+      "route": "/assinatura",
+      "metric": "inp",
+      "value": 10127,
+      "threshold": 500,
+      "unit": "ms",
+      "severity": "warning",
+      "category": "standard"
+    }
+  ]
+}

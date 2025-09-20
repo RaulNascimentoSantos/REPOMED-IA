@@ -1,0 +1,396 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e4]:
+      - generic [ref=e6]:
+        - img [ref=e8]
+        - generic [ref=e12]:
+          - heading "RepoMed IA" [level=1] [ref=e13]
+          - paragraph [ref=e14]: Sistema Médico v4.0
+      - navigation [ref=e15]:
+        - list [ref=e16]:
+          - listitem [ref=e17]:
+            - list [ref=e18]:
+              - listitem [ref=e19]:
+                - button "Dashboard" [ref=e20] [cursor=pointer]:
+                  - img [ref=e21] [cursor=pointer]
+                  - text: Dashboard
+              - listitem [ref=e24]:
+                - button "Pacientes" [ref=e25] [cursor=pointer]:
+                  - img [ref=e26] [cursor=pointer]
+                  - text: Pacientes
+                  - img [ref=e31] [cursor=pointer]
+              - listitem [ref=e33]:
+                - button "Documentos" [ref=e34] [cursor=pointer]:
+                  - img [ref=e35] [cursor=pointer]
+                  - text: Documentos
+                  - img [ref=e38] [cursor=pointer]
+                - list [ref=e40]:
+                  - listitem [ref=e41]:
+                    - button "Todos os Documentos" [ref=e42] [cursor=pointer]
+                  - listitem [ref=e43]:
+                    - button "Receitas" [ref=e44] [cursor=pointer]
+                  - listitem [ref=e45]:
+                    - button "Atestados" [ref=e46] [cursor=pointer]
+                  - listitem [ref=e47]:
+                    - button "Relatórios" [ref=e48] [cursor=pointer]
+              - listitem [ref=e49]:
+                - button "Consultas" [ref=e50] [cursor=pointer]:
+                  - img [ref=e51] [cursor=pointer]
+                  - text: Consultas
+                  - img [ref=e53] [cursor=pointer]
+              - listitem [ref=e55]:
+                - button "Assinatura Digital" [ref=e56] [cursor=pointer]:
+                  - img [ref=e57] [cursor=pointer]
+                  - text: Assinatura Digital
+              - listitem [ref=e59]:
+                - button "Templates" [ref=e60] [cursor=pointer]:
+                  - img [ref=e61] [cursor=pointer]
+                  - text: Templates
+                  - img [ref=e64] [cursor=pointer]
+              - listitem [ref=e66]:
+                - button "Agendamento" [ref=e67] [cursor=pointer]:
+                  - img [ref=e68] [cursor=pointer]
+                  - text: Agendamento
+              - listitem [ref=e70]:
+                - button "Telemedicina" [ref=e71] [cursor=pointer]:
+                  - img [ref=e72] [cursor=pointer]
+                  - text: Telemedicina
+              - listitem [ref=e75]:
+                - button "Histórico" [ref=e76] [cursor=pointer]:
+                  - img [ref=e77] [cursor=pointer]
+                  - text: Histórico
+              - listitem [ref=e81]:
+                - button "Notificações" [ref=e82] [cursor=pointer]:
+                  - img [ref=e83] [cursor=pointer]
+                  - text: Notificações
+              - listitem [ref=e86]:
+                - button "Prescrições" [ref=e87] [cursor=pointer]:
+                  - img [ref=e88] [cursor=pointer]
+                  - text: Prescrições
+              - listitem [ref=e91]:
+                - button "Exames" [ref=e92] [cursor=pointer]:
+                  - img [ref=e93] [cursor=pointer]
+                  - text: Exames
+              - listitem [ref=e97]:
+                - button "Relatórios" [ref=e98] [cursor=pointer]:
+                  - img [ref=e99] [cursor=pointer]
+                  - text: Relatórios
+              - listitem [ref=e101]:
+                - button "Financeiro" [ref=e102] [cursor=pointer]:
+                  - img [ref=e103] [cursor=pointer]
+                  - text: Financeiro
+              - listitem [ref=e105]:
+                - button "Sistema" [ref=e106] [cursor=pointer]:
+                  - img [ref=e107] [cursor=pointer]
+                  - text: Sistema
+                  - img [ref=e109] [cursor=pointer]
+          - listitem [ref=e111]:
+            - generic [ref=e113]:
+              - generic [ref=e115]: JS
+              - generic [ref=e116]:
+                - paragraph [ref=e117]: Dr. João Silva
+                - paragraph [ref=e118]: CRM SP 123456
+    - generic [ref=e119]:
+      - generic [ref=e121]:
+        - generic [ref=e122]:
+          - generic [ref=e123]: Buscar
+          - img
+          - searchbox "Buscar" [ref=e124]
+        - generic [ref=e125]:
+          - generic [ref=e126]:
+            - img [ref=e127]
+            - generic [ref=e131]: Online
+          - button "3" [ref=e132] [cursor=pointer]:
+            - img [ref=e133] [cursor=pointer]
+            - generic [ref=e136] [cursor=pointer]: "3"
+          - button "JS" [ref=e138] [cursor=pointer]:
+            - generic [ref=e140] [cursor=pointer]: JS
+            - img [ref=e141] [cursor=pointer]
+      - main [ref=e143]:
+        - generic [ref=e144]:
+          - generic [ref=e146]:
+            - generic [ref=e147]:
+              - button "Voltar" [ref=e148] [cursor=pointer]:
+                - img [ref=e149] [cursor=pointer]
+                - text: Voltar
+              - generic [ref=e151]:
+                - heading "🏥 Gestão de Pacientes IA" [level=1] [ref=e152]:
+                  - text: 🏥 Gestão de Pacientes
+                  - generic [ref=e153]: IA
+                - paragraph [ref=e154]: Monitoramento inteligente • 6 pacientes ativos • 0 críticos
+            - button "Novo Paciente" [ref=e155] [cursor=pointer]:
+              - img [ref=e156] [cursor=pointer]
+              - generic [ref=e157] [cursor=pointer]: Novo Paciente
+          - generic [ref=e158]:
+            - generic [ref=e160]:
+              - generic [ref=e161]:
+                - paragraph [ref=e162]: Total
+                - paragraph [ref=e163]: "6"
+              - img [ref=e164]
+            - generic [ref=e170]:
+              - generic [ref=e171]:
+                - paragraph [ref=e172]: Ativos
+                - paragraph [ref=e173]: "2"
+              - img [ref=e174]
+            - generic [ref=e178]:
+              - generic [ref=e179]:
+                - paragraph [ref=e180]: Alto Risco
+                - paragraph [ref=e181]: "1"
+              - img [ref=e182]
+            - generic [ref=e185]:
+              - generic [ref=e186]:
+                - paragraph [ref=e187]: Críticos
+                - paragraph [ref=e188]: "0"
+              - img [ref=e189]
+          - generic [ref=e191]:
+            - generic [ref=e193]:
+              - img [ref=e194]
+              - textbox "Buscar pacientes..." [ref=e197]
+            - generic [ref=e198]:
+              - button "Cards" [ref=e199] [cursor=pointer]:
+                - img [ref=e200] [cursor=pointer]
+                - text: Cards
+              - button "Lista" [ref=e202] [cursor=pointer]:
+                - img [ref=e203] [cursor=pointer]
+                - text: Lista
+          - generic [ref=e204]:
+            - generic [ref=e205]:
+              - generic [ref=e207]:
+                - generic [ref=e209]: MS
+                - generic [ref=e210]:
+                  - heading "Maria Silva Santos" [level=3] [ref=e211]
+                  - paragraph [ref=e212]: 34 anos
+                  - generic [ref=e213]: Ativo
+              - generic [ref=e214]:
+                - generic [ref=e215]:
+                  - img [ref=e216]
+                  - generic [ref=e218]: (11) 99999-9999
+                - generic [ref=e219]:
+                  - img [ref=e220]
+                  - generic [ref=e223]: maria.silva@email.com
+                - generic [ref=e224]:
+                  - img [ref=e225]
+                  - generic [ref=e228]: Rua das Flores, 123 - São Paulo/SP
+              - generic [ref=e229]:
+                - heading "Condições Médicas" [level=4] [ref=e230]:
+                  - img [ref=e231]
+                  - text: Condições Médicas
+                - generic [ref=e233]:
+                  - generic [ref=e234]: Hipertensão
+                  - generic [ref=e235]: Diabetes Tipo 2
+              - generic [ref=e237]:
+                - button "Ver Perfil" [ref=e238] [cursor=pointer]:
+                  - img [ref=e239] [cursor=pointer]
+                  - text: Ver Perfil
+                - button "Editar" [ref=e242] [cursor=pointer]:
+                  - img [ref=e243] [cursor=pointer]
+                  - text: Editar
+            - generic [ref=e246]:
+              - generic [ref=e248]:
+                - generic [ref=e250]: JC
+                - generic [ref=e251]:
+                  - heading "João Costa Lima" [level=3] [ref=e252]
+                  - paragraph [ref=e253]: 45 anos
+                  - generic [ref=e254]: Em Tratamento
+              - generic [ref=e255]:
+                - generic [ref=e256]:
+                  - img [ref=e257]
+                  - generic [ref=e259]: (11) 88888-8888
+                - generic [ref=e260]:
+                  - img [ref=e261]
+                  - generic [ref=e264]: joao.costa@email.com
+                - generic [ref=e265]:
+                  - img [ref=e266]
+                  - generic [ref=e269]: Av. Paulista, 456 - São Paulo/SP
+              - generic [ref=e270]:
+                - heading "Condições Médicas" [level=4] [ref=e271]:
+                  - img [ref=e272]
+                  - text: Condições Médicas
+                - generic [ref=e274]:
+                  - generic [ref=e275]: Cefaleia Crônica
+                  - generic [ref=e276]: Ansiedade
+              - generic [ref=e278]:
+                - button "Ver Perfil" [ref=e279] [cursor=pointer]:
+                  - img [ref=e280] [cursor=pointer]
+                  - text: Ver Perfil
+                - button "Editar" [ref=e283] [cursor=pointer]:
+                  - img [ref=e284] [cursor=pointer]
+                  - text: Editar
+            - generic [ref=e287]:
+              - generic [ref=e289]:
+                - generic [ref=e291]: AP
+                - generic [ref=e292]:
+                  - heading "Ana Paula Ferreira" [level=3] [ref=e293]
+                  - paragraph [ref=e294]: 28 anos
+                  - generic [ref=e295]: Acompanhamento
+              - generic [ref=e296]:
+                - generic [ref=e297]:
+                  - img [ref=e298]
+                  - generic [ref=e300]: (11) 77777-7777
+                - generic [ref=e301]:
+                  - img [ref=e302]
+                  - generic [ref=e305]: ana.paula@email.com
+                - generic [ref=e306]:
+                  - img [ref=e307]
+                  - generic [ref=e310]: Rua Augusta, 789 - São Paulo/SP
+              - generic [ref=e311]:
+                - heading "Condições Médicas" [level=4] [ref=e312]:
+                  - img [ref=e313]
+                  - text: Condições Médicas
+                - generic [ref=e315]:
+                  - generic [ref=e316]: Gravidez
+                  - generic [ref=e317]: Anemia
+              - generic [ref=e319]:
+                - button "Ver Perfil" [ref=e320] [cursor=pointer]:
+                  - img [ref=e321] [cursor=pointer]
+                  - text: Ver Perfil
+                - button "Editar" [ref=e324] [cursor=pointer]:
+                  - img [ref=e325] [cursor=pointer]
+                  - text: Editar
+            - generic [ref=e328]:
+              - generic [ref=e330]:
+                - generic [ref=e332]: PS
+                - generic [ref=e333]:
+                  - heading "Pedro Santos Oliveira" [level=3] [ref=e334]
+                  - paragraph [ref=e335]: 52 anos
+                  - generic [ref=e336]: Recuperação
+              - generic [ref=e337]:
+                - generic [ref=e338]:
+                  - img [ref=e339]
+                  - generic [ref=e341]: (11) 66666-6666
+                - generic [ref=e342]:
+                  - img [ref=e343]
+                  - generic [ref=e346]: pedro.santos@email.com
+                - generic [ref=e347]:
+                  - img [ref=e348]
+                  - generic [ref=e351]: Rua da Consolação, 321 - São Paulo/SP
+              - generic [ref=e352]:
+                - heading "Condições Médicas" [level=4] [ref=e353]:
+                  - img [ref=e354]
+                  - text: Condições Médicas
+                - generic [ref=e356]:
+                  - generic [ref=e357]: Fratura de Fêmur
+                  - generic [ref=e358]: Fisioterapia
+              - generic [ref=e360]:
+                - button "Ver Perfil" [ref=e361] [cursor=pointer]:
+                  - img [ref=e362] [cursor=pointer]
+                  - text: Ver Perfil
+                - button "Editar" [ref=e365] [cursor=pointer]:
+                  - img [ref=e366] [cursor=pointer]
+                  - text: Editar
+            - generic [ref=e369]:
+              - generic [ref=e371]:
+                - generic [ref=e373]: CM
+                - generic [ref=e374]:
+                  - heading "Carla Mendes Silva" [level=3] [ref=e375]
+                  - paragraph [ref=e376]: 39 anos
+                  - generic [ref=e377]: Ativo
+              - generic [ref=e378]:
+                - generic [ref=e379]:
+                  - img [ref=e380]
+                  - generic [ref=e382]: (11) 55555-5555
+                - generic [ref=e383]:
+                  - img [ref=e384]
+                  - generic [ref=e387]: carla.mendes@email.com
+                - generic [ref=e388]:
+                  - img [ref=e389]
+                  - generic [ref=e392]: Alameda Santos, 654 - São Paulo/SP
+              - generic [ref=e393]:
+                - heading "Condições Médicas" [level=4] [ref=e394]:
+                  - img [ref=e395]
+                  - text: Condições Médicas
+                - generic [ref=e397]:
+                  - generic [ref=e398]: Hipertireoidismo
+                  - generic [ref=e399]: Osteoporose
+              - generic [ref=e401]:
+                - button "Ver Perfil" [ref=e402] [cursor=pointer]:
+                  - img [ref=e403] [cursor=pointer]
+                  - text: Ver Perfil
+                - button "Editar" [ref=e406] [cursor=pointer]:
+                  - img [ref=e407] [cursor=pointer]
+                  - text: Editar
+            - generic [ref=e410]:
+              - generic [ref=e412]:
+                - generic [ref=e414]: RA
+                - generic [ref=e415]:
+                  - heading "Roberto Alves Costa" [level=3] [ref=e416]
+                  - paragraph [ref=e417]: 67 anos
+                  - generic [ref=e418]: Alto Risco
+              - generic [ref=e419]:
+                - generic [ref=e420]:
+                  - img [ref=e421]
+                  - generic [ref=e423]: (11) 44444-4444
+                - generic [ref=e424]:
+                  - img [ref=e425]
+                  - generic [ref=e428]: roberto.alves@email.com
+                - generic [ref=e429]:
+                  - img [ref=e430]
+                  - generic [ref=e433]: Rua Oscar Freire, 987 - São Paulo/SP
+              - generic [ref=e434]:
+                - heading "Condições Médicas" [level=4] [ref=e435]:
+                  - img [ref=e436]
+                  - text: Condições Médicas
+                - generic [ref=e438]:
+                  - generic [ref=e439]: Diabetes
+                  - generic [ref=e440]: Hipertensão
+                  - generic [ref=e441]: Cardiopatia
+              - generic [ref=e443]:
+                - button "Ver Perfil" [ref=e444] [cursor=pointer]:
+                  - img [ref=e445] [cursor=pointer]
+                  - text: Ver Perfil
+                - button "Editar" [ref=e448] [cursor=pointer]:
+                  - img [ref=e449] [cursor=pointer]
+                  - text: Editar
+    - generic [ref=e452]:
+      - button "Abrir ações rápidas" [ref=e453] [cursor=pointer]:
+        - img [ref=e454] [cursor=pointer]
+      - generic [ref=e458]: "2"
+  - alert [ref=e459]
+  - dialog [ref=e462]:
+    - generic [ref=e463]:
+      - generic [ref=e464]:
+        - heading "Build Error" [level=1] [ref=e465]
+        - paragraph [ref=e466]: Failed to compile
+        - generic [ref=e467]:
+          - generic "An outdated version detected (latest is 15.5.3), upgrade is highly recommended!" [ref=e469]: Next.js (14.2.32) is outdated
+          - link "(learn more)" [ref=e470] [cursor=pointer]:
+            - /url: https://nextjs.org/docs/messages/version-staleness
+      - generic [ref=e471]:
+        - generic [ref=e472]:
+          - link "./src/components/ui/error-boundary.tsx" [ref=e473] [cursor=pointer]:
+            - text: ./src/components/ui/error-boundary.tsx
+            - img [ref=e474] [cursor=pointer]
+          - generic [ref=e478]:
+            - generic [ref=e479]: "Error:"
+            - generic [ref=e480]: x
+            - generic [ref=e481]: "Unexpected token `div`. Expected jsx identifier ,-["
+            - generic [ref=e482]: C:\Users\Raul\Desktop\WORKSPACE\RepoMed IA\repomed-web\src\components\ui\error-boundary.tsx
+            - generic [ref=e483]: :39:1]
+            - generic [ref=e484]: "39"
+            - generic [ref=e485]: "| render() {"
+            - generic [ref=e486]: "40"
+            - generic [ref=e487]: "| if (this.state.hasError) {"
+            - generic [ref=e488]: "41"
+            - generic [ref=e489]: "| return this.props.fallback || ("
+            - generic [ref=e490]: "42"
+            - generic [ref=e491]: "| <div className=\"flex flex-col items-center justify-center min-h-[400px] p-8\"> :"
+            - generic [ref=e492]: ^^^
+            - generic [ref=e494]: "43"
+            - generic [ref=e495]: "| <AlertCircle className=\"h-12 w-12 text-red-500 mb-4\" />"
+            - generic [ref=e496]: "44"
+            - generic [ref=e497]: "| <h2 className=\"text-xl font-semibold mb-2\">Ops! Algo deu errado</h2>"
+            - generic [ref=e498]: "45"
+            - generic [ref=e499]: "| <p className=\"text-gray-600 mb-4 text-center max-w-md\"> `---- Caused by: Syntax Error Import trace for requested module:"
+            - link "./src/components/ui/error-boundary.tsx" [ref=e500] [cursor=pointer]:
+              - text: ./src/components/ui/error-boundary.tsx
+              - img [ref=e501] [cursor=pointer]
+            - link "./src/app/auth/register/page.tsx" [ref=e505] [cursor=pointer]:
+              - text: ./src/app/auth/register/page.tsx
+              - img [ref=e506] [cursor=pointer]
+        - contentinfo [ref=e510]:
+          - paragraph [ref=e511]:
+            - generic [ref=e512]: This error occurred during the build process and can only be dismissed by fixing the error.
+```

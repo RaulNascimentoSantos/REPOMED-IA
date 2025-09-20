@@ -1,0 +1,463 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e4]:
+      - generic [ref=e6]:
+        - img [ref=e8]
+        - generic [ref=e12]:
+          - heading "RepoMed IA" [level=1] [ref=e13]
+          - paragraph [ref=e14]: Sistema Médico v4.0
+      - navigation [ref=e15]:
+        - list [ref=e16]:
+          - listitem [ref=e17]:
+            - list [ref=e18]:
+              - listitem [ref=e19]:
+                - button "Dashboard" [ref=e20] [cursor=pointer]:
+                  - img [ref=e21] [cursor=pointer]
+                  - text: Dashboard
+              - listitem [ref=e24]:
+                - button "Pacientes" [ref=e25] [cursor=pointer]:
+                  - img [ref=e26] [cursor=pointer]
+                  - text: Pacientes
+                  - img [ref=e31] [cursor=pointer]
+              - listitem [ref=e33]:
+                - button "Documentos" [ref=e34] [cursor=pointer]:
+                  - img [ref=e35] [cursor=pointer]
+                  - text: Documentos
+                  - img [ref=e38] [cursor=pointer]
+                - list [ref=e40]:
+                  - listitem [ref=e41]:
+                    - button "Todos os Documentos" [ref=e42] [cursor=pointer]
+                  - listitem [ref=e43]:
+                    - button "Receitas" [ref=e44] [cursor=pointer]
+                  - listitem [ref=e45]:
+                    - button "Atestados" [ref=e46] [cursor=pointer]
+                  - listitem [ref=e47]:
+                    - button "Relatórios" [ref=e48] [cursor=pointer]
+              - listitem [ref=e49]:
+                - button "Consultas" [ref=e50] [cursor=pointer]:
+                  - img [ref=e51] [cursor=pointer]
+                  - text: Consultas
+                  - img [ref=e53] [cursor=pointer]
+              - listitem [ref=e55]:
+                - button "Assinatura Digital" [ref=e56] [cursor=pointer]:
+                  - img [ref=e57] [cursor=pointer]
+                  - text: Assinatura Digital
+              - listitem [ref=e59]:
+                - button "Templates" [ref=e60] [cursor=pointer]:
+                  - img [ref=e61] [cursor=pointer]
+                  - text: Templates
+                  - img [ref=e64] [cursor=pointer]
+              - listitem [ref=e66]:
+                - button "Agendamento" [ref=e67] [cursor=pointer]:
+                  - img [ref=e68] [cursor=pointer]
+                  - text: Agendamento
+              - listitem [ref=e70]:
+                - button "Telemedicina" [ref=e71] [cursor=pointer]:
+                  - img [ref=e72] [cursor=pointer]
+                  - text: Telemedicina
+              - listitem [ref=e75]:
+                - button "Histórico" [ref=e76] [cursor=pointer]:
+                  - img [ref=e77] [cursor=pointer]
+                  - text: Histórico
+              - listitem [ref=e81]:
+                - button "Notificações" [ref=e82] [cursor=pointer]:
+                  - img [ref=e83] [cursor=pointer]
+                  - text: Notificações
+              - listitem [ref=e86]:
+                - button "Prescrições" [ref=e87] [cursor=pointer]:
+                  - img [ref=e88] [cursor=pointer]
+                  - text: Prescrições
+              - listitem [ref=e91]:
+                - button "Exames" [ref=e92] [cursor=pointer]:
+                  - img [ref=e93] [cursor=pointer]
+                  - text: Exames
+              - listitem [ref=e97]:
+                - button "Relatórios" [ref=e98] [cursor=pointer]:
+                  - img [ref=e99] [cursor=pointer]
+                  - text: Relatórios
+              - listitem [ref=e101]:
+                - button "Financeiro" [ref=e102] [cursor=pointer]:
+                  - img [ref=e103] [cursor=pointer]
+                  - text: Financeiro
+              - listitem [ref=e105]:
+                - button "Sistema" [ref=e106] [cursor=pointer]:
+                  - img [ref=e107] [cursor=pointer]
+                  - text: Sistema
+                  - img [ref=e109] [cursor=pointer]
+          - listitem [ref=e111]:
+            - generic [ref=e113]:
+              - generic [ref=e115]: JS
+              - generic [ref=e116]:
+                - paragraph [ref=e117]: Dr. João Silva
+                - paragraph [ref=e118]: CRM SP 123456
+    - generic [ref=e119]:
+      - generic [ref=e121]:
+        - generic [ref=e122]:
+          - generic [ref=e123]: Buscar
+          - img
+          - searchbox "Buscar" [ref=e124]
+        - generic [ref=e125]:
+          - generic [ref=e126]:
+            - img [ref=e127]
+            - generic [ref=e131]: Online
+          - button "3" [ref=e132] [cursor=pointer]:
+            - img [ref=e133] [cursor=pointer]
+            - generic [ref=e136] [cursor=pointer]: "3"
+          - button "JS" [ref=e138] [cursor=pointer]:
+            - generic [ref=e140] [cursor=pointer]: JS
+            - img [ref=e141] [cursor=pointer]
+      - main [ref=e143]:
+        - main [ref=e144]:
+          - generic [ref=e146]:
+            - generic [ref=e147]:
+              - heading "📄 RepoMed IA - Documentos Médicos01:23:00" [level=1] [ref=e148]:
+                - text: 📄 RepoMed IA - Documentos Médicos
+                - generic [ref=e149]: 01:23:00
+              - paragraph [ref=e150]: Bom dia, Dr. João Silva • CRM SP 123456 • Sistema de Documentação Digital
+            - generic [ref=e151]:
+              - button "Ativar Voz" [ref=e152] [cursor=pointer]:
+                - img [ref=e153] [cursor=pointer]
+                - text: Ativar Voz
+              - generic [ref=e159]:
+                - img [ref=e160] [cursor=pointer]
+                - generic [ref=e163]: "3"
+              - generic [ref=e166]: Online
+          - generic [ref=e167]:
+            - generic [ref=e170] [cursor=pointer]:
+              - img [ref=e173] [cursor=pointer]
+              - generic [ref=e176] [cursor=pointer]:
+                - heading "Receita Médica" [level=3] [ref=e177] [cursor=pointer]
+                - paragraph [ref=e178] [cursor=pointer]: Criar Nova
+                - paragraph [ref=e179] [cursor=pointer]: Template com IA e validação automática
+                - generic [ref=e181] [cursor=pointer]: ↗ 156 criadas
+            - generic [ref=e184] [cursor=pointer]:
+              - img [ref=e187] [cursor=pointer]
+              - generic [ref=e191] [cursor=pointer]:
+                - heading "Atestado Médico" [level=3] [ref=e192] [cursor=pointer]
+                - paragraph [ref=e193] [cursor=pointer]: Gerar Agora
+                - paragraph [ref=e194] [cursor=pointer]: Atestado de saúde com validade jurídica
+                - generic [ref=e196] [cursor=pointer]: ↗ 89 emitidos
+            - generic [ref=e199] [cursor=pointer]:
+              - generic [ref=e200] [cursor=pointer]:
+                - img [ref=e202] [cursor=pointer]
+                - generic [ref=e204] [cursor=pointer]: HIGH
+              - generic [ref=e205] [cursor=pointer]:
+                - heading "Assinatura Digital" [level=3] [ref=e206] [cursor=pointer]
+                - paragraph [ref=e207] [cursor=pointer]: Assinar Docs
+                - paragraph [ref=e208] [cursor=pointer]: 8 documentos aguardando assinatura
+                - generic [ref=e210] [cursor=pointer]: ↗ 12 hoje
+            - generic [ref=e213] [cursor=pointer]:
+              - img [ref=e216] [cursor=pointer]
+              - generic [ref=e219] [cursor=pointer]:
+                - heading "Templates IA" [level=3] [ref=e220] [cursor=pointer]
+                - paragraph [ref=e221] [cursor=pointer]: Personalizar
+                - paragraph [ref=e222] [cursor=pointer]: Templates inteligentes personalizáveis
+                - generic [ref=e224] [cursor=pointer]: ↗ +40% eficiência
+          - generic [ref=e225]:
+            - generic [ref=e228]:
+              - img [ref=e231]
+              - generic [ref=e234]:
+                - heading "Documentos Hoje" [level=3] [ref=e235]
+                - paragraph [ref=e236]: "23"
+                - paragraph [ref=e237]: Receitas, atestados e laudos
+                - generic [ref=e239]: ↗ +8 vs ontem
+            - generic [ref=e248]:
+              - img [ref=e251]
+              - generic [ref=e253]:
+                - heading "Assinados Hoje" [level=3] [ref=e254]
+                - paragraph [ref=e255]: "15"
+                - paragraph [ref=e256]: Validação jurídica completa
+                - generic [ref=e258]: ↗ 65% do total
+            - generic [ref=e261]:
+              - img [ref=e264]
+              - generic [ref=e267]:
+                - heading "Templates Ativos" [level=3] [ref=e268]
+                - paragraph [ref=e269]: "12"
+                - paragraph [ref=e270]: Personalizados para sua prática
+                - generic [ref=e272]: ↗ +3 este mês
+            - generic [ref=e275]:
+              - img [ref=e278]
+              - generic [ref=e281]:
+                - heading "Tempo Médio" [level=3] [ref=e282]
+                - paragraph [ref=e283]: 2.3 min
+                - paragraph [ref=e284]: Por documento criado
+                - generic [ref=e286]: ↗ -40% com IA
+          - generic [ref=e287]:
+            - generic [ref=e288]:
+              - generic [ref=e289]:
+                - heading "Templates de Documentos 6 Ativos" [level=3] [ref=e290]:
+                  - img [ref=e291]
+                  - text: Templates de Documentos
+                  - generic [ref=e294]: 6 Ativos
+                - button "Novo Template" [ref=e295] [cursor=pointer]:
+                  - img [ref=e296] [cursor=pointer]
+                  - text: Novo Template
+              - generic [ref=e297]:
+                - generic [ref=e300] [cursor=pointer]:
+                  - generic [ref=e301] [cursor=pointer]:
+                    - img [ref=e303] [cursor=pointer]
+                    - generic [ref=e306] [cursor=pointer]:
+                      - generic [ref=e307] [cursor=pointer]: IA Assistida
+                      - generic [ref=e308] [cursor=pointer]: CFM Validado
+                  - generic [ref=e309] [cursor=pointer]:
+                    - heading "Receita Médica Simples" [level=3] [ref=e310] [cursor=pointer]
+                    - paragraph [ref=e311] [cursor=pointer]: Template padrão para prescrições de medicamentos controlados e simples
+                    - generic [ref=e312] [cursor=pointer]:
+                      - generic [ref=e313] [cursor=pointer]:
+                        - generic [ref=e314] [cursor=pointer]: Usado 156x
+                        - generic [ref=e315] [cursor=pointer]: • hoje
+                      - generic [ref=e316] [cursor=pointer]: ~2 min
+                    - generic [ref=e317] [cursor=pointer]:
+                      - generic [ref=e318] [cursor=pointer]: Receita
+                      - button "Criar Documento →" [ref=e319] [cursor=pointer]
+                - generic [ref=e322] [cursor=pointer]:
+                  - generic [ref=e323] [cursor=pointer]:
+                    - img [ref=e325] [cursor=pointer]
+                    - generic [ref=e329] [cursor=pointer]:
+                      - generic [ref=e330] [cursor=pointer]: IA Assistida
+                      - generic [ref=e331] [cursor=pointer]: CFM Validado
+                  - generic [ref=e332] [cursor=pointer]:
+                    - heading "Atestado Médico" [level=3] [ref=e333] [cursor=pointer]
+                    - paragraph [ref=e334] [cursor=pointer]: Atestado de saúde e capacidade laboral com validação automática
+                    - generic [ref=e335] [cursor=pointer]:
+                      - generic [ref=e336] [cursor=pointer]:
+                        - generic [ref=e337] [cursor=pointer]: Usado 89x
+                        - generic [ref=e338] [cursor=pointer]: • ontem
+                      - generic [ref=e339] [cursor=pointer]: ~1 min
+                    - generic [ref=e340] [cursor=pointer]:
+                      - generic [ref=e341] [cursor=pointer]: Atestado
+                      - button "Criar Documento →" [ref=e342] [cursor=pointer]
+                - generic [ref=e345] [cursor=pointer]:
+                  - generic [ref=e346] [cursor=pointer]:
+                    - img [ref=e348] [cursor=pointer]
+                    - generic [ref=e351] [cursor=pointer]:
+                      - generic [ref=e352] [cursor=pointer]: IA Assistida
+                      - generic [ref=e353] [cursor=pointer]: CFM Validado
+                  - generic [ref=e354] [cursor=pointer]:
+                    - heading "Laudo Médico" [level=3] [ref=e355] [cursor=pointer]
+                    - paragraph [ref=e356] [cursor=pointer]: Laudo completo com diagnóstico e recomendações terapêuticas
+                    - generic [ref=e357] [cursor=pointer]:
+                      - generic [ref=e358] [cursor=pointer]:
+                        - generic [ref=e359] [cursor=pointer]: Usado 45x
+                        - generic [ref=e360] [cursor=pointer]: • 2 dias
+                      - generic [ref=e361] [cursor=pointer]: ~5 min
+                    - generic [ref=e362] [cursor=pointer]:
+                      - generic [ref=e363] [cursor=pointer]: Laudo
+                      - button "Criar Documento →" [ref=e364] [cursor=pointer]
+                - generic [ref=e367] [cursor=pointer]:
+                  - generic [ref=e368] [cursor=pointer]:
+                    - img [ref=e370] [cursor=pointer]
+                    - generic [ref=e373] [cursor=pointer]:
+                      - generic [ref=e374] [cursor=pointer]: IA Assistida
+                      - generic [ref=e375] [cursor=pointer]: CFM Validado
+                  - generic [ref=e376] [cursor=pointer]:
+                    - heading "Relatório de Consulta" [level=3] [ref=e377] [cursor=pointer]
+                    - paragraph [ref=e378] [cursor=pointer]: Relatório detalhado da consulta médica realizada
+                    - generic [ref=e379] [cursor=pointer]:
+                      - generic [ref=e380] [cursor=pointer]:
+                        - generic [ref=e381] [cursor=pointer]: Usado 234x
+                        - generic [ref=e382] [cursor=pointer]: • hoje
+                      - generic [ref=e383] [cursor=pointer]: ~3 min
+                    - generic [ref=e384] [cursor=pointer]:
+                      - generic [ref=e385] [cursor=pointer]: Relatorio
+                      - button "Criar Documento →" [ref=e386] [cursor=pointer]
+                - generic [ref=e389] [cursor=pointer]:
+                  - generic [ref=e390] [cursor=pointer]:
+                    - img [ref=e392] [cursor=pointer]
+                    - generic [ref=e395] [cursor=pointer]:
+                      - generic [ref=e396] [cursor=pointer]: IA Assistida
+                      - generic [ref=e397] [cursor=pointer]: CFM Validado
+                  - generic [ref=e398] [cursor=pointer]:
+                    - heading "Encaminhamento Médico" [level=3] [ref=e399] [cursor=pointer]
+                    - paragraph [ref=e400] [cursor=pointer]: Encaminhamento para especialista ou exame complementar
+                    - generic [ref=e401] [cursor=pointer]:
+                      - generic [ref=e402] [cursor=pointer]:
+                        - generic [ref=e403] [cursor=pointer]: Usado 67x
+                        - generic [ref=e404] [cursor=pointer]: • hoje
+                      - generic [ref=e405] [cursor=pointer]: ~2 min
+                    - generic [ref=e406] [cursor=pointer]:
+                      - generic [ref=e407] [cursor=pointer]: Encaminhamento
+                      - button "Criar Documento →" [ref=e408] [cursor=pointer]
+                - generic [ref=e411] [cursor=pointer]:
+                  - generic [ref=e412] [cursor=pointer]:
+                    - img [ref=e414] [cursor=pointer]
+                    - generic [ref=e417] [cursor=pointer]: CFM Validado
+                  - generic [ref=e418] [cursor=pointer]:
+                    - heading "Declaração de Óbito" [level=3] [ref=e419] [cursor=pointer]
+                    - paragraph [ref=e420] [cursor=pointer]: Declaração oficial de óbito com protocolo de registro
+                    - generic [ref=e421] [cursor=pointer]:
+                      - generic [ref=e422] [cursor=pointer]:
+                        - generic [ref=e423] [cursor=pointer]: Usado 12x
+                        - generic [ref=e424] [cursor=pointer]: • 1 semana
+                      - generic [ref=e425] [cursor=pointer]: ~8 min
+                    - generic [ref=e426] [cursor=pointer]:
+                      - generic [ref=e427] [cursor=pointer]: Declaracao
+                      - button "Criar Documento →" [ref=e428] [cursor=pointer]
+            - generic [ref=e429]:
+              - generic [ref=e432] [cursor=pointer]:
+                - generic [ref=e433] [cursor=pointer]:
+                  - generic [ref=e434] [cursor=pointer]:
+                    - img [ref=e436] [cursor=pointer]
+                    - generic [ref=e438] [cursor=pointer]:
+                      - heading "Assinatura Digital" [level=3] [ref=e439] [cursor=pointer]
+                      - paragraph [ref=e440] [cursor=pointer]: Certificado ICP-Brasil
+                  - generic [ref=e441] [cursor=pointer]:
+                    - generic [ref=e442] [cursor=pointer]:
+                      - img [ref=e443] [cursor=pointer]
+                      - text: Válido
+                    - generic [ref=e446] [cursor=pointer]:
+                      - img [ref=e447] [cursor=pointer]
+                      - text: CFM/CRM
+                - generic [ref=e450] [cursor=pointer]:
+                  - generic [ref=e451] [cursor=pointer]:
+                    - generic [ref=e452] [cursor=pointer]:
+                      - img [ref=e453] [cursor=pointer]
+                      - generic [ref=e457] [cursor=pointer]: Hoje
+                    - paragraph [ref=e458] [cursor=pointer]: "12"
+                    - paragraph [ref=e459] [cursor=pointer]: documentos assinados
+                  - generic [ref=e460] [cursor=pointer]:
+                    - generic [ref=e461] [cursor=pointer]:
+                      - img [ref=e462] [cursor=pointer]
+                      - generic [ref=e465] [cursor=pointer]: Pendentes
+                    - paragraph [ref=e466] [cursor=pointer]: "3"
+                    - paragraph [ref=e467] [cursor=pointer]: aguardando assinatura
+                - generic [ref=e468] [cursor=pointer]:
+                  - generic [ref=e469] [cursor=pointer]:
+                    - generic [ref=e470] [cursor=pointer]:
+                      - img [ref=e471] [cursor=pointer]
+                      - generic [ref=e475] [cursor=pointer]: Certificado Digital
+                    - img [ref=e476] [cursor=pointer]
+                  - generic [ref=e479] [cursor=pointer]:
+                    - generic [ref=e480] [cursor=pointer]:
+                      - generic [ref=e481] [cursor=pointer]: "Validade:"
+                      - generic [ref=e482] [cursor=pointer]: 15/12/2025
+                    - generic [ref=e483] [cursor=pointer]:
+                      - generic [ref=e484] [cursor=pointer]: "Tipo:"
+                      - generic [ref=e485] [cursor=pointer]: A3 - ICP-Brasil
+                    - generic [ref=e486] [cursor=pointer]:
+                      - generic [ref=e487] [cursor=pointer]: "Emissor:"
+                      - generic [ref=e488] [cursor=pointer]: Serpro
+                - generic [ref=e489] [cursor=pointer]:
+                  - button "Assinar Documentos" [ref=e490] [cursor=pointer]:
+                    - img [ref=e491] [cursor=pointer]
+                    - text: Assinar Documentos
+                  - button [ref=e494] [cursor=pointer]:
+                    - img [ref=e495] [cursor=pointer]
+                - paragraph [ref=e498] [cursor=pointer]: ✓ Assinaturas válidas juridicamente conforme MP 2.200-2/2001
+              - generic [ref=e499]:
+                - generic [ref=e500]:
+                  - heading "IA Assistente" [level=4] [ref=e501]:
+                    - img [ref=e502]
+                    - text: IA Assistente
+                  - generic [ref=e505]: 2 Insights
+                - generic [ref=e506]:
+                  - generic [ref=e507]:
+                    - generic [ref=e509]:
+                      - generic [ref=e510]:
+                        - img [ref=e512]
+                        - generic [ref=e514]:
+                          - heading "Template de Receita Otimizado" [level=4] [ref=e515]
+                          - generic [ref=e516]:
+                            - img [ref=e517]
+                            - generic [ref=e519]: "IA Confiança: 94%"
+                      - generic [ref=e520]: MEDIUM
+                    - generic [ref=e521]:
+                      - paragraph [ref=e522]: IA sugere usar template específico para diabetes que reduz tempo de preenchimento em 40% e melhora aderência.
+                      - generic [ref=e524]:
+                        - generic [ref=e525]: Confiança da IA
+                        - generic [ref=e526]: 94%
+                      - generic [ref=e529]:
+                        - img [ref=e530]
+                        - text: 5 min atrás
+                      - generic [ref=e533]:
+                        - button "Aplicar Recomendação" [ref=e534] [cursor=pointer]:
+                          - img [ref=e535] [cursor=pointer]
+                          - text: Aplicar Recomendação
+                        - button "Feedback" [ref=e539] [cursor=pointer]:
+                          - img [ref=e540] [cursor=pointer]
+                          - text: Feedback
+                  - generic [ref=e544]:
+                    - generic [ref=e546]:
+                      - generic [ref=e547]:
+                        - img [ref=e549]
+                        - generic [ref=e551]:
+                          - heading "Documentos Pendentes de Assinatura" [level=4] [ref=e552]
+                          - generic [ref=e553]:
+                            - img [ref=e554]
+                            - generic [ref=e556]: "IA Confiança: 100%"
+                      - generic [ref=e557]: HIGH
+                    - generic [ref=e558]:
+                      - paragraph [ref=e559]: 8 documentos criados hoje ainda não foram assinados digitalmente. Recomenda-se processar para validade jurídica.
+                      - generic [ref=e561]:
+                        - generic [ref=e562]: Confiança da IA
+                        - generic [ref=e563]: 100%
+                      - generic [ref=e566]:
+                        - img [ref=e567]
+                        - text: 10 min atrás
+                      - generic [ref=e570]:
+                        - button "Aplicar Recomendação" [ref=e571] [cursor=pointer]:
+                          - img [ref=e572] [cursor=pointer]
+                          - text: Aplicar Recomendação
+                        - button "Feedback" [ref=e576] [cursor=pointer]:
+                          - img [ref=e577] [cursor=pointer]
+                          - text: Feedback
+              - generic [ref=e581]:
+                - generic [ref=e582]:
+                  - heading "Documentos Recentes" [level=4] [ref=e583]:
+                    - img [ref=e584]
+                    - text: Documentos Recentes
+                  - generic [ref=e587]: Hoje
+                - generic [ref=e588]:
+                  - generic [ref=e589]:
+                    - generic [ref=e590]:
+                      - paragraph [ref=e591]: Receita - Maria Silva
+                      - paragraph [ref=e592]: Receita
+                    - generic [ref=e593]:
+                      - generic [ref=e594]: 14:30
+                      - generic [ref=e595]: assinado
+                  - generic [ref=e596]:
+                    - generic [ref=e597]:
+                      - paragraph [ref=e598]: Atestado - João Costa
+                      - paragraph [ref=e599]: Atestado
+                    - generic [ref=e600]:
+                      - generic [ref=e601]: 13:15
+                      - generic [ref=e602]: pendente
+                  - generic [ref=e603]:
+                    - generic [ref=e604]:
+                      - paragraph [ref=e605]: Laudo - Pedro Santos
+                      - paragraph [ref=e606]: Laudo
+                    - generic [ref=e607]:
+                      - generic [ref=e608]: 11:45
+                      - generic [ref=e609]: assinado
+                  - generic [ref=e610]:
+                    - generic [ref=e611]:
+                      - paragraph [ref=e612]: Encaminhamento - Ana Lima
+                      - paragraph [ref=e613]: Encaminhamento
+                    - generic [ref=e614]:
+                      - generic [ref=e615]: 10:20
+                      - generic [ref=e616]: pendente
+                - button "Ver Todos os Documentos" [ref=e617] [cursor=pointer]
+          - generic [ref=e618]:
+            - button "Gerenciar Templates" [ref=e619] [cursor=pointer]:
+              - img [ref=e620] [cursor=pointer]
+              - text: Gerenciar Templates
+            - button "Central de Assinatura" [ref=e623] [cursor=pointer]:
+              - img [ref=e624] [cursor=pointer]
+              - text: Central de Assinatura
+            - button "Histórico de Documentos" [ref=e626] [cursor=pointer]:
+              - img [ref=e627] [cursor=pointer]
+              - text: Histórico de Documentos
+    - generic [ref=e630]:
+      - button "Abrir ações rápidas" [ref=e631] [cursor=pointer]:
+        - img [ref=e632] [cursor=pointer]
+      - generic [ref=e636]: "3"
+    - status "Informação:" [ref=e638]:
+      - img [ref=e639]
+      - generic [ref=e642]:
+        - img [ref=e643]
+        - text: Reconectando...
+  - alert [ref=e648]
+```
