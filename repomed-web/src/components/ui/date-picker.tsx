@@ -82,7 +82,7 @@ export function DatePicker({
           disabled={disabled}
           className="cursor-pointer pr-10"
         />
-        <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: 'var(--text-aaa-secondary)' }} />
       </div>
 
       {isOpen && (
@@ -95,7 +95,7 @@ export function DatePicker({
               className="h-8 w-8 p-0"
             >
               <ChevronLeft className="h-4 w-4" />
-            </button>
+            </Button>
             
             <h3 className="font-medium">
               {viewDate.toLocaleDateString('pt-BR', { 
@@ -111,12 +111,12 @@ export function DatePicker({
               className="h-8 w-8 p-0"
             >
               <ChevronRight className="h-4 w-4" />
-            </button>
+            </Button>
           </div>
 
           <div className="grid grid-cols-7 gap-1 mb-2">
             {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(day => (
-              <div key={day} className="text-xs text-gray-500 text-center py-2">
+              <div key={day} className="text-xs text-center py-2" style={{ color: 'var(--text-aaa-secondary)' }}>
                 {day}
               </div>
             ))}
@@ -139,13 +139,13 @@ export function DatePicker({
                   disabled={disabled}
                   className={cn(
                     'h-8 w-8 p-0 text-sm',
-                    !isCurrentMonth && 'text-gray-400',
                     isToday && !isSelected && 'ring-2 ring-blue-500',
                     isSelected && 'bg-blue-600 text-white'
                   )}
+                  style={!isCurrentMonth ? { color: 'var(--text-aaa-secondary)' } : undefined}
                 >
                   {date.getDate()}
-                </button>
+                </Button>
               );
             })}
           </div>

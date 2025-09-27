@@ -1,7 +1,7 @@
 'use client';
 
 import BackButton from '@/app/components/BackButton';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Pill,
@@ -20,6 +20,8 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { usePrescriptionAutoSave, loadPrescriptionDraft, clearPrescriptionDraft } from '@/hooks/useAutoSave';
 import { usePrescriptionFormShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { ShortcutHelp } from '@/components/ui/ShortcutHelp';
+import AutoSaveIndicator from '@/components/autosave/AutoSaveIndicator';
+import { useFeatureFlag } from '@/config/feature-flags';
 // Updated to use Fastify API instead of localStorage
 
 interface Medication {
@@ -44,6 +46,9 @@ export default function NovaPrescricaoPage() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [submitError, setSubmitError] = useState<string>('');
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const isAiEnabled = useFeatureFlag('FF_AI_SUGGESTIONS');
+
   const [formData, setFormData] = useState({
     paciente: '',
     dataEmissao: new Date().toISOString().split('T')[0],
@@ -62,14 +67,14 @@ export default function NovaPrescricaoPage() {
     }
   ]);
 
-  const isFormValid = formData.paciente && medications.some(med => med.name.trim() !== '');
+  const isFormValid = Boolean(formData.paciente && medications.some(med => med.name.trim() !== ''));
 
   const autoSave = usePrescriptionAutoSave(
     { formData, medications },
     isFormValid
   );
 
-  const addMedication = () => {
+  const addMedication = useCallback(() => {
     setMedications(prev => [...prev, {
       name: '',
       dosage: '',
@@ -77,13 +82,13 @@ export default function NovaPrescricaoPage() {
       duration: '',
       instructions: ''
     }]);
-  };
+  }, []);
 
-  const removeMedication = (index: number) => {
+  const removeMedication = useCallback((index: number) => {
     if (medications.length > 1) {
       setMedications(prev => prev.filter((_, i) => i !== index));
     }
-  };
+  }, [medications.length]);
 
   const formShortcuts = usePrescriptionFormShortcuts(
     () => handleSubmit(new Event('submit') as any),
@@ -138,36 +143,40 @@ export default function NovaPrescricaoPage() {
     }
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
-  };
+  }, []);
 
-  const handleMedicationChange = (index: number, field: keyof Medication, value: string) => {
+  const handleMedicationChange = useCallback((index: number, field: keyof Medication, value: string) => {
     setMedications(prev => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };
       return updated;
     });
-  };
+  }, []);
 
-  const validateForm = () => {
+  const validMedications = useMemo(() =>
+    medications.filter(med => med.name.trim() !== ''),
+    [medications]
+  );
+
+  const validateForm = useCallback(() => {
     if (!formData.paciente) {
       setSubmitError('Selecione um paciente');
       return false;
     }
 
-    const validMedications = medications.filter(med => med.name.trim() !== '');
     if (validMedications.length === 0) {
       setSubmitError('Adicione pelo menos um medicamento');
       return false;
     }
 
     return true;
-  };
+  }, [formData.paciente, validMedications.length]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -228,13 +237,13 @@ export default function NovaPrescricaoPage() {
   };
 
   return (
-    <div className="p-6 bg-slate-900 min-h-screen">
+    <div className="bg-slate-900 min-h-screen" style={{padding: 'var(--semantic-space-card)'}}>
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-4">
+      <div style={{marginBottom: 'var(--semantic-space-2xl)'}}>
+        <div className="flex items-center" style={{gap: 'var(--semantic-space-md)'}}>
           <BackButton href="/prescricoes" inline />
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-white flex items-center" style={{marginBottom: 'var(--semantic-space-sm)', gap: 'var(--semantic-space-sm)'}}>
               💊 Nova Prescrição
               <span className="text-lg bg-green-600 text-white px-3 py-1 rounded-full">IA</span>
               {autoSave.isSaving && (
@@ -253,29 +262,31 @@ export default function NovaPrescricaoPage() {
       {/* Formulário */}
       <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
         {/* Dados da Prescrição */}
-        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 mb-6">
-          <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+        <div className="bg-slate-800 rounded-xl border border-slate-700" style={{padding: 'var(--semantic-space-card)', marginBottom: 'var(--semantic-space-section)'}}>
+          <h2 className="text-xl font-bold text-white flex items-center" style={{marginBottom: 'var(--semantic-space-lg)', gap: 'var(--semantic-space-sm)'}}>
             <FileText className="w-5 h-5 text-blue-400" />
             Dados da Prescrição
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2" style={{gap: 'var(--semantic-space-lg)'}}>
             <div>
-              <label className="block text-slate-300 text-sm font-medium mb-2">
+              <label htmlFor="paciente-select" className="block text-slate-300 text-base font-medium" style={{marginBottom: 'var(--semantic-space-sm)'}}>
                 Paciente *
               </label>
               {!formData.paciente && submitError && (
                 <StatusBadge status="error">Campo obrigatório</StatusBadge>
               )}
               <select
+                id="paciente-select"
                 name="paciente"
                 value={formData.paciente}
                 onChange={handleInputChange}
                 required
-                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                aria-label="Selecione um paciente"
+                className="w-full bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500" style={{padding: 'var(--semantic-space-sm) var(--semantic-space-md)'}}
               >
                 <option value="">Selecione um paciente</option>
-                {patients.map((patient) => (
+                {Array.isArray(patients) && patients.map((patient) => (
                   <option key={patient.id} value={patient.nome}>
                     {patient.nome} - {patient.idade}
                   </option>
@@ -284,7 +295,7 @@ export default function NovaPrescricaoPage() {
             </div>
 
             <div>
-              <label className="block text-slate-300 text-sm font-medium mb-2">
+              <label className="block text-slate-300 text-base font-medium mb-2">
                 CRM Médico
               </label>
               <input
@@ -298,7 +309,7 @@ export default function NovaPrescricaoPage() {
             </div>
 
             <div>
-              <label className="block text-slate-300 text-sm font-medium mb-2">
+              <label className="block text-slate-300 text-base font-medium mb-2">
                 Data de Emissão *
               </label>
               <input
@@ -312,7 +323,7 @@ export default function NovaPrescricaoPage() {
             </div>
 
             <div>
-              <label className="block text-slate-300 text-sm font-medium mb-2">
+              <label className="block text-slate-300 text-base font-medium mb-2">
                 Data de Validade *
               </label>
               <input
@@ -328,26 +339,26 @@ export default function NovaPrescricaoPage() {
         </div>
 
         {/* Medicamentos */}
-        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 mb-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+        <div className="bg-slate-800 rounded-xl border border-slate-700" style={{padding: 'var(--semantic-space-card)', marginBottom: 'var(--semantic-space-section)'}}>
+          <div className="flex items-center justify-between" style={{marginBottom: 'var(--semantic-space-lg)'}}>
+            <h2 className="text-xl font-bold text-white flex items-center" style={{gap: 'var(--semantic-space-sm)'}}>
               <Pill className="w-5 h-5 text-green-400" />
               Medicamentos Prescritos
             </h2>
             <button
               type="button"
               onClick={addMedication}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+              className="flex items-center bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors" style={{gap: 'var(--semantic-space-sm)', padding: 'var(--semantic-space-sm) var(--semantic-space-md)'}}
             >
               <Plus className="w-4 h-4" />
               Adicionar Medicamento
             </button>
           </div>
 
-          <div className="space-y-4">
+          <div style={{display: 'flex', flexDirection: 'column', gap: 'var(--semantic-space-md)'}}>
             {medications.map((medication, index) => (
-              <div key={index} className="bg-slate-700 rounded-lg p-4 border border-slate-600">
-                <div className="flex items-center justify-between mb-4">
+              <div key={index} className="bg-slate-700 rounded-lg border border-slate-600" style={{padding: 'var(--semantic-space-md)'}}>
+                <div className="flex items-center justify-between" style={{marginBottom: 'var(--semantic-space-md)'}}>
                   <h3 className="text-white font-medium">Medicamento {index + 1}</h3>
                   {medications.length > 1 && (
                     <button
@@ -360,9 +371,9 @@ export default function NovaPrescricaoPage() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2" style={{gap: 'var(--semantic-space-md)'}}>
                   <div>
-                    <label className="block text-slate-300 text-sm font-medium mb-2">
+                    <label className="block text-slate-300 text-base font-medium mb-2">
                       Nome do Medicamento *
                     </label>
                     {!medication.name && submitError && (
@@ -379,7 +390,7 @@ export default function NovaPrescricaoPage() {
                   </div>
 
                   <div>
-                    <label className="block text-slate-300 text-sm font-medium mb-2">
+                    <label className="block text-slate-300 text-base font-medium mb-2">
                       Dosagem
                     </label>
                     <input
@@ -392,7 +403,7 @@ export default function NovaPrescricaoPage() {
                   </div>
 
                   <div>
-                    <label className="block text-slate-300 text-sm font-medium mb-2">
+                    <label className="block text-slate-300 text-base font-medium mb-2">
                       Frequência
                     </label>
                     <input
@@ -405,7 +416,7 @@ export default function NovaPrescricaoPage() {
                   </div>
 
                   <div>
-                    <label className="block text-slate-300 text-sm font-medium mb-2">
+                    <label className="block text-slate-300 text-base font-medium mb-2">
                       Duração
                     </label>
                     <input
@@ -418,7 +429,7 @@ export default function NovaPrescricaoPage() {
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className="block text-slate-300 text-sm font-medium mb-2">
+                    <label className="block text-slate-300 text-base font-medium mb-2">
                       Instruções de Uso
                     </label>
                     <textarea
@@ -436,14 +447,14 @@ export default function NovaPrescricaoPage() {
         </div>
 
         {/* Observações */}
-        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 mb-6">
-          <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+        <div className="bg-slate-800 rounded-xl border border-slate-700" style={{padding: 'var(--semantic-space-card)', marginBottom: 'var(--semantic-space-section)'}}>
+          <h2 className="text-xl font-bold text-white flex items-center" style={{marginBottom: 'var(--semantic-space-lg)', gap: 'var(--semantic-space-sm)'}}>
             <FileText className="w-5 h-5 text-orange-400" />
             Observações Gerais
           </h2>
 
           <div>
-            <label className="block text-slate-300 text-sm font-medium mb-2">
+            <label className="block text-slate-300 text-base font-medium mb-2">
               Observações e Orientações
             </label>
             <textarea
@@ -462,20 +473,20 @@ export default function NovaPrescricaoPage() {
           <button
             type="button"
             onClick={() => router.push('/prescricoes')}
-            className="flex items-center gap-2 px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+            className="flex items-center bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors" style={{gap: 'var(--semantic-space-sm)', padding: 'var(--semantic-space-sm) var(--semantic-space-lg)'}}
           >
             <X className="w-4 h-4" />
             Cancelar
           </button>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center" style={{gap: 'var(--semantic-space-md)'}}>
             {formData.paciente && medications.some(med => med.name.trim() !== '') && (
               <StatusBadge status="success">Pronto para assinar</StatusBadge>
             )}
             <button
               type="submit"
               disabled={loading}
-              className="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 disabled:bg-green-800 text-white rounded-lg transition-colors"
+              className="flex items-center bg-green-600 hover:bg-green-700 disabled:bg-green-800 text-white rounded-lg transition-colors" style={{gap: 'var(--semantic-space-sm)', padding: 'var(--semantic-space-sm) var(--semantic-space-lg)'}}
             >
               {loading ? (
                 <>
@@ -526,6 +537,20 @@ export default function NovaPrescricaoPage() {
       <ShortcutHelp
         shortcuts={formShortcuts.shortcuts}
       />
+
+      {/* Auto-Save Indicator */}
+      {autoSave.isEnabled && isAiEnabled && (
+        <AutoSaveIndicator
+          isSaving={autoSave.isSaving}
+          lastSaved={autoSave.lastSaved ? new Date(autoSave.lastSaved) : null}
+          metrics={autoSave.metrics}
+          onForceSave={autoSave.forceSave}
+          onLoadHistory={autoSave.loadHistory}
+          onClearHistory={autoSave.clearHistory}
+          currentCriticality={autoSave.currentCriticality}
+          position="fixed"
+        />
+      )}
     </div>
   );
 }

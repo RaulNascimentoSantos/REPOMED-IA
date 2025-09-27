@@ -45,7 +45,7 @@ export function SearchInput({
 
   return (
     <div className={cn('relative', className)}>
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: 'var(--text-aaa-secondary)' }} />
       <Input
         value={searchValue}
         onChange={(e) => setSearchValue(e.target.value)}
@@ -60,7 +60,7 @@ export function SearchInput({
           className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
         >
           <X className="h-4 w-4" />
-        </button>
+        </Button>
       )}
     </div>
   );

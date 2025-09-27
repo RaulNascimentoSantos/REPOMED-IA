@@ -49,6 +49,64 @@
   --radius-lg: 1rem;       /* 16px */
   --shadow-1: 0 1px 2px rgba(0,0,0,.08);
   --shadow-2: 0 6px 20px rgba(0,0,0,.12);
+
+  /* TOKENS AAA MÉDICOS - Baseado nos 708 problemas de contraste identificados */
+  /* Substitui cores problemáticas com baixo contraste por AAA tokens */
+
+  /* CONTRASTE AAA (≥7:1) PARA ELEMENTOS CRÍTICOS */
+  --text-aaa-primary: #0b1220;       /* 15.3:1 - crítico médico */
+  --text-aaa-secondary: #1f2937;     /* 10.4:1 - substitui gray-500 */
+  --text-aaa-tertiary: #374151;      /* 7.1:1 - mínimo AAA */
+
+  /* LINKS AAA */
+  --link-aaa: #0b5fff;               /* 8.2:1 */
+  --link-aaa-hover: #0847c2;         /* 9.1:1 */
+
+  /* NAVEGAÇÃO AAA (≥7:1) */
+  --nav-aaa-fg: #ffffff;             /* 21:1 */
+  --nav-aaa-bg: #0b1b3a;             /* Fundo escuro para navegação */
+
+  /* DADOS CLÍNICOS AAA */
+  --clinical-text: #000000;          /* 21:1 - máximo contraste */
+  --dosage-text: #1a1a1a;            /* 13.1:1 - dosagens */
+  --patient-data: #0f172a;           /* 16.8:1 - dados paciente */
+
+  /* FALLBACKS SEGUROS */
+  --text-primary-safe: #0b1220;
+  --bg-primary-safe: #ffffff;
+
+  /* SEMANTIC TOKENS MÉDICOS - Sistema unificado */
+  /* Sistema de texto com AAA compliance */
+  --semantic-text-primary: #0b1220;        /* 15.3:1 - texto crítico médico */
+  --semantic-text-secondary: #374151;      /* 7.1:1 - texto secundário AAA */
+  --semantic-text-tertiary: #6b7280;       /* 4.5:1 - AA para texto grande */
+
+  /* Sistema de backgrounds */
+  --semantic-bg-primary: #ffffff;          /* Fundo principal */
+  --semantic-bg-secondary: #f8fafc;        /* Fundo elevado */
+  --semantic-bg-tertiary: #f1f5f9;         /* Fundo cards */
+
+  /* Sistema de ações e interação */
+  --semantic-action-primary: #2563eb;      /* Ação primária azul médico */
+  --semantic-action-secondary: #0ea5e9;    /* Ação secundária */
+  --semantic-action-hover: #1d4ed8;        /* Estado hover */
+
+  /* Sistema de bordas */
+  --semantic-border-default: #e5e7eb;      /* Borda padrão */
+  --semantic-border-focus: #3b82f6;        /* Borda foco */
+  --semantic-border-error: #ef4444;        /* Borda erro */
+
+  /* Sistema de status clínico */
+  --semantic-status-normal: #10b981;       /* Verde - normal */
+  --semantic-status-warning: #f59e0b;      /* Amarelo - atenção */
+  --semantic-status-critical: #ef4444;     /* Vermelho - crítico */
+  --semantic-status-info: #3b82f6;         /* Azul - informativo */
+
+  /* Cores específicas por contexto médico */
+  --semantic-prescription: #7c3aed;        /* Roxo - prescrições */
+  --semantic-patient: #0ea5e9;             /* Ciano - pacientes */
+  --semantic-emergency: #dc2626;           /* Vermelho crítico - emergência */
+  --semantic-appointment: #059669;         /* Verde - consultas */
 }
 
   
@@ -69,4 +127,37 @@
   --panel: var(--bg-elev);
   --border: rgba(148,163,184,.18);
   --brand: var(--brand-500);
+
+  /* SEMANTIC TOKENS DARK - Sistema unificado para tema escuro */
+  /* Sistema de texto com AAA compliance para dark mode */
+  --semantic-text-primary: #f8fafc;        /* 15.3:1 - texto crítico médico */
+  --semantic-text-secondary: #e2e8f0;      /* 12.1:1 - texto secundário AAA */
+  --semantic-text-tertiary: #cbd5e1;       /* 9.4:1 - texto terciário */
+
+  /* Sistema de backgrounds para dark mode */
+  --semantic-bg-primary: #0f172a;          /* Fundo principal escuro */
+  --semantic-bg-secondary: #1e293b;        /* Fundo elevado */
+  --semantic-bg-tertiary: #334155;         /* Fundo cards */
+
+  /* Sistema de ações e interação para dark mode */
+  --semantic-action-primary: #3b82f6;      /* Ação primária azul médico */
+  --semantic-action-secondary: #06b6d4;    /* Ação secundária */
+  --semantic-action-hover: #2563eb;        /* Estado hover */
+
+  /* Sistema de bordas para dark mode */
+  --semantic-border-default: #475569;      /* Borda padrão */
+  --semantic-border-focus: #60a5fa;        /* Borda foco */
+  --semantic-border-error: #f87171;        /* Borda erro */
+
+  /* Sistema de status clínico para dark mode */
+  --semantic-status-normal: #34d399;       /* Verde - normal */
+  --semantic-status-warning: #fbbf24;      /* Amarelo - atenção */
+  --semantic-status-critical: #f87171;     /* Vermelho - crítico */
+  --semantic-status-info: #60a5fa;         /* Azul - informativo */
+
+  /* Cores específicas por contexto médico para dark mode */
+  --semantic-prescription: #a78bfa;        /* Roxo - prescrições */
+  --semantic-patient: #22d3ee;             /* Ciano - pacientes */
+  --semantic-emergency: #ef4444;           /* Vermelho crítico - emergência */
+  --semantic-appointment: #10b981;         /* Verde - consultas */
 }

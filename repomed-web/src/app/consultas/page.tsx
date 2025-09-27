@@ -3,6 +3,7 @@
 
 import BackButton from '@/app/components/BackButton';
 import React, { useState } from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
 import {
   Calendar,
   Clock,
@@ -22,6 +23,7 @@ import {
 } from 'lucide-react';
 
 export default function ConsultasPage() {
+  const { theme, isDarkMode, isMedicalTheme } = useTheme();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState('agenda'); // agenda, lista, calendario
 
@@ -91,15 +93,24 @@ export default function ConsultasPage() {
   };
 
   return (
-    <div className="p-6">
+    <div className={`min-h-screen p-6 ${
+      isMedicalTheme ? 'bg-slate-900 text-white' :
+      isDarkMode ? 'bg-slate-900 text-white' : 'bg-gray-50 text-gray-900'
+    }`}>
       {/* Header com estatísticas */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
             <BackButton href="/" inline />
             <div>
-              <h1 className="text-2xl font-bold text-white mb-2">Agenda de Consultas</h1>
-              <p className="text-slate-400">Gerenciar consultas e agendamentos</p>
+              <h1 className={`text-2xl font-bold mb-2 ${
+                isMedicalTheme ? 'text-white' :
+                isDarkMode ? 'text-white' : 'text-slate-800'
+              }`}>Agenda de Consultas</h1>
+              <p className={`${
+                isMedicalTheme ? 'text-slate-400' :
+                isDarkMode ? 'text-slate-400' : 'text-slate-600'
+              }`}>Gerenciar consultas e agendamentos</p>
             </div>
           </div>
           <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
@@ -110,41 +121,81 @@ export default function ConsultasPage() {
 
         {/* Estatísticas */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+          <div className={`rounded-xl p-4 ${
+            isMedicalTheme ? 'bg-slate-800 border-slate-700' :
+            isDarkMode ? 'bg-slate-800 border-slate-700' :
+            'bg-white border-slate-200 shadow-sm'
+          }`}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm">Hoje</p>
-                <p className="text-2xl font-bold text-white">{stats.hoje}</p>
+                <p className={`text-base ${
+                  isMedicalTheme ? 'text-slate-400' :
+                  isDarkMode ? 'text-slate-400' : 'text-slate-600'
+                }`}>Hoje</p>
+                <p className={`text-2xl font-bold ${
+                  isMedicalTheme ? 'text-white' :
+                  isDarkMode ? 'text-white' : 'text-slate-800'
+                }`}>{stats.hoje}</p>
               </div>
               <Calendar className="w-8 h-8 text-blue-500" />
             </div>
           </div>
 
-          <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+          <div className={`rounded-xl p-4 ${
+            isMedicalTheme ? 'bg-slate-800 border-slate-700' :
+            isDarkMode ? 'bg-slate-800 border-slate-700' :
+            'bg-white border-slate-200 shadow-sm'
+          }`}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm">Confirmadas</p>
-                <p className="text-2xl font-bold text-white">{stats.confirmadas}</p>
+                <p className={`text-base ${
+                  isMedicalTheme ? 'text-slate-400' :
+                  isDarkMode ? 'text-slate-400' : 'text-slate-600'
+                }`}>Confirmadas</p>
+                <p className={`text-2xl font-bold ${
+                  isMedicalTheme ? 'text-white' :
+                  isDarkMode ? 'text-white' : 'text-slate-800'
+                }`}>{stats.confirmadas}</p>
               </div>
               <CheckCircle className="w-8 h-8 text-green-500" />
             </div>
           </div>
 
-          <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+          <div className={`rounded-xl p-4 ${
+            isMedicalTheme ? 'bg-slate-800 border-slate-700' :
+            isDarkMode ? 'bg-slate-800 border-slate-700' :
+            'bg-white border-slate-200 shadow-sm'
+          }`}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm">Pendentes</p>
-                <p className="text-2xl font-bold text-white">{stats.pendentes}</p>
+                <p className={`text-base ${
+                  isMedicalTheme ? 'text-slate-400' :
+                  isDarkMode ? 'text-slate-400' : 'text-slate-600'
+                }`}>Pendentes</p>
+                <p className={`text-2xl font-bold ${
+                  isMedicalTheme ? 'text-white' :
+                  isDarkMode ? 'text-white' : 'text-slate-800'
+                }`}>{stats.pendentes}</p>
               </div>
               <Clock className="w-8 h-8 text-yellow-500" />
             </div>
           </div>
 
-          <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+          <div className={`rounded-xl p-4 ${
+            isMedicalTheme ? 'bg-slate-800 border-slate-700' :
+            isDarkMode ? 'bg-slate-800 border-slate-700' :
+            'bg-white border-slate-200 shadow-sm'
+          }`}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm">Canceladas</p>
-                <p className="text-2xl font-bold text-white">{stats.canceladas}</p>
+                <p className={`text-base ${
+                  isMedicalTheme ? 'text-slate-400' :
+                  isDarkMode ? 'text-slate-400' : 'text-slate-600'
+                }`}>Canceladas</p>
+                <p className={`text-2xl font-bold ${
+                  isMedicalTheme ? 'text-white' :
+                  isDarkMode ? 'text-white' : 'text-slate-800'
+                }`}>{stats.canceladas}</p>
               </div>
               <AlertCircle className="w-8 h-8 text-red-500" />
             </div>
@@ -155,14 +206,31 @@ export default function ConsultasPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Agenda do Dia */}
         <div className="lg:col-span-2">
-          <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+          <div className={`rounded-xl p-6 ${
+            isMedicalTheme ? 'bg-slate-800 border-slate-700' :
+            isDarkMode ? 'bg-slate-800 border-slate-700' :
+            'bg-white border-slate-200 shadow-sm'
+          }`}>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-white">Agenda do Dia</h2>
+              <h2 className={`text-xl font-semibold ${
+                isMedicalTheme ? 'text-white' :
+                isDarkMode ? 'text-white' : 'text-slate-800'
+              }`}>Agenda do Dia</h2>
               <div className="flex items-center space-x-2">
-                <button className="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors">
-                  <ChevronLeft className="w-4 h-4 text-white" />
+                <button className={`p-2 rounded-lg transition-colors ${
+                  isMedicalTheme ? 'bg-slate-700 hover:bg-slate-600' :
+                  isDarkMode ? 'bg-slate-700 hover:bg-slate-600' :
+                  'bg-slate-100 hover:bg-slate-200'
+                }`}>
+                  <ChevronLeft className={`w-4 h-4 ${
+                    isMedicalTheme ? 'text-white' :
+                    isDarkMode ? 'text-white' : 'text-slate-600'
+                  }`} />
                 </button>
-                <span className="text-white font-medium px-4">
+                <span className={`font-medium px-4 ${
+                  isMedicalTheme ? 'text-white' :
+                  isDarkMode ? 'text-white' : 'text-slate-800'
+                }`}>
                   {new Date().toLocaleDateString('pt-BR', {
                     weekday: 'long',
                     year: 'numeric',
@@ -170,8 +238,15 @@ export default function ConsultasPage() {
                     day: 'numeric'
                   })}
                 </span>
-                <button className="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors">
-                  <ChevronRight className="w-4 h-4 text-white" />
+                <button className={`p-2 rounded-lg transition-colors ${
+                  isMedicalTheme ? 'bg-slate-700 hover:bg-slate-600' :
+                  isDarkMode ? 'bg-slate-700 hover:bg-slate-600' :
+                  'bg-slate-100 hover:bg-slate-200'
+                }`}>
+                  <ChevronRight className={`w-4 h-4 ${
+                    isMedicalTheme ? 'text-white' :
+                    isDarkMode ? 'text-white' : 'text-slate-600'
+                  }`} />
                 </button>
               </div>
             </div>
@@ -183,37 +258,76 @@ export default function ConsultasPage() {
 
                 return (
                   <div key={horario} className="flex items-center">
-                    <div className="w-16 text-slate-400 text-sm font-medium">
+                    <div className={`w-16 text-base font-medium ${
+                      isMedicalTheme ? 'text-slate-400' :
+                      isDarkMode ? 'text-slate-400' : 'text-slate-600'
+                    }`}>
                       {horario}
                     </div>
                     <div className="flex-1 ml-4">
                       {consulta ? (
-                        <div className="bg-slate-700 rounded-lg p-4 border-l-4 border-blue-500">
+                        <div className={`rounded-lg p-4 border-l-4 border-blue-500 ${
+                          isMedicalTheme ? 'bg-slate-700' :
+                          isDarkMode ? 'bg-slate-700' : 'bg-blue-50'
+                        }`}>
                           <div className="flex items-center justify-between">
                             <div className="flex-1">
                               <div className="flex items-center space-x-3 mb-2">
-                                <h3 className="text-white font-medium">{consulta.paciente}</h3>
+                                <h3 className={`font-medium ${
+                                  isMedicalTheme ? 'text-white' :
+                                  isDarkMode ? 'text-white' : 'text-slate-800'
+                                }`}>{consulta.paciente}</h3>
                                 <span className={`px-2 py-1 ${consulta.statusColor} text-white text-xs rounded-full`}>
                                   {consulta.status}
                                 </span>
                               </div>
-                              <p className="text-slate-400 text-sm mb-1">{consulta.tipo}</p>
-                              <p className="text-slate-500 text-xs">{consulta.observacoes}</p>
+                              <p className={`text-base mb-1 ${
+                                isMedicalTheme ? 'text-slate-400' :
+                                isDarkMode ? 'text-slate-400' : 'text-slate-600'
+                              }`}>{consulta.tipo}</p>
+                              <p className={`text-xs ${
+                                isMedicalTheme ? 'text-slate-500' :
+                                isDarkMode ? 'text-slate-500' : 'text-slate-500'
+                              }`}>{consulta.observacoes}</p>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <span className="text-slate-400 text-sm">{consulta.duracao}</span>
-                              <button className="p-2 bg-slate-600 hover:bg-slate-500 rounded-lg transition-colors">
-                                <Eye className="w-4 h-4 text-white" />
+                              <span className={`text-base ${
+                                isMedicalTheme ? 'text-slate-400' :
+                                isDarkMode ? 'text-slate-400' : 'text-slate-600'
+                              }`}>{consulta.duracao}</span>
+                              <button className={`p-2 rounded-lg transition-colors ${
+                                isMedicalTheme ? 'bg-slate-600 hover:bg-slate-500' :
+                                isDarkMode ? 'bg-slate-600 hover:bg-slate-500' :
+                                'bg-slate-100 hover:bg-slate-200'
+                              }`}>
+                                <Eye className={`w-4 h-4 ${
+                                  isMedicalTheme ? 'text-white' :
+                                  isDarkMode ? 'text-white' : 'text-slate-600'
+                                }`} />
                               </button>
-                              <button className="p-2 bg-slate-600 hover:bg-slate-500 rounded-lg transition-colors">
-                                <Edit className="w-4 h-4 text-white" />
+                              <button className={`p-2 rounded-lg transition-colors ${
+                                isMedicalTheme ? 'bg-slate-600 hover:bg-slate-500' :
+                                isDarkMode ? 'bg-slate-600 hover:bg-slate-500' :
+                                'bg-slate-100 hover:bg-slate-200'
+                              }`}>
+                                <Edit className={`w-4 h-4 ${
+                                  isMedicalTheme ? 'text-white' :
+                                  isDarkMode ? 'text-white' : 'text-slate-600'
+                                }`} />
                               </button>
                             </div>
                           </div>
                         </div>
                       ) : (
-                        <div className="h-12 border-2 border-dashed border-slate-700 rounded-lg flex items-center justify-center hover:border-slate-600 transition-colors cursor-pointer">
-                          <span className="text-slate-500 text-sm">Horário disponível</span>
+                        <div className={`h-12 border-2 border-dashed rounded-lg flex items-center justify-center transition-colors cursor-pointer ${
+                          isMedicalTheme ? 'border-slate-700 hover:border-slate-600' :
+                          isDarkMode ? 'border-slate-700 hover:border-slate-600' :
+                          'border-slate-300 hover:border-slate-400'
+                        }`}>
+                          <span className={`text-base ${
+                            isMedicalTheme ? 'text-slate-500' :
+                            isDarkMode ? 'text-slate-500' : 'text-slate-400'
+                          }`}>Horário disponível</span>
                         </div>
                       )}
                     </div>
@@ -227,54 +341,120 @@ export default function ConsultasPage() {
         {/* Painel Lateral */}
         <div className="space-y-6">
           {/* Próximas Consultas */}
-          <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-            <h3 className="text-lg font-semibold text-white mb-4">Próximas Consultas</h3>
+          <div className={`rounded-xl p-6 ${
+            isMedicalTheme ? 'bg-slate-800 border-slate-700' :
+            isDarkMode ? 'bg-slate-800 border-slate-700' :
+            'bg-white border-slate-200 shadow-sm'
+          }`}>
+            <h3 className={`text-lg font-semibold mb-4 ${
+              isMedicalTheme ? 'text-white' :
+              isDarkMode ? 'text-white' : 'text-slate-800'
+            }`}>Próximas Consultas</h3>
             <div className="space-y-3">
               {consultas.filter(c => c.status === 'Confirmada').map((consulta) => (
-                <div key={consulta.id} className="bg-slate-700 rounded-lg p-3">
+                <div key={consulta.id} className={`rounded-lg p-3 ${
+                  isMedicalTheme ? 'bg-slate-700' :
+                  isDarkMode ? 'bg-slate-700' : 'bg-slate-50'
+                }`}>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-white font-medium text-sm">{consulta.paciente}</span>
-                    <span className="text-slate-400 text-xs">{consulta.horario}</span>
+                    <span className={`font-medium text-base ${
+                      isMedicalTheme ? 'text-white' :
+                      isDarkMode ? 'text-white' : 'text-slate-800'
+                    }`}>{consulta.paciente}</span>
+                    <span className={`text-xs ${
+                      isMedicalTheme ? 'text-slate-400' :
+                      isDarkMode ? 'text-slate-400' : 'text-slate-600'
+                    }`}>{consulta.horario}</span>
                   </div>
-                  <p className="text-slate-400 text-xs">{consulta.tipo}</p>
+                  <p className={`text-xs ${
+                    isMedicalTheme ? 'text-slate-400' :
+                    isDarkMode ? 'text-slate-400' : 'text-slate-600'
+                  }`}>{consulta.tipo}</p>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Ações Rápidas */}
-          <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-            <h3 className="text-lg font-semibold text-white mb-4">Ações Rápidas</h3>
+          <div className={`rounded-xl p-6 ${
+            isMedicalTheme ? 'bg-slate-800 border-slate-700' :
+            isDarkMode ? 'bg-slate-800 border-slate-700' :
+            'bg-white border-slate-200 shadow-sm'
+          }`}>
+            <h3 className={`text-lg font-semibold mb-4 ${
+              isMedicalTheme ? 'text-white' :
+              isDarkMode ? 'text-white' : 'text-slate-800'
+            }`}>Ações Rápidas</h3>
             <div className="space-y-3">
-              <button className="w-full flex items-center space-x-3 p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors text-left">
+              <button className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors text-left ${
+                isMedicalTheme ? 'bg-slate-700 hover:bg-slate-600' :
+                isDarkMode ? 'bg-slate-700 hover:bg-slate-600' :
+                'bg-slate-50 hover:bg-slate-100'
+              }`}>
                 <Plus className="w-5 h-5 text-blue-500" />
-                <span className="text-white">Nova Consulta</span>
+                <span className={`${
+                  isMedicalTheme ? 'text-white' :
+                  isDarkMode ? 'text-white' : 'text-slate-800'
+                }`}>Nova Consulta</span>
               </button>
-              <button className="w-full flex items-center space-x-3 p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors text-left">
+              <button className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors text-left ${
+                isMedicalTheme ? 'bg-slate-700 hover:bg-slate-600' :
+                isDarkMode ? 'bg-slate-700 hover:bg-slate-600' :
+                'bg-slate-50 hover:bg-slate-100'
+              }`}>
                 <Calendar className="w-5 h-5 text-green-500" />
-                <span className="text-white">Ver Calendário</span>
+                <span className={`${
+                  isMedicalTheme ? 'text-white' :
+                  isDarkMode ? 'text-white' : 'text-slate-800'
+                }`}>Ver Calendário</span>
               </button>
-              <button className="w-full flex items-center space-x-3 p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors text-left">
+              <button className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors text-left ${
+                isMedicalTheme ? 'bg-slate-700 hover:bg-slate-600' :
+                isDarkMode ? 'bg-slate-700 hover:bg-slate-600' :
+                'bg-slate-50 hover:bg-slate-100'
+              }`}>
                 <Search className="w-5 h-5 text-purple-500" />
-                <span className="text-white">Buscar Paciente</span>
+                <span className={`${
+                  isMedicalTheme ? 'text-white' :
+                  isDarkMode ? 'text-white' : 'text-slate-800'
+                }`}>Buscar Paciente</span>
               </button>
             </div>
           </div>
 
           {/* Estatísticas Rápidas */}
-          <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-            <h3 className="text-lg font-semibold text-white mb-4">Esta Semana</h3>
+          <div className={`rounded-xl p-6 ${
+            isMedicalTheme ? 'bg-slate-800 border-slate-700' :
+            isDarkMode ? 'bg-slate-800 border-slate-700' :
+            'bg-white border-slate-200 shadow-sm'
+          }`}>
+            <h3 className={`text-lg font-semibold mb-4 ${
+              isMedicalTheme ? 'text-white' :
+              isDarkMode ? 'text-white' : 'text-slate-800'
+            }`}>Esta Semana</h3>
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-slate-400">Total de consultas:</span>
-                <span className="text-white font-medium">12</span>
+                <span className={`${
+                  isMedicalTheme ? 'text-slate-400' :
+                  isDarkMode ? 'text-slate-400' : 'text-slate-600'
+                }`}>Total de consultas:</span>
+                <span className={`font-medium ${
+                  isMedicalTheme ? 'text-white' :
+                  isDarkMode ? 'text-white' : 'text-slate-800'
+                }`}>12</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Taxa de comparecimento:</span>
+                <span className={`${
+                  isMedicalTheme ? 'text-slate-400' :
+                  isDarkMode ? 'text-slate-400' : 'text-slate-600'
+                }`}>Taxa de comparecimento:</span>
                 <span className="text-green-400 font-medium">92%</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Cancelamentos:</span>
+                <span className={`${
+                  isMedicalTheme ? 'text-slate-400' :
+                  isDarkMode ? 'text-slate-400' : 'text-slate-600'
+                }`}>Cancelamentos:</span>
                 <span className="text-red-400 font-medium">8%</span>
               </div>
             </div>

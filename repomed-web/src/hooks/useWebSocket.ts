@@ -84,15 +84,15 @@ export function useWebSocket(config: WebSocketConfig) {
 
         // Start heartbeat
         if (heartbeatInterval > 0) {
-          heartbeatIntervalRef.current = setInterval(() => {
-            if (socket.readyState === WebSocket.OPEN) {
-              socket.send(JSON.stringify({
-                type: 'ping',
-                payload: {},
-                timestamp: new Date().toISOString()
-              }));
-            }
-          }, heartbeatInterval);
+          // DESABILITADO: heartbeatIntervalRef.current = setInterval(() => {
+          //   if (socket.readyState === WebSocket.OPEN) {
+          //     socket.send(JSON.stringify({
+          //       type: 'ping',
+          //       payload: {},
+          //       timestamp: new Date().toISOString()
+          //     }));
+          //   }
+          // }, heartbeatInterval);
         }
 
         onOpen?.(event);

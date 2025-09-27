@@ -12,40 +12,40 @@ interface StatusBadgeProps {
 
 const statusConfig = {
   success: {
-    className: 'text-green-800',
+    className: 'semantic-status-normal',
     style: {
       backgroundColor: 'var(--status-success-bg)',
-      color: 'var(--status-success-text)',
+      color: 'var(--semantic-status-normal)',
       borderColor: 'var(--status-success-border)'
     },
     icon: CheckCircle,
     ariaLabel: 'Sucesso'
   },
   warning: {
-    className: 'text-yellow-800',
+    className: 'semantic-status-warning',
     style: {
       backgroundColor: 'var(--status-warning-bg)',
-      color: 'var(--status-warning-text)',
+      color: 'var(--semantic-status-warning)',
       borderColor: 'var(--status-warning-border)'
     },
     icon: AlertTriangle,
     ariaLabel: 'Atenção'
   },
   error: {
-    className: 'text-red-800',
+    className: 'semantic-status-critical',
     style: {
       backgroundColor: 'var(--status-error-bg)',
-      color: 'var(--status-error-text)',
+      color: 'var(--semantic-status-critical)',
       borderColor: 'var(--status-error-border)'
     },
     icon: XCircle,
     ariaLabel: 'Erro crítico'
   },
   info: {
-    className: 'text-blue-800',
+    className: 'semantic-status-info',
     style: {
       backgroundColor: 'var(--status-info-bg)',
-      color: 'var(--status-info-text)',
+      color: 'var(--semantic-status-info)',
       borderColor: 'var(--status-info-border)'
     },
     icon: Info,

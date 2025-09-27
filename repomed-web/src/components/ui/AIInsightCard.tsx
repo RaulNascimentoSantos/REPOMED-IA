@@ -90,7 +90,7 @@ export default function AIInsightCard({
 
   return (
     <div className={`
-      card-primary rounded-xl p-6
+      semantic-card
       hover:border-opacity-80 hover:shadow-lg
       transform hover:scale-[1.02] transition-all duration-300
       ${priorityStyle.pulse}

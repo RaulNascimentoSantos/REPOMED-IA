@@ -194,11 +194,11 @@ export default function SystemMonitorPage() {
     }
   };
 
-  const getTrendColor = (trend: string) => {
+  const getTrendStyle = (trend: string) => {
     switch (trend) {
-      case 'up': return 'text-green-400';
-      case 'down': return 'text-red-400';
-      default: return 'text-gray-400';
+      case 'up': return { color: '#34d399' };
+      case 'down': return { color: '#f87171' };
+      default: return { color: 'var(--text-aaa-secondary)' };
     }
   };
 
@@ -303,7 +303,7 @@ export default function SystemMonitorPage() {
                       <metric.icon className="w-6 h-6 text-white" />
                     </div>
                     <div className="flex items-center gap-1">
-                      <TrendIcon className={`w-4 h-4 ${getTrendColor(metric.trend)}`} />
+                      <TrendIcon className="w-4 h-4" style={getTrendStyle(metric.trend)} />
                       <span className={`text-xs px-2 py-1 rounded-full ${metric.status === 'excellent' ? 'bg-green-600' : metric.status === 'normal' ? 'bg-blue-600' : 'bg-yellow-600'} text-white`}>
                         {metric.status}
                       </span>

@@ -1,0 +1,155 @@
+name: Stack Guardrails
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  push:
+    branches: [ main, develop ]
+
+jobs:
+  stack-validation:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Validate Stack Dependencies
+      run: |
+        echo "🔍 Validating critical dependencies..."
+
+        # Check Next.js version
+        NEXT_VERSION=$(npm list next --depth=0 | grep next@ | sed 's/.*next@//' | sed 's/ .*//')
+        echo "Next.js version: $NEXT_VERSION"
+        if [[ ! "$NEXT_VERSION" =~ ^14\. ]]; then
+          echo "❌ ERROR: Next.js must be version 14.x"
+          exit 1
+        fi
+
+        # Check React version
+        REACT_VERSION=$(npm list react --depth=0 | grep react@ | sed 's/.*react@//' | sed 's/ .*//')
+        echo "React version: $REACT_VERSION"
+        if [[ ! "$REACT_VERSION" =~ ^18\. ]]; then
+          echo "❌ ERROR: React must be version 18.x"
+          exit 1
+        fi
+
+        # Check TypeScript
+        TS_VERSION=$(npm list typescript --depth=0 | grep typescript@ | sed 's/.*typescript@//' | sed 's/ .*//')
+        echo "TypeScript version: $TS_VERSION"
+        if [[ ! "$TS_VERSION" =~ ^5\. ]]; then
+          echo "❌ ERROR: TypeScript must be version 5.x"
+          exit 1
+        fi
+
+        # Check TanStack Query
+        QUERY_VERSION=$(npm list @tanstack/react-query --depth=0 | grep @tanstack/react-query@ | sed 's/.*@tanstack\/react-query@//' | sed 's/ .*//')
+        echo "TanStack Query version: $QUERY_VERSION"
+        if [[ ! "$QUERY_VERSION" =~ ^5\. ]]; then
+          echo "❌ ERROR: TanStack Query must be version 5.x"
+          exit 1
+        fi
+
+        echo "✅ All stack dependencies validated"
+
+    - name: Validate Medical UX Components
+      run: |
+        echo "🔍 Validating medical UX components..."
+
+        # Check StatusBadge component
+        if [ ! -f "src/components/ui/StatusBadge.tsx" ]; then
+          echo "❌ ERROR: StatusBadge component missing"
+          exit 1
+        fi
+
+        # Check ConfirmDialog component
+        if [ ! -f "src/components/ui/ConfirmDialog.tsx" ]; then
+          echo "❌ ERROR: ConfirmDialog component missing"
+          exit 1
+        fi
+
+        # Check useAutoSave hook
+        if [ ! -f "src/hooks/useAutoSave.ts" ]; then
+          echo "❌ ERROR: useAutoSave hook missing"
+          exit 1
+        fi
+
+        # Check feature flags
+        if ! grep -q "FF_SAFETY_GUARDS" src/lib/feature-flags.ts; then
+          echo "❌ ERROR: Feature flags missing"
+          exit 1
+        fi
+
+        echo "✅ Medical UX components validated"
+
+    - name: Type Check
+      run: npx tsc --noEmit --skipLibCheck
+
+    - name: Lint Check
+      run: npm run lint
+
+    - name: Medical Accessibility Check
+      run: |
+        echo "🔍 Checking medical accessibility patterns..."
+
+        # Check for aria-label in medical forms
+        if ! grep -r "aria-label" src/app/prescricoes/nova/ --include="*.tsx"; then
+          echo "⚠️  WARNING: Consider adding aria-labels to prescription forms"
+        fi
+
+        # Check for keyboard navigation
+        if ! grep -r "onKeyDown\|tabIndex" src/components/ui/ --include="*.tsx"; then
+          echo "⚠️  WARNING: Consider adding keyboard navigation to UI components"
+        fi
+
+        # Check for focus management
+        if ! grep -r "focus\|Focus" src/components/ui/ --include="*.tsx"; then
+          echo "⚠️  WARNING: Consider implementing focus management"
+        fi
+
+        echo "✅ Accessibility patterns checked"
+
+    - name: Security Check
+      run: |
+        echo "🔍 Running security checks..."
+
+        # Check for hardcoded secrets
+        if grep -r "password\|secret\|key\|token" src/ --include="*.ts" --include="*.tsx" | grep -v "// Security: OK"; then
+          echo "⚠️  WARNING: Potential hardcoded secrets found"
+        fi
+
+        # Check for SQL injection patterns
+        if grep -r "SELECT\|INSERT\|UPDATE\|DELETE" src/ --include="*.ts" --include="*.tsx"; then
+          echo "⚠️  WARNING: Direct SQL queries found - use ORM/prepared statements"
+        fi
+
+        echo "✅ Security checks completed"
+
+    - name: Performance Check
+      run: |
+        echo "🔍 Checking performance patterns..."
+
+        # Check for useEffect cleanup
+        if grep -r "useEffect" src/ --include="*.tsx" | wc -l > /tmp/effects.count; then
+          EFFECTS=$(cat /tmp/effects.count)
+          echo "Found $EFFECTS useEffect hooks"
+          if [ "$EFFECTS" -gt 20 ]; then
+            echo "⚠️  WARNING: High number of useEffect hooks - consider optimization"
+          fi
+        fi
+
+        # Check for large bundle sizes
+        if [ -d "node_modules" ]; then
+          SIZE=$(du -sh node_modules | cut -f1)
+          echo "node_modules size: $SIZE"
+        fi
+
+        echo "✅ Performance checks completed"

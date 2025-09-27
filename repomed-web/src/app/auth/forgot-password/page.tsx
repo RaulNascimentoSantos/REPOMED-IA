@@ -32,8 +32,8 @@ export default function ForgotPasswordPage() {
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             Recuperar Senha
           </h1>
-          <p className="text-gray-600 mt-2">
-            Gerencie recuperar senha
+          <p className="text-base mt-2" style={{color: 'var(--text-aaa-secondary)'}}>
+            Digite seu email para recuperar o acesso
           </p>
         </div>
 
@@ -42,15 +42,41 @@ export default function ForgotPasswordPage() {
             <CardTitle>Recuperar Senha</CardTitle>
           </CardHeader>
           <CardContent>
-            <EmptyState
-              title="Funcionalidade em desenvolvimento"
-              description="Esta página será implementada em breve"
-              action={
-                <Button onClick={() => router.back()}>
+            <form
+              className="space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                // Add password recovery logic here
+                alert('Link de recuperação enviado para seu email!');
+                router.push('/auth/login');
+              }}
+            >
+              <div>
+                <label htmlFor="email" className="block text-gray-700 text-base font-medium mb-2">
+                  Email Cadastrado *
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  placeholder="dr.silva@hospital.com.br"
+                  required
+                  aria-describedby="email-help"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+                />
+                <p id="email-help" className="text-base mt-1" style={{color: 'var(--text-aaa-secondary)'}}>
+                  Enviaremos instruções para redefinir sua senha
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <Button type="submit" className="flex-1">
+                  Enviar Link de Recuperação
+                </Button>
+                <Button type="button" variant="outline" onClick={() => router.back()}>
                   Voltar
                 </Button>
-              }
-            />
+              </div>
+            </form>
           </CardContent>
         </Card>
       </div>

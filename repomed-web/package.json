@@ -13,6 +13,7 @@
     "test:contrast": "playwright test tests/accessibility/medical-contrast.spec.ts",
     "test:themes": "node scripts/validate-accessibility-themes.mjs",
     "validate:plan": "node scripts/validate-plan-completion.mjs",
+    "qa:validate": "node scripts/qa-validation-suite.mjs",
     "preview": "next start -p 3023",
     "lint": "next lint",
     "typecheck": "tsc --noEmit --skipLibCheck",
@@ -22,7 +23,13 @@
     "qa:performance": "node scripts/performance-budgets.mjs",
     "qa:baseline": "node scripts/collect-baseline-metrics.mjs",
     "guardrails": "node scripts/test-guardrails.js",
-    "validate": "npm run typecheck && npm run lint && npm run guardrails"
+    "validate": "npm run typecheck && npm run lint && npm run guardrails",
+    "ux:guard:grays": "node -e \"const fs=require('fs'),path=require('path');const bad=/(#6b7280|#9ca3af|#94a3b8)/i;const exts=new Set(['.tsx','.ts','.jsx','.js','.css','.scss','.mdx']);function walk(d){if(!fs.existsSync(d))return;for(const e of fs.readdirSync(d,{withFileTypes:true})){const p=path.join(d,e.name);if(e.isDirectory())walk(p);else if(exts.has(path.extname(p))){const content=fs.readFileSync(p,'utf8');const lines=content.split('\\n').filter(line=>!line.trim().startsWith('//') && !line.trim().startsWith('/*') && !line.trim().startsWith('*'));if(bad.test(lines.join('\\n'))){console.error('❌ Cinza fraco em',p);process.exit(1);}}}}walk('src');walk('styles');walk('app');console.log('✅ Sem cinzas fracos');\"",
+    "ux:setup": "pnpm add -D @playwright/test playwright @axe-core/playwright tsx",
+    "ux:discover": "tsx \"scripts/discover-routes.pw.ts\"",
+    "ux:test": "playwright test \"tests/ux/medical-compliance.spec.ts\"",
+    "ux:aggregate": "node \"scripts/ux-aggregate.mjs\"",
+    "ux:full": "npm run ux:guard:grays && npm run ux:test && npm run ux:aggregate"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
@@ -54,15 +61,19 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.2",
+    "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.55.0",
     "@types/node": "24.3.3",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
     "autoprefixer": "^10.4.16",
+    "axe-core": "^4.10.3",
     "axe-playwright": "^2.2.2",
+    "lighthouse": "^12.8.2",
     "playwright": "^1.55.0",
     "postcss": "^8.4.31",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.20.5",
     "typescript": "^5.2.2"
   }
 }

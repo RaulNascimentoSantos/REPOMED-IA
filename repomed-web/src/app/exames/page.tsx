@@ -3,6 +3,7 @@
 
 import BackButton from '@/app/components/BackButton';
 import React, { useState } from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
 import {
   Activity,
   Plus,
@@ -26,6 +27,7 @@ import {
 } from 'lucide-react';
 
 export default function ExamesPage() {
+  const { theme, isDarkMode, isMedicalTheme } = useTheme();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('todos');
   const [filterType, setFilterType] = useState('todos');
@@ -140,7 +142,7 @@ export default function ExamesPage() {
     return matchesSearch && matchesStatus && matchesType;
   });
 
-  const getIconForCategory = (categoria) => {
+  const getIconForCategory = (categoria: string) => {
     switch (categoria) {
       case 'Cardiologia': return Heart;
       case 'Neurologia': return Brain;
@@ -150,7 +152,7 @@ export default function ExamesPage() {
     }
   };
 
-  const getStatusIcon = (status) => {
+  const getStatusIcon = (status: string) => {
     switch (status) {
       case 'Concluído': return CheckCircle;
       case 'Pendente': return Clock;
@@ -161,15 +163,24 @@ export default function ExamesPage() {
   };
 
   return (
-    <div className="p-6">
+    <div className={`min-h-screen p-6 ${
+      isMedicalTheme ? 'bg-slate-900 text-white' :
+      isDarkMode ? 'bg-slate-900 text-white' : 'bg-gray-50 text-gray-900'
+    }`}>
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <BackButton href="/" inline />
             <div>
-              <h1 className="text-2xl font-bold text-white mb-2">Exames Médicos</h1>
-              <p className="text-slate-400">Gerenciar exames e resultados</p>
+              <h1 className={`text-2xl font-bold mb-2 ${
+                isMedicalTheme ? 'text-white' :
+                isDarkMode ? 'text-white' : 'text-slate-800'
+              }`}>Exames Médicos</h1>
+              <p className={`${
+                isMedicalTheme ? 'text-slate-400' :
+                isDarkMode ? 'text-slate-400' : 'text-slate-600'
+              }`}>Gerenciar exames e resultados</p>
             </div>
           </div>
           <div>
@@ -183,51 +194,101 @@ export default function ExamesPage() {
 
       {/* Estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-6">
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div className={`rounded-xl p-4 ${
+          isMedicalTheme ? 'bg-slate-800 border-slate-700' :
+          isDarkMode ? 'bg-slate-800 border-slate-700' :
+          'bg-white border-slate-200 shadow-sm'
+        }`}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-slate-400 text-sm">Total</p>
-              <p className="text-2xl font-bold text-white">{stats.total}</p>
+              <p className={`text-sm ${
+                isMedicalTheme ? 'text-slate-400' :
+                isDarkMode ? 'text-slate-400' : 'text-slate-600'
+              }`}>Total</p>
+              <p className={`text-2xl font-bold ${
+                isMedicalTheme ? 'text-white' :
+                isDarkMode ? 'text-white' : 'text-slate-800'
+              }`}>{stats.total}</p>
             </div>
             <FileText className="w-8 h-8 text-blue-500" />
           </div>
         </div>
 
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div className={`rounded-xl p-4 ${
+          isMedicalTheme ? 'bg-slate-800 border-slate-700' :
+          isDarkMode ? 'bg-slate-800 border-slate-700' :
+          'bg-white border-slate-200 shadow-sm'
+        }`}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-slate-400 text-sm">Concluídos</p>
-              <p className="text-2xl font-bold text-white">{stats.concluidos}</p>
+              <p className={`text-sm ${
+                isMedicalTheme ? 'text-slate-400' :
+                isDarkMode ? 'text-slate-400' : 'text-slate-600'
+              }`}>Concluídos</p>
+              <p className={`text-2xl font-bold ${
+                isMedicalTheme ? 'text-white' :
+                isDarkMode ? 'text-white' : 'text-slate-800'
+              }`}>{stats.concluidos}</p>
             </div>
             <CheckCircle className="w-8 h-8 text-green-500" />
           </div>
         </div>
 
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div className={`rounded-xl p-4 ${
+          isMedicalTheme ? 'bg-slate-800 border-slate-700' :
+          isDarkMode ? 'bg-slate-800 border-slate-700' :
+          'bg-white border-slate-200 shadow-sm'
+        }`}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-slate-400 text-sm">Pendentes</p>
-              <p className="text-2xl font-bold text-white">{stats.pendentes}</p>
+              <p className={`text-sm ${
+                isMedicalTheme ? 'text-slate-400' :
+                isDarkMode ? 'text-slate-400' : 'text-slate-600'
+              }`}>Pendentes</p>
+              <p className={`text-2xl font-bold ${
+                isMedicalTheme ? 'text-white' :
+                isDarkMode ? 'text-white' : 'text-slate-800'
+              }`}>{stats.pendentes}</p>
             </div>
             <Clock className="w-8 h-8 text-yellow-500" />
           </div>
         </div>
 
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div className={`rounded-xl p-4 ${
+          isMedicalTheme ? 'bg-slate-800 border-slate-700' :
+          isDarkMode ? 'bg-slate-800 border-slate-700' :
+          'bg-white border-slate-200 shadow-sm'
+        }`}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-slate-400 text-sm">Em Andamento</p>
-              <p className="text-2xl font-bold text-white">{stats.emAndamento}</p>
+              <p className={`text-sm ${
+                isMedicalTheme ? 'text-slate-400' :
+                isDarkMode ? 'text-slate-400' : 'text-slate-600'
+              }`}>Em Andamento</p>
+              <p className={`text-2xl font-bold ${
+                isMedicalTheme ? 'text-white' :
+                isDarkMode ? 'text-white' : 'text-slate-800'
+              }`}>{stats.emAndamento}</p>
             </div>
             <Activity className="w-8 h-8 text-blue-500" />
           </div>
         </div>
 
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div className={`rounded-xl p-4 ${
+          isMedicalTheme ? 'bg-slate-800 border-slate-700' :
+          isDarkMode ? 'bg-slate-800 border-slate-700' :
+          'bg-white border-slate-200 shadow-sm'
+        }`}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-slate-400 text-sm">Cancelados</p>
-              <p className="text-2xl font-bold text-white">{stats.cancelados}</p>
+              <p className={`text-sm ${
+                isMedicalTheme ? 'text-slate-400' :
+                isDarkMode ? 'text-slate-400' : 'text-slate-600'
+              }`}>Cancelados</p>
+              <p className={`text-2xl font-bold ${
+                isMedicalTheme ? 'text-white' :
+                isDarkMode ? 'text-white' : 'text-slate-800'
+              }`}>{stats.cancelados}</p>
             </div>
             <XCircle className="w-8 h-8 text-red-500" />
           </div>
@@ -244,14 +305,22 @@ export default function ExamesPage() {
               placeholder="Buscar exames..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-slate-800 border border-slate-600 rounded-lg pl-10 pr-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 w-80"
+              className={`rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-80 ${
+                isMedicalTheme ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-400' :
+                isDarkMode ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-400' :
+                'bg-white border-slate-300 text-slate-900 placeholder-slate-500'
+              }`}
             />
           </div>
 
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              isMedicalTheme ? 'bg-slate-800 border-slate-600 text-white' :
+              isDarkMode ? 'bg-slate-800 border-slate-600 text-white' :
+              'bg-white border-slate-300 text-slate-900'
+            }`}
           >
             <option value="todos">Todos os Status</option>
             <option value="concluidos">Concluídos</option>
@@ -263,7 +332,11 @@ export default function ExamesPage() {
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              isMedicalTheme ? 'bg-slate-800 border-slate-600 text-white' :
+              isDarkMode ? 'bg-slate-800 border-slate-600 text-white' :
+              'bg-white border-slate-300 text-slate-900'
+            }`}
           >
             <option value="todos">Todas as Categorias</option>
             <option value="laboratorio">Laboratório</option>
@@ -273,7 +346,11 @@ export default function ExamesPage() {
           </select>
         </div>
 
-        <button className="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors">
+        <button className={`p-2 rounded-lg transition-colors ${
+          isMedicalTheme ? 'bg-slate-800 hover:bg-slate-700' :
+          isDarkMode ? 'bg-slate-800 hover:bg-slate-700' :
+          'bg-white hover:bg-slate-50 border border-slate-300'
+        }`}>
           <Filter className="w-4 h-4 text-slate-400" />
         </button>
       </div>
@@ -287,7 +364,11 @@ export default function ExamesPage() {
           return (
             <div
               key={exame.id}
-              className="bg-slate-800 rounded-xl p-6 border border-slate-700 hover:border-slate-600 transition-all"
+              className={`rounded-xl p-6 transition-all ${
+                isMedicalTheme ? 'bg-slate-800 border-slate-700 hover:border-slate-600' :
+                isDarkMode ? 'bg-slate-800 border-slate-700 hover:border-slate-600' :
+                'bg-white border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-md'
+              }`}
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-start space-x-4 flex-1">
@@ -300,10 +381,10 @@ export default function ExamesPage() {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-3">
                         <h3 className="text-white font-semibold">{exame.tipo}</h3>
-                        <span className={`px-2 py-1 ${exame.statusColor} text-white text-xs rounded-full`}>
+                        <span className={`px-2 py-1 ${exame.statusColor} text-white text-base rounded-full`}>
                           {exame.status}
                         </span>
-                        <span className={`px-2 py-1 ${exame.prioridadeColor} text-white text-xs rounded-full`}>
+                        <span className={`px-2 py-1 ${exame.prioridadeColor} text-white text-base rounded-full`}>
                           {exame.prioridade}
                         </span>
                       </div>
@@ -375,18 +456,29 @@ export default function ExamesPage() {
 
       {/* Paginação */}
       <div className="flex items-center justify-between mt-8">
-        <p className="text-slate-400 text-sm">
+        <p className={`text-sm ${
+          isMedicalTheme ? 'text-slate-400' :
+          isDarkMode ? 'text-slate-400' : 'text-slate-600'
+        }`}>
           Mostrando {filteredExames.length} de {exames.length} exames
         </p>
 
         <div className="flex items-center space-x-2">
-          <button className="px-3 py-2 bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 transition-colors">
+          <button className={`px-3 py-2 rounded-lg transition-colors ${
+            isMedicalTheme ? 'bg-slate-800 text-slate-400 hover:bg-slate-700' :
+            isDarkMode ? 'bg-slate-800 text-slate-400 hover:bg-slate-700' :
+            'bg-white text-slate-600 hover:bg-slate-50 border border-slate-300'
+          }`}>
             Anterior
           </button>
           <button className="px-3 py-2 bg-blue-600 text-white rounded-lg">
             1
           </button>
-          <button className="px-3 py-2 bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 transition-colors">
+          <button className={`px-3 py-2 rounded-lg transition-colors ${
+            isMedicalTheme ? 'bg-slate-800 text-slate-400 hover:bg-slate-700' :
+            isDarkMode ? 'bg-slate-800 text-slate-400 hover:bg-slate-700' :
+            'bg-white text-slate-600 hover:bg-slate-50 border border-slate-300'
+          }`}>
             Próximo
           </button>
         </div>

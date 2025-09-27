@@ -30,7 +30,7 @@ export function EmptyState({
   type = 'default'
 }: EmptyStateProps) {
   const IconComponent = typeIcons[type];
-  const displayIcon = icon || <IconComponent className="h-12 w-12 text-gray-400" />;
+  const displayIcon = icon || <IconComponent className="h-12 w-12" style={{ color: 'var(--text-aaa-secondary)' }} />;
 
   return (
     <div className={cn(
@@ -48,7 +48,7 @@ export function EmptyState({
       </h3>
       
       {description && (
-        <p className="text-gray-600 mb-6 max-w-sm">
+        <p className="mb-6 max-w-sm" style={{ color: 'var(--text-aaa-secondary)' }}>
           {description}
         </p>
       )}
@@ -69,7 +69,7 @@ export function EmptyPatients({ onAddPatient }: { onAddPatient?: () => void }) {
         onAddPatient && (
           <Button onClick={onAddPatient}>
             Adicionar Primeiro Paciente
-          </button>
+          </Button>
         )
       }
     />
@@ -86,7 +86,7 @@ export function EmptyDocuments({ onCreateDocument }: { onCreateDocument?: () => 
         onCreateDocument && (
           <Button onClick={onCreateDocument}>
             Criar Novo Documento
-          </button>
+          </Button>
         )
       }
     />
@@ -103,7 +103,7 @@ export function EmptySearchResults({ query, onClearSearch }: { query?: string; o
         onClearSearch && (
           <Button variant="outline" onClick={onClearSearch}>
             Limpar Busca
-          </button>
+          </Button>
         )
       }
     />

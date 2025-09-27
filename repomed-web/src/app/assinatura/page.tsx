@@ -223,12 +223,12 @@ export default function AssinaturaDigitalPage() {
     }
   };
 
-  const getCertificateStatusColor = (status: string) => {
+  const getCertificateStatusStyle = (status: string) => {
     switch (status) {
-      case 'valid': return 'text-green-400 bg-green-600';
-      case 'expired': return 'text-red-400 bg-red-600';
-      case 'expiring': return 'text-orange-400 bg-orange-600';
-      default: return 'text-gray-400 bg-gray-600';
+      case 'valid': return { color: '#34d399', backgroundColor: '#059669' };
+      case 'expired': return { color: '#f87171', backgroundColor: '#dc2626' };
+      case 'expiring': return { color: '#fb923c', backgroundColor: '#ea580c' };
+      default: return { color: '#ffffff', backgroundColor: 'var(--text-aaa-secondary)' };
     }
   };
 
@@ -459,7 +459,7 @@ export default function AssinaturaDigitalPage() {
                     </div>
                     <div className="flex justify-between text-xs">
                       <span className="text-slate-400">Status:</span>
-                      <span className={`px-2 py-1 rounded-full text-xs ${getCertificateStatusColor(cert.status)}`}>
+                      <span className="px-2 py-1 rounded-full text-xs" style={getCertificateStatusStyle(cert.status)}>
                         {getCertificateStatusText(cert.status)}
                       </span>
                     </div>

@@ -43,7 +43,7 @@ export function ArrayField({ field, register, setValue, watch, errors }) {
                 <input
                   type="text"
                   placeholder="Nome do medicamento"
-                  className="form-input text-sm"
+                  className="form-input text-lg"
                   value={value.name || ''}
                   onChange={(e) => updateItem(index, { 
                     ...value, 
@@ -53,7 +53,7 @@ export function ArrayField({ field, register, setValue, watch, errors }) {
                 <input
                   type="text"
                   placeholder="Dosagem"
-                  className="form-input text-sm"
+                  className="form-input text-lg"
                   value={value.dosage || ''}
                   onChange={(e) => updateItem(index, { 
                     ...value, 
@@ -63,7 +63,7 @@ export function ArrayField({ field, register, setValue, watch, errors }) {
                 <input
                   type="text"
                   placeholder="Frequência"
-                  className="form-input text-sm"
+                  className="form-input text-lg"
                   value={value.frequency || ''}
                   onChange={(e) => updateItem(index, { 
                     ...value, 
@@ -77,7 +77,7 @@ export function ArrayField({ field, register, setValue, watch, errors }) {
                 <input
                   type="text"
                   placeholder="Nome do exame"
-                  className="form-input text-sm"
+                  className="form-input text-lg"
                   value={value.name || ''}
                   onChange={(e) => updateItem(index, { 
                     ...value, 
@@ -85,7 +85,7 @@ export function ArrayField({ field, register, setValue, watch, errors }) {
                   })}
                 />
                 <select
-                  className="form-input text-sm"
+                  className="form-input text-lg"
                   value={value.urgency || ''}
                   onChange={(e) => updateItem(index, { 
                     ...value, 
@@ -123,7 +123,7 @@ export function ArrayField({ field, register, setValue, watch, errors }) {
         <button
           type="button"
           onClick={addItem}
-          className="flex items-center text-sm text-medical-blue hover:text-blue-700 font-medium"
+          className="flex items-center text-base text-medical-blue hover:text-blue-700 font-medium"
         >
           <Plus className="h-4 w-4 mr-1" />
           Adicionar {field.id === 'medications' ? 'medicamento' : 
@@ -132,7 +132,7 @@ export function ArrayField({ field, register, setValue, watch, errors }) {
       </div>
 
       {errors?.[field.id] && (
-        <p className="text-red-500 text-sm mt-1">
+        <p className="text-red-500 text-base mt-1">
           {errors[field.id].message}
         </p>
       )}

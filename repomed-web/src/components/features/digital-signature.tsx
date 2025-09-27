@@ -204,8 +204,8 @@ export function DocumentSignature({ documentId, documentData, onSignatureComplet
                 </>
               ) : (
                 <>
-                  <XCircle className="h-5 w-5 text-gray-400" />
-                  <span className="text-gray-500">Not Signed</span>
+                  <XCircle className="h-5 w-5" style={{ color: 'var(--text-aaa-secondary)' }} />
+                  <span style={{ color: 'var(--text-aaa-secondary)' }}>Not Signed</span>
                 </>
               )}
             </div>
@@ -419,7 +419,7 @@ export function DocumentSignature({ documentId, documentData, onSignatureComplet
                 <div key={index} className="bg-gray-50 p-4 rounded-lg">
                   <div className="flex justify-between items-start mb-2">
                     <Badge variant="outline">{log.action}</Badge>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs" style={{ color: 'var(--text-aaa-secondary)' }}>
                       {new Date(log.createdAt).toLocaleString()}
                     </span>
                   </div>

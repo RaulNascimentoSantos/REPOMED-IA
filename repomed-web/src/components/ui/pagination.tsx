@@ -69,7 +69,7 @@ export function Pagination({
       >
         <ChevronLeft className="h-4 w-4" />
         Anterior
-      </button>
+      </Button>
       
       {visiblePages.map((page, index) => {
         if (typeof page === 'string') {
@@ -82,7 +82,7 @@ export function Pagination({
               className="cursor-default"
             >
               <MoreHorizontal className="h-4 w-4" />
-            </button>
+            </Button>
           );
         }
         
@@ -98,7 +98,7 @@ export function Pagination({
             )}
           >
             {page}
-          </button>
+          </Button>
         );
       })}
       
@@ -111,7 +111,7 @@ export function Pagination({
       >
         Próxima
         <ChevronRight className="h-4 w-4" />
-      </button>
+      </Button>
     </div>
   );
 }

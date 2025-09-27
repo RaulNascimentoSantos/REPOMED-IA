@@ -1,0 +1,392 @@
+/**
+ * RepoMed IA v6.0 - Clinical Theme
+ *
+ * Tema médico otimizado para profissionais de saúde
+ * - Cores com base científica para reduzir fadiga visual
+ * - Contraste otimizado para leitura de documentos médicos
+ * - Paleta de cores que facilita identificação de prioridades médicas
+ */
+
+/* ===== CLINICAL COLOR PALETTE ===== */
+:root {
+  /* Medical Status Colors */
+  --clinical-critical: #dc2626;      /* Vermelho médico crítico */
+  --clinical-urgent: #ea580c;        /* Laranja urgente */
+  --clinical-warning: #d97706;       /* Amarelo atenção */
+  --clinical-stable: #059669;        /* Verde estável */
+  --clinical-info: #0284c7;          /* Azul informativo */
+  --clinical-neutral: #6b7280;       /* Cinza neutro */
+
+  /* Background Colors - Otimizados para reduzir fadiga visual */
+  --clinical-bg-primary: #fefefe;    /* Branco levemente off-white */
+  --clinical-bg-secondary: #f8fafc;  /* Cinza muito claro */
+  --clinical-bg-tertiary: #f1f5f9;   /* Cinza claro */
+  --clinical-bg-accent: #e2e8f0;     /* Cinza médio */
+
+  /* Text Colors - Alto contraste para leitura médica */
+  --clinical-text-primary: #0f172a;  /* Preto médico */
+  --clinical-text-secondary: #334155; /* Cinza escuro */
+  --clinical-text-tertiary: #64748b;  /* Cinza médio */
+  --clinical-text-muted: #94a3b8;    /* Cinza claro */
+
+  /* Border Colors - Sutis mas definidos */
+  --clinical-border-light: #e2e8f0;
+  --clinical-border-medium: #cbd5e1;
+  --clinical-border-strong: #94a3b8;
+
+  /* Medical Specialty Colors */
+  --clinical-cardiology: #ef4444;    /* Vermelho cardio */
+  --clinical-neurology: #8b5cf6;     /* Roxo neuro */
+  --clinical-oncology: #f59e0b;      /* Amarelo onco */
+  --clinical-pediatrics: #10b981;    /* Verde pediatria */
+  --clinical-emergency: #dc2626;     /* Vermelho emergência */
+  --clinical-surgery: #6366f1;       /* Azul cirurgia */
+
+  /* Accessibility & Focus */
+  --clinical-focus-ring: #3b82f6;
+  --clinical-focus-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+
+  /* Medical Form States */
+  --clinical-form-valid: #10b981;
+  --clinical-form-invalid: #ef4444;
+  --clinical-form-pending: #f59e0b;
+}
+
+/* ===== CLINICAL TYPOGRAPHY ===== */
+.clinical-font-primary {
+  font-family: 'Inter', 'Segoe UI', 'Roboto', system-ui, sans-serif;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.clinical-font-mono {
+  font-family: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
+  font-feature-settings: 'cv01', 'cv02', 'cv03', 'cv06';
+}
+
+/* ===== CLINICAL COMPONENTS ===== */
+
+/* Medical Priority Indicators */
+.clinical-priority-critical {
+  background-color: var(--clinical-critical);
+  color: white;
+  border-left: 4px solid #b91c1c;
+}
+
+.clinical-priority-urgent {
+  background-color: var(--clinical-urgent);
+  color: white;
+  border-left: 4px solid #c2410c;
+}
+
+.clinical-priority-normal {
+  background-color: var(--clinical-info);
+  color: white;
+  border-left: 4px solid #0369a1;
+}
+
+.clinical-priority-stable {
+  background-color: var(--clinical-stable);
+  color: white;
+  border-left: 4px solid #047857;
+}
+
+/* Medical Card Styling */
+.clinical-card {
+  background: var(--clinical-bg-primary);
+  border: 1px solid var(--clinical-border-light);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease-in-out;
+}
+
+.clinical-card:hover {
+  border-color: var(--clinical-border-medium);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
+}
+
+.clinical-card-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--clinical-border-light);
+  background: var(--clinical-bg-secondary);
+  border-radius: 12px 12px 0 0;
+}
+
+.clinical-card-content {
+  padding: 1.5rem;
+}
+
+/* Medical Form Styling */
+.clinical-form-group {
+  margin-bottom: 1.5rem;
+}
+
+.clinical-form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--clinical-text-secondary);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.clinical-form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--clinical-border-light);
+  border-radius: 8px;
+  font-size: 1rem;
+  color: var(--clinical-text-primary);
+  background: var(--clinical-bg-primary);
+  transition: all 0.2s ease-in-out;
+}
+
+.clinical-form-input:focus {
+  outline: none;
+  border-color: var(--clinical-focus-ring);
+  box-shadow: var(--clinical-focus-shadow);
+}
+
+.clinical-form-input.valid {
+  border-color: var(--clinical-form-valid);
+}
+
+.clinical-form-input.invalid {
+  border-color: var(--clinical-form-invalid);
+}
+
+/* Medical Button Styling */
+.clinical-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+}
+
+.clinical-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.clinical-btn-primary {
+  background: var(--clinical-info);
+  color: white;
+}
+
+.clinical-btn-primary:hover:not(:disabled) {
+  background: #0369a1;
+  transform: translateY(-1px);
+}
+
+.clinical-btn-critical {
+  background: var(--clinical-critical);
+  color: white;
+}
+
+.clinical-btn-critical:hover:not(:disabled) {
+  background: #b91c1c;
+  transform: translateY(-1px);
+}
+
+.clinical-btn-stable {
+  background: var(--clinical-stable);
+  color: white;
+}
+
+.clinical-btn-stable:hover:not(:disabled) {
+  background: #047857;
+  transform: translateY(-1px);
+}
+
+/* Medical Table Styling */
+.clinical-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.clinical-table th {
+  background: var(--clinical-bg-tertiary);
+  color: var(--clinical-text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 2px solid var(--clinical-border-medium);
+}
+
+.clinical-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--clinical-border-light);
+  color: var(--clinical-text-primary);
+}
+
+.clinical-table tbody tr:hover {
+  background: var(--clinical-bg-secondary);
+}
+
+/* Medical Status Indicators */
+.clinical-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.clinical-status-critical {
+  background: rgba(220, 38, 38, 0.1);
+  color: var(--clinical-critical);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+.clinical-status-urgent {
+  background: rgba(234, 88, 12, 0.1);
+  color: var(--clinical-urgent);
+  border: 1px solid rgba(234, 88, 12, 0.2);
+}
+
+.clinical-status-stable {
+  background: rgba(5, 150, 105, 0.1);
+  color: var(--clinical-stable);
+  border: 1px solid rgba(5, 150, 105, 0.2);
+}
+
+.clinical-status-pending {
+  background: rgba(217, 119, 6, 0.1);
+  color: var(--clinical-warning);
+  border: 1px solid rgba(217, 119, 6, 0.2);
+}
+
+/* Medical Navigation Styling */
+.clinical-nav-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  color: var(--clinical-text-secondary);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+  font-weight: 500;
+}
+
+.clinical-nav-item:hover {
+  background: var(--clinical-bg-tertiary);
+  color: var(--clinical-text-primary);
+}
+
+.clinical-nav-item.active {
+  background: var(--clinical-info);
+  color: white;
+}
+
+.clinical-nav-item.critical {
+  border-left: 4px solid var(--clinical-critical);
+}
+
+/* Accessibility Enhancements */
+.clinical-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.clinical-focus-visible:focus {
+  outline: 2px solid var(--clinical-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Medical Animation Utilities */
+.clinical-pulse {
+  animation: clinical-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes clinical-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.clinical-fade-in {
+  animation: clinical-fade-in 0.3s ease-in-out;
+}
+
+@keyframes clinical-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Clinical Utilities */
+@media (max-width: 768px) {
+  .clinical-card {
+    border-radius: 8px;
+  }
+
+  .clinical-form-input {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  .clinical-btn {
+    padding: 0.875rem 1.25rem;
+    font-size: 1rem;
+  }
+}
+
+/* Dark Mode Support for Clinical Theme */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --clinical-bg-primary: #0f172a;
+    --clinical-bg-secondary: #1e293b;
+    --clinical-bg-tertiary: #334155;
+    --clinical-bg-accent: #475569;
+
+    --clinical-text-primary: #f8fafc;
+    --clinical-text-secondary: #cbd5e1;
+    --clinical-text-tertiary: #94a3b8;
+    --clinical-text-muted: #64748b;
+
+    --clinical-border-light: #334155;
+    --clinical-border-medium: #475569;
+    --clinical-border-strong: #64748b;
+  }
+
+  .clinical-card {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  .clinical-card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  }
+}

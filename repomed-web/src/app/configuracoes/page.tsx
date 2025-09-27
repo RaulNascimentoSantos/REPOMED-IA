@@ -42,6 +42,12 @@ export default function ConfiguracoesPage() {
     alertas: true
   });
 
+  interface NotificationItem {
+    key: keyof typeof notifications;
+    label: string;
+    icon: any;
+  }
+
   const { theme, setTheme, fontSize, setFontSize, language, setLanguage } = useTheme();
 
   const tabsConfig = [
@@ -54,7 +60,7 @@ export default function ConfiguracoesPage() {
     { id: 'backup', label: 'Backup', icon: Download }
   ];
 
-  const handleNotificationChange = (key: string) => {
+  const handleNotificationChange = (key: keyof typeof notifications) => {
     setNotifications(prev => ({
       ...prev,
       [key]: !prev[key]
@@ -257,11 +263,11 @@ export default function ConfiguracoesPage() {
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-4">Canais de Notificação</h3>
                   <div className="space-y-4">
-                    {[
+                    {([
                       { key: 'email', label: 'Notificações por Email', icon: Mail },
                       { key: 'sms', label: 'Notificações por SMS', icon: Phone },
                       { key: 'push', label: 'Notificações Push', icon: Bell }
-                    ].map((item) => {
+                    ] as NotificationItem[]).map((item) => {
                       const Icon = item.icon;
                       return (
                         <div key={item.key} className="flex items-center justify-between">
@@ -287,11 +293,11 @@ export default function ConfiguracoesPage() {
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-4">Tipos de Notificação</h3>
                   <div className="space-y-4">
-                    {[
+                    {([
                       { key: 'consultas', label: 'Lembretes de Consulta', icon: Calendar },
                       { key: 'documentos', label: 'Novos Documentos', icon: FileText },
                       { key: 'alertas', label: 'Alertas Críticos', icon: AlertTriangle }
-                    ].map((item) => {
+                    ] as NotificationItem[]).map((item) => {
                       const Icon = item.icon;
                       return (
                         <div key={item.key} className="flex items-center justify-between">

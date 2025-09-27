@@ -120,8 +120,8 @@ export default function ProntuariosPage() {
     switch (status) {
       case 'active': return <CheckCircle2 className="w-4 h-4 text-green-500" />;
       case 'pending': return <AlertCircle className="w-4 h-4 text-yellow-500" />;
-      case 'archived': return <XCircle className="w-4 h-4 text-gray-500" />;
-      default: return <AlertCircle className="w-4 h-4 text-gray-500" />;
+      case 'archived': return <XCircle className="w-4 h-4" style={{ color: 'var(--text-aaa-secondary)' }} />;
+      default: return <AlertCircle className="w-4 h-4" style={{ color: 'var(--text-aaa-secondary)' }} />;
     }
   };
 
@@ -131,7 +131,7 @@ export default function ProntuariosPage() {
       case 'exame': return <Activity className="w-4 h-4 text-purple-500" />;
       case 'cirurgia': return <Heart className="w-4 h-4 text-red-500" />;
       case 'retorno': return <Clock className="w-4 h-4 text-green-500" />;
-      default: return <FileText className="w-4 h-4 text-gray-500" />;
+      default: return <FileText className="w-4 h-4" style={{ color: 'var(--text-aaa-secondary)' }} />;
     }
   };
 
@@ -148,7 +148,7 @@ export default function ProntuariosPage() {
     <div className="min-h-screen" style={{backgroundColor: 'var(--bg-primary)'}}>
       <div className="max-w-7xl mx-auto p-6">
         {/* Header */}
-        <div className="card-primary rounded-2xl shadow-lg p-6 mb-6">
+        <div className="semantic-card rounded-2xl shadow-lg p-6 mb-6">
           <div className="flex items-center gap-4 mb-4">
             <Button
               variant="ghost"
@@ -219,7 +219,7 @@ export default function ProntuariosPage() {
           {filteredProntuarios.map((prontuario) => (
             <div
               key={prontuario.id}
-              className="card-primary rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow"
+              className="semantic-card rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">

@@ -108,7 +108,7 @@ export default function URLsDashboard() {
       const results: URLEntry[] = [...list];
 
       for (const batch of batches) {
-        const batchResults = await Promise.all(batch.map(async (u) => {
+        const batchResults = await Promise.all(batch.map(async (u: any) => {
           if (!u || !u.url) {
             const result = { ...u, status: 'offline' as const, lastChecked: new Date().toISOString() };
             statusCache.set(u.url, { status: 'offline', timestamp: now });
@@ -390,7 +390,7 @@ export default function URLsDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-white">Central de URLs - RepoMed IA</h1>
-              <p className="text-sm text-slate-400 mt-1">
+              <p className="text-base text-slate-400 mt-1">
                 Alimentado automaticamente via Node-RED | Última atualização: {lastUpdate}
               </p>
             </div>
@@ -467,7 +467,7 @@ export default function URLsDashboard() {
                   <div key={url.id} className="bg-slate-800 rounded-lg shadow-sm border border-slate-700 p-4 hover:shadow-md hover:border-blue-500 hover:shadow-blue-500/20 transition-all transform hover:scale-105 duration-300 group cursor-pointer">
                     <div className="flex items-start justify-between mb-2">
                       <h3 className="font-semibold text-white group-hover:text-blue-200 transition-colors">{url.name}</h3>
-                      <span className={`px-2 py-1 rounded-full text-xs ${
+                      <span className={`px-2 py-1 rounded-full text-base ${
                         url.status === 'online'
                           ? 'bg-green-600 text-white'
                           : url.status === 'offline'
@@ -477,38 +477,38 @@ export default function URLsDashboard() {
                         {url.status || 'pending'}
                       </span>
                     </div>
-                    <p className="text-sm text-slate-300 mb-3 group-hover:text-slate-200 transition-colors">{url.description}</p>
+                    <p className="text-base text-slate-300 mb-3 group-hover:text-slate-200 transition-colors">{url.description}</p>
                     <a
                       href={url.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm font-mono text-indigo-400 hover:text-indigo-300 break-all transition-colors"
+                      className="text-base font-mono text-indigo-400 hover:text-indigo-300 break-all transition-colors"
                     >
                       {url.url}
                     </a>
                     {url.port && (
-                      <div className="mt-2 text-xs text-slate-400">
+                      <div className="mt-2 text-base text-slate-400">
                         Porta: {url.port}
                       </div>
                     )}
                     {url.metadata?.method && (
                       <div className="mt-2 flex items-center gap-2">
-                        <span className="px-2 py-1 bg-slate-700 text-slate-300 rounded text-xs group-hover:bg-slate-600 transition-colors">
+                        <span className="px-2 py-1 bg-slate-700 text-slate-300 rounded text-base group-hover:bg-slate-600 transition-colors">
                           {url.metadata.method}
                         </span>
                         {url.metadata.auth && (
-                          <span className="px-2 py-1 bg-yellow-600 text-white rounded text-xs">
+                          <span className="px-2 py-1 bg-yellow-600 text-white rounded text-base">
                             Auth
                           </span>
                         )}
                         {typeof url.metadata.responseTime === 'number' && (
-                          <span className="px-2 py-1 bg-blue-600 text-white rounded text-xs">
+                          <span className="px-2 py-1 bg-blue-600 text-white rounded text-base">
                             {url.metadata.responseTime}ms
                           </span>
                         )}
                       </div>
                     )}
-                    <div className="mt-2 text-xs text-slate-500">
+                    <div className="mt-2 text-base text-slate-500">
                       Adicionado: {new Date(url.createdAt).toLocaleString('pt-BR')}
                     </div>
                   </div>
@@ -527,7 +527,7 @@ export default function URLsDashboard() {
             Logs de Execução Node-RED
           </h2>
           <div className="flex items-center gap-2">
-            <span className={`px-2 py-1 rounded-full text-xs ${
+            <span className={`px-2 py-1 rounded-full text-base ${
               logs.backupStatus === 'healthy'
                 ? 'bg-green-600 text-white'
                 : logs.backupStatus === 'warning'
@@ -536,7 +536,7 @@ export default function URLsDashboard() {
             }`}>
               {logs.backupStatus || 'unknown'}
             </span>
-            <span className="text-xs text-slate-400">
+            <span className="text-base text-slate-400">
               Fonte: {logs.source || 'N/A'}
             </span>
           </div>
@@ -549,16 +549,16 @@ export default function URLsDashboard() {
                 {logs.logs.map((log, index) => (
                   <div
                     key={index}
-                    className="flex items-start gap-3 py-2 px-3 rounded bg-slate-700/30 hover:bg-slate-700/50 transition-colors font-mono text-sm"
+                    className="flex items-start gap-3 py-2 px-3 rounded bg-slate-700/30 hover:bg-slate-700/50 transition-colors font-mono text-base"
                   >
-                    <span className="text-slate-500 text-xs mt-1 min-w-[80px]">
+                    <span className="text-slate-500 text-base mt-1 min-w-[80px]">
                       {new Date(log.timestamp).toLocaleTimeString('pt-BR')}
                     </span>
                     <span className={`font-semibold min-w-[80px] ${getLogLevelColor(log.level)}`}>
                       [{log.level.toUpperCase()}]
                     </span>
                     <span className="text-slate-300 flex-1">{log.message}</span>
-                    <span className="text-slate-500 text-xs">
+                    <span className="text-slate-500 text-base">
                       {log.component}
                     </span>
                   </div>
@@ -568,13 +568,13 @@ export default function URLsDashboard() {
               <div className="text-center py-8 text-slate-400">
                 <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" />
                 <p>Nenhum log disponível</p>
-                <p className="text-xs mt-1">Aguardando execução do Node-RED...</p>
+                <p className="text-base mt-1">Aguardando execução do Node-RED...</p>
               </div>
             )}
           </div>
 
           {logs.lastUpdate && (
-            <div className="mt-3 pt-3 border-t border-slate-700 text-xs text-slate-400 text-center">
+            <div className="mt-3 pt-3 border-t border-slate-700 text-base text-slate-400 text-center">
               Última atualização: {new Date(logs.lastUpdate).toLocaleString('pt-BR')}
             </div>
           )}
@@ -594,16 +594,16 @@ export default function URLsDashboard() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-medium text-white group-hover:text-blue-200 transition-colors">{dev.description}</h3>
-                    <span className="text-xs text-slate-400">
+                    <span className="text-base text-slate-400">
                       {new Date(dev.timestamp).toLocaleString('pt-BR')}
                     </span>
                   </div>
-                  <p className="text-sm text-slate-300">Tipo: {dev.type}</p>
+                  <p className="text-base text-slate-300">Tipo: {dev.type}</p>
                   {dev.files?.length ? (
-                    <div className="mt-2 text-xs text-slate-400">Arquivos: {dev.files.join(', ')}</div>
+                    <div className="mt-2 text-base text-slate-400">Arquivos: {dev.files.join(', ')}</div>
                   ) : null}
                   {dev.urls?.length ? (
-                    <div className="mt-2 text-xs text-indigo-400">+{dev.urls.length} URLs adicionadas</div>
+                    <div className="mt-2 text-base text-indigo-400">+{dev.urls.length} URLs adicionadas</div>
                   ) : null}
                 </div>
               </div>

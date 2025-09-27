@@ -124,7 +124,7 @@ export default function NovoProntuarioPage() {
     <div className="min-h-screen" style={{backgroundColor: 'var(--bg-primary)'}}>
       <div className="max-w-4xl mx-auto p-6">
         {/* Header */}
-        <div className="card-primary rounded-2xl shadow-lg p-6 mb-6">
+        <div className="semantic-card rounded-2xl shadow-lg p-6 mb-6">
           <div className="flex items-center gap-4 mb-4">
             <Button
               variant="ghost"

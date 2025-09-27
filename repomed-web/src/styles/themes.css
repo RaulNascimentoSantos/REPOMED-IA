@@ -7,6 +7,7 @@
   --text-primary: #ffffff;
   --text-secondary: #cbd5e1;
   --text-muted: #64748b;
+  --text-aaa-secondary: #e2e8f0;  /* AAA 7:1 contrast for secondary text */
   --accent-primary: #3b82f6;
   --accent-secondary: #1d4ed8;
   --border-color: #475569;
@@ -50,7 +51,8 @@
   --bg-tertiary: #e2e8f0;
   --text-primary: #1e293b;
   --text-secondary: #475569;
-  --text-muted: #94a3b8;
+  --text-muted: #64748b;
+  --text-aaa-secondary: #374151;  /* AAA 7:1 contrast for light theme */
   --accent-primary: #3b82f6;
   --accent-secondary: #1d4ed8;
   --border-color: #e2e8f0;
@@ -229,7 +231,7 @@
 }
 
 .text-slate-400 {
-  color: var(--text-muted) !important;
+  color: var(--text-aaa-secondary) !important;
 }
 
 .border-slate-700 {
@@ -425,7 +427,7 @@ td {
 }
 
 .text-gray-500, .text-gray-400 {
-  color: var(--text-muted) !important;
+  color: var(--text-aaa-secondary) !important;
 }
 
 /* Border classes */
@@ -516,7 +518,7 @@ td {
 }
 
 [data-theme="light"] .text-slate-400 {
-  color: var(--text-muted) !important;
+  color: var(--text-aaa-secondary) !important;
 }
 
 /* Medical theme specific overrides */
@@ -541,11 +543,11 @@ td {
 }
 
 [data-theme="medical"] .text-slate-400 {
-  color: var(--text-muted) !important;
+  color: var(--text-aaa-secondary) !important;
 }
 
 /* Enhanced card styling */
-.card-primary {
+.semantic-card {
   background-color: var(--bg-secondary) !important;
   border: 1px solid var(--border-color) !important;
   color: var(--text-primary) !important;
@@ -595,6 +597,181 @@ td {
 .focus-visible:focus-visible {
   outline: 2px solid var(--accent-primary) !important;
   outline-offset: 2px !important;
+}
+
+/* ===== CLINICAL THEME ===== */
+/* Tema específico para ambientes hospitalares baseado em pesquisa UX médica */
+[data-theme="clinical"] {
+  /* Core Colors - Otimizado para fadiga visual reduzida */
+  --bg-primary: #fefffe;           /* Branco suave, não puro */
+  --bg-secondary: #f7f9fc;         /* Azul muito claro para cards */
+  --bg-tertiary: #eef4f7;          /* Azul claro para separações */
+  --bg-elevated: #ffffff;          /* Branco puro para modals */
+
+  /* Text Colors - Contraste WCAG 2.1 AAA (≥ 7:1) */
+  --text-primary: #0f1419;         /* Quase preto para máxima legibilidade */
+  --text-secondary: #374151;       /* Cinza escuro para texto secundário */
+  --text-muted: var(--text-aaa-secondary);           /* Cinza médio para texto de apoio */
+  --text-disabled: var(--text-aaa-secondary);        /* Cinza claro para elementos desabilitados */
+  --text-inverse: #ffffff;         /* Branco para backgrounds escuros */
+
+  /* Medical Status Colors - Cores específicas para contexto médico */
+  --accent-primary: #0066cc;       /* Azul médico confiável */
+  --accent-secondary: #004499;     /* Azul médico escuro */
+  --success: #006633;              /* Verde médico para status normal */
+  --warning: #cc6600;              /* Laranja médico para atenção */
+  --error: #cc0000;                /* Vermelho médico para crítico */
+  --info: #0066cc;                 /* Azul informativo */
+
+  /* Clinical Context Colors - Cores semânticas médicas */
+  --clinical-vitals: #006633;      /* Sinais vitais normais */
+  --clinical-prescription: #0066cc; /* Prescrições */
+  --clinical-lab: #663399;         /* Exames laboratoriais */
+  --clinical-emergency: #cc0000;   /* Emergências */
+  --clinical-surgery: #cc6600;     /* Cirurgias */
+
+  /* Borders & Interactive */
+  --border-color: #d1d5db;         /* Bordas suaves */
+  --border-focus: #0066cc;         /* Foco azul médico */
+  --hover-bg: #f3f4f6;             /* Hover muito sutil */
+  --focus-ring: #0066cc;           /* Ring de foco médico */
+
+  /* Enhanced Medical Status Backgrounds - Alta visibilidade */
+  --status-success-bg: #ecfdf5;    /* Verde muito claro */
+  --status-success-text: #006633;  /* Verde médico */
+  --status-success-border: #22c55e; /* Verde médio */
+
+  --status-warning-bg: #fffbeb;    /* Laranja muito claro */
+  --status-warning-text: #cc6600;  /* Laranja médico */
+  --status-warning-border: #f59e0b; /* Laranja médio */
+
+  --status-error-bg: #fef2f2;      /* Vermelho muito claro */
+  --status-error-text: #cc0000;    /* Vermelho médico */
+  --status-error-border: #ef4444;  /* Vermelho médio */
+
+  --status-info-bg: #eff6ff;       /* Azul muito claro */
+  --status-info-text: #0066cc;     /* Azul médico */
+  --status-info-border: #3b82f6;   /* Azul médio */
+
+  /* Accessibility Enhancements */
+  --min-contrast-ratio: 7;         /* Contraste AAA */
+  --focus-ring-width: 3px;         /* Ring mais visível */
+  --focus-ring-offset: 2px;
+  --keyboard-focus: #0066cc;
+  --screen-reader-only: absolute;
+  --aria-live-region: #f7f9fc;
+}
+
+/* Clinical Theme Overrides - Aplicar cores clínicas */
+[data-theme="clinical"] .bg-slate-900 {
+  background-color: var(--bg-primary) !important;
+}
+
+[data-theme="clinical"] .bg-slate-800 {
+  background-color: var(--bg-secondary) !important;
+}
+
+[data-theme="clinical"] .bg-slate-700 {
+  background-color: var(--bg-tertiary) !important;
+}
+
+[data-theme="clinical"] .text-white {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="clinical"] .text-slate-300 {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="clinical"] .text-slate-400 {
+  color: var(--text-aaa-secondary) !important;
+}
+
+/* Clinical Card Enhancements */
+[data-theme="clinical"] .semantic-card {
+  background-color: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-theme="clinical"] .card-secondary {
+  background-color: var(--bg-tertiary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+/* Clinical Interactive Elements */
+[data-theme="clinical"] .btn-primary {
+  background-color: var(--accent-primary) !important;
+  border-color: var(--accent-primary) !important;
+  color: white !important;
+}
+
+[data-theme="clinical"] .btn-primary:hover {
+  background-color: var(--accent-secondary) !important;
+  border-color: var(--accent-secondary) !important;
+}
+
+/* Clinical Form Elements */
+[data-theme="clinical"] .form-input,
+[data-theme="clinical"] .form-select,
+[data-theme="clinical"] .form-textarea {
+  background-color: var(--bg-elevated) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="clinical"] .form-input:focus,
+[data-theme="clinical"] .form-select:focus,
+[data-theme="clinical"] .form-textarea:focus {
+  border-color: var(--border-focus) !important;
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1) !important;
+}
+
+/* Clinical Status Badges */
+[data-theme="clinical"] .status-success {
+  background-color: var(--status-success-bg) !important;
+  color: var(--status-success-text) !important;
+  border: 1px solid var(--status-success-border) !important;
+}
+
+[data-theme="clinical"] .status-warning {
+  background-color: var(--status-warning-bg) !important;
+  color: var(--status-warning-text) !important;
+  border: 1px solid var(--status-warning-border) !important;
+}
+
+[data-theme="clinical"] .status-error {
+  background-color: var(--status-error-bg) !important;
+  color: var(--status-error-text) !important;
+  border: 1px solid var(--status-error-border) !important;
+}
+
+[data-theme="clinical"] .status-info {
+  background-color: var(--status-info-bg) !important;
+  color: var(--status-info-text) !important;
+  border: 1px solid var(--status-info-border) !important;
+}
+
+/* Clinical Enhanced Focus */
+[data-theme="clinical"] .focus-visible:focus-visible {
+  outline: var(--focus-ring-width) solid var(--keyboard-focus) !important;
+  outline-offset: var(--focus-ring-offset) !important;
+}
+
+/* Clinical Accessibility - High Contrast Mode */
+[data-theme="clinical"] @media (prefers-contrast: high) {
+  --text-primary: #000000;
+  --border-color: #000000;
+  --focus-ring-width: 4px;
+}
+
+/* Clinical Reduced Motion */
+[data-theme="clinical"] @media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Print styles */

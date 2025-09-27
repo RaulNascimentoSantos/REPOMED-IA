@@ -13,8 +13,8 @@
   
   /* Textos */
   --text-primary: #1f2937;
-  --text-secondary: #6b7280;
-  --text-muted: #9ca3af;
+  --text-secondary: var(--text-aaa-secondary);
+  --text-muted: var(--text-aaa-secondary);
   --text-label: #374151;
   
   /* Bordas */

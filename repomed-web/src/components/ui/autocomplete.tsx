@@ -169,9 +169,9 @@ export function Autocomplete({
             <div className="animate-spin h-4 w-4 border-2 border-gray-300 border-t-blue-600 rounded-full" />
           )}
           <ChevronDown className={cn(
-            'h-4 w-4 text-gray-400 transition-transform',
+            'h-4 w-4 transition-transform',
             isOpen && 'rotate-180'
-          )} />
+          )} style={{ color: 'var(--text-aaa-secondary)' }} />
         </div>
       </div>
 
@@ -199,7 +199,7 @@ export function Autocomplete({
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-sm">{option.label}</div>
                     {option.description && (
-                      <div className="text-xs text-gray-500 truncate">
+                      <div className="text-xs truncate" style={{ color: 'var(--text-aaa-secondary)' }}>
                         {option.description}
                       </div>
                     )}
@@ -212,7 +212,7 @@ export function Autocomplete({
               ))}
             </div>
           ) : (
-            <div className="px-3 py-4 text-center text-gray-500 text-sm">
+            <div className="px-3 py-4 text-center text-sm" style={{ color: 'var(--text-aaa-secondary)' }}>
               {loading ? 'Carregando...' : (
                 <>
                   {query ? (
@@ -229,7 +229,7 @@ export function Autocomplete({
                           className="w-full mt-2"
                         >
                           Criar "{query}"
-                        </button>
+                        </Button>
                       )}
                     </>
                   ) : (

@@ -81,7 +81,7 @@ export function TimePicker({
           disabled={disabled}
           className="cursor-pointer pr-10"
         />
-        <Clock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Clock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: 'var(--text-aaa-secondary)' }} />
       </div>
 
       {isOpen && (
@@ -102,7 +102,7 @@ export function TimePicker({
                     className="w-full justify-start"
                   >
                     {format24h ? hour.toString().padStart(2, '0') : (hour === 0 ? 12 : hour)}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -122,7 +122,7 @@ export function TimePicker({
                     className="w-full justify-start"
                   >
                     {minute.toString().padStart(2, '0')}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -141,7 +141,7 @@ export function TimePicker({
                     className="w-full"
                   >
                     AM
-                  </button>
+                  </Button>
                   <Button
                     variant={selectedHour >= 12 ? 'default' : 'ghost'}
                     size="sm"
@@ -149,7 +149,7 @@ export function TimePicker({
                     className="w-full"
                   >
                     PM
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
@@ -161,14 +161,14 @@ export function TimePicker({
               className="flex-1"
             >
               Confirmar
-            </button>
+            </Button>
             <Button
               variant="outline"
               onClick={() => setIsOpen(false)}
               className="flex-1"
             >
               Cancelar
-            </button>
+            </Button>
           </div>
         </div>
       )}

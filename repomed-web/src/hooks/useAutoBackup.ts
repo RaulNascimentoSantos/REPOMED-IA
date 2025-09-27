@@ -205,9 +205,9 @@ export function useAutoBackup(config: BackupConfig = {}) {
 
     const intervalMs = (finalConfig.interval || 5) * 60 * 1000; // Convert minutes to ms
 
-    intervalRef.current = setInterval(async () => {
-      await backupKanbanData();
-    }, intervalMs);
+    // DESABILITADO: intervalRef.current = setInterval(async () => {
+    //   await backupKanbanData();
+    // }, intervalMs);
 
     console.log(`Auto-backup started with ${finalConfig.interval} minute intervals`);
   }, [finalConfig.enabled, finalConfig.interval, backupKanbanData]);

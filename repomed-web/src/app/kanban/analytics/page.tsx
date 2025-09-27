@@ -303,7 +303,7 @@ export default function KanbanAnalytics() {
                 <p className="text-gray-600">
                   Análise detalhada de performance e produtividade do time
                 </p>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-black dark:text-white mt-1">
                   Última atualização: {format(lastUpdated, 'dd/MM/yyyy HH:mm', { locale: ptBR })}
                 </p>
               </div>
@@ -446,7 +446,7 @@ export default function KanbanAnalytics() {
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-medium">{item.status}</span>
-                        <span className="text-sm text-gray-500">{item.count} ({item.percentage}%)</span>
+                        <span className="text-sm text-black dark:text-white">{item.count} ({item.percentage}%)</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-3">
                         <div
@@ -478,7 +478,7 @@ export default function KanbanAnalytics() {
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-1">
                           <span className="font-medium">{item.priority}</span>
-                          <span className="text-sm text-gray-500">{item.count} ({item.percentage}%)</span>
+                          <span className="text-sm text-black dark:text-white">{item.count} ({item.percentage}%)</span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-3">
                           <div

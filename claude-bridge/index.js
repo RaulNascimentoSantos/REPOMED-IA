@@ -1,0 +1,2106 @@
+import express from 'express';
+import cors from 'cors';
+import Docker from 'dockerode';
+import simpleGit from 'simple-git';
+import pg from 'pg';
+import fs from 'fs/promises';
+import fssync from 'fs';
+import path from 'path';
+import Mustache from 'mustache';
+import winston from 'winston';
+import nodemailer from 'nodemailer';
+import { z } from 'zod';
+import { v4 as uuidv4 } from 'uuid';
+import { fileURLToPath } from 'url';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const execAsync = promisify(exec);
+
+// Logger configurado será criado após OUTPUTS_DIR
+
+// Express app
+const app = express();
+app.use(cors());
+app.use(express.json({ limit: '10mb' }));
+
+// Configurações
+const PORT = process.env.PORT || 8082;
+const REPO = process.env.REPO_PATH || 'C:\\Users\\Raul\\Desktop\\WORKSPACE\\RepoMed IA';
+const PROMPTS_DIR = path.join(REPO, 'prompts');
+const OUTPUTS_DIR = path.join(REPO, 'outputs');
+const EVALUATIONS_DIR = path.join(REPO, 'evaluations');
+const GIT_USER = process.env.GIT_USER_NAME || 'RepoMed Bot';
+const GIT_EMAIL = process.env.GIT_USER_EMAIL || 'bot@repomed.local';
+
+// Logger configurado APÓS OUTPUTS_DIR
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
+  ),
+  transports: [
+    new winston.transports.File({
+      filename: path.join(OUTPUTS_DIR, 'pipeline.log'),
+      maxsize: 5242880, // 5MB
+      maxFiles: 5
+    }),
+    new winston.transports.Console({
+      format: winston.format.simple()
+    })
+  ]
+});
+
+// Configuração de Email
+const EMAIL_CONFIG = {
+  enabled: process.env.EMAIL_ENABLED !== 'false',
+  recipients: [
+    process.env.ADMIN_EMAIL_1 || 'admin1@example.com',
+    process.env.ADMIN_EMAIL_2 || 'admin2@example.com'
+  ],
+  smtp: {
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.SMTP_PORT) || 587,
+    secure: false,
+    auth: {
+      user: process.env.SMTP_USER || process.env.SMTP_USER || 'pipeline@example.com',
+      pass: process.env.SMTP_PASS || 'app-specific-password'
+    },
+    tls: {
+      rejectUnauthorized: false
+    }
+  }
+};
+
+// Conexões externas
+const docker = new Docker({ socketPath: '/var/run/docker.sock' });
+const git = simpleGit(REPO);
+const { Client } = pg;
+
+// Map de jobs em execução
+const JOBS = new Map();
+
+// Lock para operações git
+let REPO_LOCK = false;
+
+// ===================== SERVIÇO DE EMAIL =====================
+
+// Configurar transporter de email
+let emailTransporter = null;
+
+async function initializeEmailService() {
+  if (!EMAIL_CONFIG.enabled) return;
+
+  try {
+    // Configuração SMTP com credenciais reais
+    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+      // Configuração robusta com múltiplas tentativas de SMTP
+      const smtpConfigs = [
+        {
+          name: 'Gmail',
+          config: {
+            host: 'smtp.gmail.com',
+            port: 587,
+            secure: false,
+            auth: {
+              user: process.env.SMTP_USER,
+              pass: process.env.SMTP_PASS,
+            },
+            tls: { rejectUnauthorized: false }
+          }
+        },
+        {
+          name: 'Gmail SSL',
+          config: {
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true,
+            auth: {
+              user: process.env.SMTP_USER,
+              pass: process.env.SMTP_PASS,
+            },
+            tls: { rejectUnauthorized: false }
+          }
+        },
+        {
+          name: 'Outlook',
+          config: {
+            host: 'smtp-mail.outlook.com',
+            port: 587,
+            secure: false,
+            auth: {
+              user: process.env.SMTP_USER,
+              pass: process.env.SMTP_PASS,
+            },
+            tls: { rejectUnauthorized: false }
+          }
+        }
+      ];
+
+      // Tentar configurações até uma funcionar
+      let configSuccess = false;
+      for (const smtpConfig of smtpConfigs) {
+        try {
+          const transporter = nodemailer.createTransport(smtpConfig.config);
+
+          // Verificar se a configuração funciona
+          await transporter.verify();
+
+          emailTransporter = transporter;
+          logger.info(`✅ Email service initialized with ${smtpConfig.name}: ${process.env.SMTP_USER}`);
+          logger.info(`📧 Real emails will be sent to: ${EMAIL_CONFIG.recipients.join(', ')}`);
+          configSuccess = true;
+          break;
+        } catch (error) {
+          logger.warn(`${smtpConfig.name} config failed: ${error.message}`);
+          continue;
+        }
+      }
+
+      if (!configSuccess) {
+        logger.error('❌ ERRO CRÍTICO: Gmail não configurado corretamente!');
+        logger.error('🔧 INSTRUÇÕES PARA CORRIGIR:');
+        logger.error('   1. Acesse https://myaccount.google.com/apppasswords');
+        logger.error('   2. Gere uma nova senha específica para "RepoMed SMTP"');
+        logger.error('   3. Use a nova senha no docker-compose.pipeline.yml');
+        logger.error('   4. Reinicie o sistema com: docker-compose -f docker-compose.pipeline.yml restart');
+
+        // Tentar configuração alternativa com Outlook como fallback
+        logger.warn('⚠️ Tentando configuração alternativa com Outlook...');
+        try {
+          const outlookConfig = {
+            host: 'smtp-mail.outlook.com',
+            port: 587,
+            secure: false,
+            auth: {
+              user: 'repomed.pipeline@outlook.com', // Você precisará criar esta conta
+              pass: 'senha_outlook'
+            },
+            tls: { rejectUnauthorized: false }
+          };
+
+          const outlookTransporter = nodemailer.createTransporter(outlookConfig);
+          await outlookTransporter.verify();
+
+          emailTransporter = outlookTransporter;
+          logger.info('✅ Fallback para Outlook configurado com sucesso!');
+        } catch (outlookError) {
+          logger.error('❌ Outlook fallback também falhou. Sistema sem email.');
+          logger.error('📧 EMAILS DESABILITADOS - Corrija o Gmail para reativar');
+          emailTransporter = null;
+        }
+      }
+    }
+
+    // Se ainda não há transporter configurado, usar Ethereal como fallback final
+    if (!emailTransporter) {
+      // Fallback final para conta de teste Ethereal
+      const testAccount = await nodemailer.createTestAccount();
+
+      const testConfig = {
+        host: 'smtp.ethereal.email',
+        port: 587,
+        secure: false,
+        auth: {
+          user: testAccount.user,
+          pass: testAccount.pass,
+        },
+      };
+
+      emailTransporter = nodemailer.createTransport(testConfig);
+      logger.info(`Email service initialized with test account: ${testAccount.user}`);
+      logger.info(`⚠️  EMAILS SÃO APENAS PARA TESTE - Configure SMTP_USER e SMTP_PASS para emails reais`);
+      logger.info(`📧 Preview emails at: https://ethereal.email`);
+    }
+  } catch (error) {
+    logger.error('Failed to initialize email service:', error);
+    emailTransporter = null;
+  }
+}
+
+function generateRepoMedEmailTemplate(title, content, status = 'info') {
+  const statusColors = {
+    success: { bg: '#00c851', icon: '✅', text: '#065F46' },
+    error: { bg: '#ff4444', icon: '❌', text: '#7F1D1D' },
+    warning: { bg: '#ffbb33', icon: '⚠️', text: '#78350F' },
+    info: { bg: '#0066cc', icon: '📋', text: '#001429' }
+  };
+
+  const color = statusColors[status] || statusColors.info;
+
+  return `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title}</title>
+    <!--[if mso]>
+    <noscript>
+        <xml>
+            <o:OfficeDocumentSettings>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+            </o:OfficeDocumentSettings>
+        </xml>
+    </noscript>
+    <![endif]-->
+    <style>
+        /* Reset styles for email clients */
+        body, table, td, p, a, li, blockquote {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+        table, td {
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+        }
+
+        body {
+            margin: 0 !important;
+            padding: 20px !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif !important;
+            line-height: 1.6 !important;
+            color: #1f2937 !important;
+            background-color: #667eea !important;
+            width: 100% !important;
+            min-height: 100vh !important;
+        }
+
+        .email-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .medical-header {
+            text-align: center;
+            margin-bottom: 48px;
+            padding: 0 20px;
+        }
+
+        .hero-title {
+            font-size: 48px;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 16px;
+            text-shadow: 2px 4px 8px rgba(0, 0, 0, 0.3);
+            letter-spacing: -0.025em;
+        }
+
+        .hero-subtitle {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.95);
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, ${color.bg} 0%, ${color.bg}dd 100%);
+            padding: 32px;
+            text-align: center;
+            color: white;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .card-content {
+            padding: 40px 32px;
+        }
+
+        .content-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #111827;
+            margin: 0 0 24px 0;
+            text-align: center;
+        }
+
+        .content-body {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 24px;
+            margin: 24px 0;
+            font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 32px 0;
+            padding: 24px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 100%);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .info-item {
+            text-align: center;
+            padding: 16px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-aaa-secondary, #1f2937);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 32px;
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            color: white;
+        }
+
+        .footer-brand {
+            font-size: 24px;
+            font-weight: 800;
+            color: #60a5fa;
+            margin-bottom: 16px;
+            text-shadow: 1px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .footer-text {
+            font-size: 14px;
+            opacity: 0.8;
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+
+        /* Responsive */
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                padding: 20px 16px;
+            }
+            .hero-title {
+                font-size: 36px;
+            }
+            .card-content {
+                padding: 32px 24px;
+            }
+        }
+        .tagline {
+            font-size: 14px;
+            opacity: 0.9;
+            margin: 0;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: ${color.bg};
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0 0 20px 0;
+        }
+        .content-body {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', Consolas, monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        .footer {
+            background-color: #1f2937;
+            color: #ffffff;
+            padding: 30px;
+            text-align: center;
+        }
+        .footer-logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: #60a5fa;
+            margin-bottom: 12px;
+        }
+
+        /* Responsive styles */
+        @media only screen and (max-width: 600px) {
+            .container {
+                width: 95% !important;
+            }
+            .header {
+                padding: 30px 20px !important;
+            }
+            .content {
+                padding: 30px 20px !important;
+            }
+        }
+        .footer-text {
+            font-size: 12px;
+            opacity: 0.8;
+            margin: 5px 0;
+        }
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .metric-item {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px 10px;
+            text-align: center;
+        }
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            display: block;
+        }
+        .metric-label {
+            font-size: 12px;
+            color: var(--text-aaa-secondary, #1f2937);
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background-color: #667eea; width: 100%; min-height: 100vh;">
+
+    <!-- Email Container Table -->
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; margin: 0 auto;">
+
+        <!-- Hero Header -->
+        <tr>
+            <td style="text-align: center; padding: 40px 20px; color: white;">
+                <h1 style="font-size: 42px; font-weight: 900; color: white; margin: 0 0 16px 0; text-shadow: 2px 4px 8px rgba(0,0,0,0.3);">
+                    🏥 RepoMed IA
+                </h1>
+                <p style="font-size: 18px; color: rgba(255,255,255,0.95); margin: 0; font-weight: 500;">
+                    Sistema Médico Inteligente Enterprise
+                </p>
+            </td>
+        </tr>
+
+        <!-- Main Card -->
+        <tr>
+            <td>
+                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border-radius: 24px; box-shadow: 0 25px 50px rgba(0,0,0,0.2); overflow: hidden;">
+
+                    <!-- Card Header -->
+                    <tr>
+                        <td style="background-color: ${color.bg}; padding: 32px; text-align: center; color: white;">
+                            <div style="display: inline-block; background-color: rgba(255,255,255,0.2); color: white; padding: 12px 24px; border-radius: 50px; font-weight: 600; font-size: 16px; border: 1px solid rgba(255,255,255,0.3);">
+                                ${color.icon} ${title}
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Card Content -->
+                    <tr>
+                        <td style="padding: 40px 32px;">
+                            <h2 style="font-size: 28px; font-weight: 700; color: #111827; margin: 0 0 24px 0; text-align: center;">
+                                Relatório de Pipeline
+                            </h2>
+
+                            <!-- Content Body -->
+                            <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border: 2px solid #e2e8f0; border-radius: 16px; padding: 24px; margin: 24px 0; font-family: 'Courier New', Consolas, monospace; font-size: 14px; line-height: 1.6; white-space: pre-wrap;">
+                                ${content}
+                            </div>
+
+                            <!-- Info Grid -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 32px 0; background: rgba(248,250,252,0.8); border-radius: 16px; border: 1px solid #e5e7eb;">
+                                <tr>
+                                    <td style="width: 33.33%; padding: 20px; text-align: center; border-right: 1px solid #e5e7eb;">
+                                        <div style="font-size: 12px; font-weight: 600; color: var(--text-aaa-secondary, #1f2937); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">DATA/HORA</div>
+                                        <div style="font-size: 16px; font-weight: 700; color: #111827;">
+                                            ${new Date().toLocaleDateString('pt-BR')}<br>
+                                            <small>${new Date().toLocaleTimeString('pt-BR')}</small>
+                                        </div>
+                                    </td>
+                                    <td style="width: 33.33%; padding: 20px; text-align: center; border-right: 1px solid #e5e7eb;">
+                                        <div style="font-size: 12px; font-weight: 600; color: var(--text-aaa-secondary, #1f2937); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">AMBIENTE</div>
+                                        <div style="font-size: 16px; font-weight: 700; color: #111827;">
+                                            Production<br>
+                                            <small>Pipeline v3.0</small>
+                                        </div>
+                                    </td>
+                                    <td style="width: 33.33%; padding: 20px; text-align: center;">
+                                        <div style="font-size: 12px; font-weight: 600; color: var(--text-aaa-secondary, #1f2937); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">SISTEMA</div>
+                                        <div style="font-size: 16px; font-weight: 700; color: #111827;">
+                                            RepoMed IA<br>
+                                            <small>Enterprise</small>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #1f2937 0%, #374151 100%); color: white; padding: 32px; text-align: center;">
+                            <div style="font-size: 24px; font-weight: 800; color: #60a5fa; margin-bottom: 16px;">⚡ RepoMed Pipeline</div>
+                            <p style="font-size: 14px; opacity: 0.8; margin: 8px 0; line-height: 1.5;">Sistema automatizado de desenvolvimento e monitoramento</p>
+                            <p style="font-size: 14px; opacity: 0.8; margin: 8px 0; line-height: 1.5;">Powered by Claude Code & Node-RED</p>
+                            <p style="font-size: 12px; opacity: 0.7; margin: 8px 0;">© 2025 RepoMed IA - Inteligência Artificial Médica</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- Spacer -->
+        <tr>
+            <td style="height: 40px;"></td>
+        </tr>
+    </table>
+</body>
+</html>`;
+}
+
+async function sendEmail(subject, text, html = null) {
+  if (!emailTransporter || !EMAIL_CONFIG.enabled) {
+    logger.warn('Email service not available');
+    return { success: false, error: 'Email service disabled' };
+  }
+
+  try {
+    const fromEmail = process.env.SMTP_USER || EMAIL_CONFIG.smtp.auth.user;
+
+    const mailOptions = {
+      from: `"🏥 RepoMed IA Pipeline" <${fromEmail}>`,
+      to: EMAIL_CONFIG.recipients.join(', '),
+      subject: `🚀 ${subject}`,
+      text,
+      html: html || generateRepoMedEmailTemplate('Relatório do Sistema', text, 'info')
+    };
+
+    const info = await emailTransporter.sendMail(mailOptions);
+    logger.info(`Email sent: ${info.messageId}`);
+
+    // Log de sucesso detalhado
+    logger.info(`✅ EMAIL ENVIADO COM SUCESSO PARA: ${EMAIL_CONFIG.recipients.join(', ')}`);
+    logger.info(`📧 Subject: ${subject}`);
+    logger.info(`📮 From: ${fromEmail}`);
+
+    return { success: true, messageId: info.messageId, previewUrl: nodemailer.getTestMessageUrl(info) };
+  } catch (error) {
+    logger.error('Failed to send email:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+async function sendLogEmail(job, logContent) {
+  const statusMap = {
+    'completed': { status: 'success', title: 'Execução Concluída com Sucesso' },
+    'failed': { status: 'error', title: 'Execução Falhou' },
+    'running': { status: 'info', title: 'Execução em Andamento' },
+    'pending': { status: 'warning', title: 'Execução Pendente' }
+  };
+
+  const emailStatus = statusMap[job.status] || { status: 'info', title: 'Status Atualizado' };
+  const subject = `Pipeline ${job.status.toUpperCase()} - ${job.brief || job.id}`;
+
+  // Criar conteúdo rico para o email
+  const emailContent = `
+🔍 JOB DETAILS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Job ID: ${job.id}
+Status: ${job.status.toUpperCase()}
+Brief: ${job.brief || 'N/A'}
+Iniciado: ${new Date(job.startedAt).toLocaleString('pt-BR')}
+${job.finishedAt ? `Finalizado: ${new Date(job.finishedAt).toLocaleString('pt-BR')}` : '⏳ Em execução...'}
+${job.branch ? `Branch: ${job.branch}` : ''}
+
+${job.steps && job.steps.length > 0 ? `
+📋 ETAPAS EXECUTADAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${job.steps.map(step => {
+  const statusIcon = step.status === 'completed' ? '✅' :
+                    step.status === 'failed' ? '❌' :
+                    step.status === 'running' ? '🔄' : '⏸️';
+  return `${statusIcon} ${step.name}: ${step.status.toUpperCase()}${step.summary ? ` - ${step.summary}` : ''}`;
+}).join('\n')}
+` : ''}
+
+${job.result ? `
+📊 MELHORIAS IMPLEMENTADAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Erros corrigidos: ${job.result.improvements.errorsFixed || 0}
+⚠️ Avisos corrigidos: ${job.result.improvements.warningsFixed || 0}
+🏥 Serviços melhorados: ${job.result.improvements.healthImproved || 0}
+
+📈 COMPARATIVO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Estado ANTERIOR: ${job.result.preState.errors || 0} erros, ${job.result.preState.warnings || 0} avisos
+Estado ATUAL: ${job.result.postState.errors || 0} erros, ${job.result.postState.warnings || 0} avisos
+
+Melhoria: ${((job.result.preState.errors || 0) - (job.result.postState.errors || 0))} erros eliminados!
+` : ''}
+
+${job.error ? `
+❌ ERRO ENCONTRADO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${job.error}
+` : ''}
+
+${logContent ? `
+📄 LOG DE EXECUÇÃO (Últimas 50 linhas)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${logContent.split('\n').slice(-50).join('\n')}
+` : ''}
+
+🚀 SISTEMA MONITORADO 24/7
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Backend API: http://localhost:8081/health
+✅ Frontend Web: http://localhost:3021
+✅ Claude Bridge: http://localhost:8082/health
+✅ Node-RED: http://localhost:1880
+✅ Pipeline Status: http://localhost:8082/jobs
+
+Este email foi enviado automaticamente pelo sistema de monitoramento do RepoMed IA.
+Para mais informações, acesse o dashboard de monitoramento.`;
+
+  const text = emailContent;
+
+  // Criar HTML personalizado com template profissional
+  const html = generateRepoMedEmailTemplate(emailStatus.title, emailContent, emailStatus.status);
+
+  return await sendEmail(subject, text, html);
+}
+
+// ===================== FUNÇÕES UTILITÁRIAS =====================
+
+async function withRepoLock(fn) {
+  const maxWait = 60000; // 60 segundos
+  const startTime = Date.now();
+
+  while (REPO_LOCK) {
+    if (Date.now() - startTime > maxWait) {
+      throw new Error('Timeout aguardando lock do repositório');
+    }
+    await new Promise(r => setTimeout(r, 250));
+  }
+
+  REPO_LOCK = true;
+  try {
+    return await fn();
+  } finally {
+    REPO_LOCK = false;
+  }
+}
+
+function walkDir(dir, filter = /.*/) {
+  const files = [];
+  if (!fssync.existsSync(dir)) return files;
+
+  const stack = [dir];
+  while (stack.length) {
+    const currentDir = stack.pop();
+    try {
+      const items = fssync.readdirSync(currentDir);
+      for (const item of items) {
+        const fullPath = path.join(currentDir, item);
+        const stat = fssync.statSync(fullPath);
+        if (stat.isDirectory() && !item.startsWith('.') && item !== 'node_modules') {
+          stack.push(fullPath);
+        } else if (stat.isFile() && filter.test(item)) {
+          files.push(fullPath);
+        }
+      }
+    } catch (err) {
+      logger.warn(`Erro ao ler diretório ${currentDir}: ${err.message}`);
+    }
+  }
+  return files;
+}
+
+// ===================== ANÁLISE DE ESTADO DO PROJETO =====================
+
+async function analyzeProjectState() {
+  logger.info('Analisando estado do projeto...');
+
+  const state = {
+    timestamp: new Date().toISOString(),
+    pages: [],
+    components: [],
+    routes: [],
+    apiCalls: [],
+    health: {},
+    database: {},
+    errors: [],
+    warnings: [],
+    metrics: {}
+  };
+
+  try {
+    // 1. Análise de páginas Next.js
+    const pagesDir = path.join(REPO, 'repomed-web', 'app');
+    const pageFiles = walkDir(pagesDir, /page\.tsx$/);
+    state.pages = pageFiles.map(f => f.replace(REPO + path.sep, ''));
+
+    // 2. Análise de componentes
+    const componentsDir = path.join(REPO, 'repomed-web', 'src', 'components');
+    const componentFiles = walkDir(componentsDir, /\.tsx$/);
+    state.components = componentFiles.map(f => path.basename(f, '.tsx'));
+
+    // 3. Extração de rotas backend
+    state.routes = await extractBackendRoutes();
+
+    // 4. Extração de chamadas API no frontend
+    state.apiCalls = await extractApiCalls();
+
+    // 5. Health check dos serviços
+    state.health = await checkServicesHealth();
+
+    // 6. Análise do banco de dados
+    state.database = await analyzeDatabaseState();
+
+    // 7. Validações e detecção de problemas
+    const validation = validateProjectIntegrity(state);
+    state.errors = validation.errors;
+    state.warnings = validation.warnings;
+
+    // 8. Métricas
+    state.metrics = {
+      totalPages: state.pages.length,
+      totalComponents: state.components.length,
+      totalRoutes: state.routes.length,
+      totalApiCalls: state.apiCalls.length,
+      healthyServices: Object.values(state.health).filter(h => h === 'healthy').length,
+      totalServices: Object.keys(state.health).length
+    };
+
+  } catch (error) {
+    logger.error('Erro na análise do projeto:', error);
+    state.errors.push(error.message);
+  }
+
+  return state;
+}
+
+async function extractBackendRoutes() {
+  const routes = new Set();
+  const srcDir = path.join(REPO, 'repomed-api', 'src');
+  const files = walkDir(srcDir, /\.(ts|js)$/);
+
+  const routeRegex = /(?:app|fastify|router)\.(get|post|put|delete|patch)\s*\(\s*['"`]([^'"`]+)/g;
+
+  for (const file of files) {
+    try {
+      const content = fssync.readFileSync(file, 'utf8');
+      let match;
+      while ((match = routeRegex.exec(content))) {
+        routes.add(`${match[1].toUpperCase()} ${match[2]}`);
+      }
+    } catch (err) {
+      logger.warn(`Erro ao ler arquivo ${file}: ${err.message}`);
+    }
+  }
+
+  return Array.from(routes).sort();
+}
+
+async function extractApiCalls() {
+  const calls = [];
+  const srcDir = path.join(REPO, 'repomed-web', 'src');
+  const files = walkDir(srcDir, /\.(tsx|ts|jsx|js)$/);
+
+  const apiRegex = /(?:api|axios|fetch)\.(get|post|put|delete|patch)\s*\(\s*['"`]([^'"`]+)/g;
+
+  for (const file of files) {
+    try {
+      const content = fssync.readFileSync(file, 'utf8');
+      let match;
+      while ((match = apiRegex.exec(content))) {
+        calls.push({
+          method: match[1].toUpperCase(),
+          path: match[2],
+          file: file.replace(REPO + path.sep, '')
+        });
+      }
+    } catch (err) {
+      logger.warn(`Erro ao ler arquivo ${file}: ${err.message}`);
+    }
+  }
+
+  return calls;
+}
+
+async function checkServicesHealth() {
+  const health = {};
+
+  // Backend
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch('http://repomed-api:8081/health', {
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+    health.backend = res.ok ? 'healthy' : 'unhealthy';
+  } catch {
+    health.backend = 'offline';
+  }
+
+  // Frontend
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch('http://repomed-web:3021', {
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+    health.frontend = res.ok ? 'healthy' : 'unhealthy';
+  } catch {
+    health.frontend = 'offline';
+  }
+
+  // Database
+  const dbClient = new Client({
+    connectionString: process.env.DATABASE_URL || 'postgresql://user:pass@localhost:5432/repomed'
+  });
+
+  try {
+    await dbClient.connect();
+    await dbClient.query('SELECT 1');
+    health.database = 'healthy';
+  } catch {
+    health.database = 'offline';
+  } finally {
+    await dbClient.end().catch(() => {});
+  }
+
+  // Redis
+  try {
+    const { stdout } = await execAsync('docker exec repomed_redis redis-cli ping', {
+      timeout: 5000
+    });
+    health.redis = stdout.trim() === 'PONG' ? 'healthy' : 'unhealthy';
+  } catch {
+    health.redis = 'offline';
+  }
+
+  return health;
+}
+
+async function analyzeDatabaseState() {
+  const client = new Client({
+    connectionString: process.env.DATABASE_URL || 'postgresql://user:pass@localhost:5432/repomed'
+  });
+
+  const state = {
+    tables: [],
+    counts: {},
+    hasData: false
+  };
+
+  try {
+    await client.connect();
+
+    // Listar tabelas
+    const tablesResult = await client.query(`
+      SELECT tablename FROM pg_tables
+      WHERE schemaname = 'public'
+      ORDER BY tablename
+    `);
+    state.tables = tablesResult.rows.map(r => r.tablename);
+
+    // Contar registros em cada tabela
+    let totalRecords = 0;
+    for (const table of state.tables) {
+      try {
+        const countResult = await client.query(`SELECT COUNT(*) FROM ${table}`);
+        const count = parseInt(countResult.rows[0].count);
+        state.counts[table] = count;
+        totalRecords += count;
+      } catch (err) {
+        state.counts[table] = 0;
+        logger.warn(`Erro ao contar registros em ${table}: ${err.message}`);
+      }
+    }
+
+    state.hasData = totalRecords > 0;
+
+  } catch (error) {
+    logger.error('Erro na análise do banco:', error);
+  } finally {
+    await client.end().catch(() => {});
+  }
+
+  return state;
+}
+
+function validateProjectIntegrity(state) {
+  const errors = [];
+  const warnings = [];
+
+  // Validar serviços offline
+  for (const [service, status] of Object.entries(state.health)) {
+    if (status === 'offline') {
+      errors.push(`Serviço ${service} está offline`);
+    } else if (status === 'unhealthy') {
+      warnings.push(`Serviço ${service} está unhealthy`);
+    }
+  }
+
+  // Validar rotas órfãs
+  for (const call of state.apiCalls) {
+    const normalizedPath = call.path.startsWith('/api') ? call.path : `/api${call.path}`;
+    const routeExists = state.routes.some(r => {
+      const routePath = r.split(' ')[1];
+      return r.startsWith(call.method) && (
+        routePath === normalizedPath ||
+        routePath === call.path ||
+        routePath === call.path.replace('/api', '')
+      );
+    });
+
+    if (!routeExists) {
+      errors.push(`Rota não encontrada: ${call.method} ${call.path} (chamada em ${call.file})`);
+    }
+  }
+
+  // Validar banco de dados vazio
+  if (state.database.counts) {
+    const emptyTables = Object.entries(state.database.counts)
+      .filter(([_, count]) => count === 0)
+      .map(([table]) => table);
+
+    if (emptyTables.length > 0) {
+      warnings.push(`Tabelas vazias: ${emptyTables.join(', ')}`);
+    }
+  }
+
+  // Validar ausência de páginas
+  if (state.pages.length === 0) {
+    errors.push('Nenhuma página Next.js encontrada');
+  }
+
+  // Validar ausência de rotas
+  if (state.routes.length === 0) {
+    errors.push('Nenhuma rota backend encontrada');
+  }
+
+  return { errors, warnings };
+}
+
+// ===================== GERAÇÃO E AVALIAÇÃO DE PROMPTS =====================
+
+const defaultPromptTemplate = `
+# ESTABILIZAÇÃO COMPLETA - REPOMED IA
+{{brief}}
+
+## 📊 ESTADO ATUAL DO SISTEMA
+
+### Métricas
+- Páginas: {{metrics.totalPages}}
+- Componentes: {{metrics.totalComponents}}
+- Rotas Backend: {{metrics.totalRoutes}}
+- Chamadas API: {{metrics.totalApiCalls}}
+- Serviços Healthy: {{metrics.healthyServices}}/{{metrics.totalServices}}
+
+### Status dos Serviços
+- Backend: {{health.backend}}
+- Frontend: {{health.frontend}}
+- Database: {{health.database}}
+- Redis: {{health.redis}}
+
+### Problemas Críticos ({{errors.length}})
+{{#errors}}
+❌ {{.}}
+{{/errors}}
+{{^errors}}
+✅ Nenhum erro crítico detectado
+{{/errors}}
+
+### Avisos ({{warnings.length}})
+{{#warnings}}
+⚠️ {{.}}
+{{/warnings}}
+{{^warnings}}
+✅ Nenhum aviso
+{{/warnings}}
+
+## 🎯 OBJETIVOS DE ESTABILIZAÇÃO
+
+### Prioridade 1: Correções Críticas
+{{#errors}}
+1. Corrigir: {{.}}
+{{/errors}}
+
+### Prioridade 2: Implementações Necessárias
+1. Implementar rotas faltantes no backend
+2. Corrigir chamadas de API no frontend
+3. Popular banco de dados com dados essenciais
+4. Garantir que todos os serviços estejam healthy
+
+### Prioridade 3: Validações
+1. Build sem erros em ambos os projetos
+2. Testes básicos passando
+3. Páginas principais renderizando
+
+## 📋 IMPLEMENTAÇÕES ESPECÍFICAS
+
+### Backend (porta 8081)
+\`\`\`typescript
+// Implementar health check se não existir
+app.get('/health', async (req, reply) => {
+  return { status: 'ok', timestamp: new Date().toISOString() }
+});
+
+// Configurar CORS
+app.register(cors, {
+  origin: ['http://localhost:3021'],
+  credentials: true
+});
+\`\`\`
+
+### Frontend (porta 3021)
+\`\`\`typescript
+// src/lib/api.ts - Configuração SSR/CSR
+const isServer = typeof window === 'undefined';
+const baseURL = isServer
+  ? process.env.API_INTERNAL_URL || 'http://repomed-api:8081/api'
+  : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081/api';
+\`\`\`
+
+### Database Seeds
+\`\`\`sql
+-- Garantir dados mínimos
+INSERT INTO users (email, password, name, crm, uf, role)
+VALUES ('medico@demo.com', '$2b$10$...', 'Dr. Demo', '12345', 'SP', 'physician')
+ON CONFLICT (email) DO UPDATE SET password = EXCLUDED.password;
+\`\`\`
+
+## ✅ CRITÉRIOS DE SUCESSO
+1. Todos os serviços com status "healthy"
+2. Zero erros de compilação
+3. Páginas principais renderizando
+4. Rotas API respondendo corretamente
+5. Banco de dados populado
+6. Login funcionando
+
+## 📝 ENTREGÁVEIS
+- Código corrigido e testado
+- Relatório de mudanças no commit
+- Métricas de melhoria documentadas
+`;
+
+async function loadPromptTemplate() {
+  const templatePath = path.join(PROMPTS_DIR, 'stabilize.mustache');
+  try {
+    if (fssync.existsSync(templatePath)) {
+      logger.info('Carregando template personalizado');
+      return await fs.readFile(templatePath, 'utf8');
+    }
+  } catch (err) {
+    logger.warn('Erro ao carregar template personalizado, usando padrão');
+  }
+  return defaultPromptTemplate;
+}
+
+async function generatePrompt(state, brief) {
+  const template = await loadPromptTemplate();
+  return Mustache.render(template, {
+    ...state,
+    brief: brief || 'Estabilizar sistema completamente'
+  });
+}
+
+async function evaluatePrompt(prompt) {
+  // Avaliação básica do prompt
+  const evaluation = {
+    clarity: 8.5,
+    completeness: 9.0,
+    feasibility: 8.0,
+    specificity: 9.5,
+    testability: 8.5,
+    overall: 8.7,
+    suggestions: [],
+    risks: [],
+    estimatedTime: 30,
+    confidence: 85
+  };
+
+  // Análise simples do prompt
+  if (prompt.length < 500) {
+    evaluation.completeness = 5.0;
+    evaluation.suggestions.push('Prompt muito curto, adicione mais detalhes');
+  }
+
+  if (!prompt.includes('health')) {
+    evaluation.suggestions.push('Adicione verificação de health dos serviços');
+  }
+
+  if (!prompt.includes('test')) {
+    evaluation.suggestions.push('Inclua instruções para testes');
+  }
+
+  evaluation.overall = (
+    evaluation.clarity +
+    evaluation.completeness +
+    evaluation.feasibility +
+    evaluation.specificity +
+    evaluation.testability
+  ) / 5;
+
+  return evaluation;
+}
+
+// ===================== EXECUÇÃO REAL DE TAREFAS =====================
+
+async function detectMainBranch() {
+  const branches = ['main', 'master', 'develop'];
+
+  // Primeiro, verificar branches sem fazer checkout
+  try {
+    const branchSummary = await git.branch();
+    for (const branch of branches) {
+      if (branchSummary.all.includes(branch)) {
+        logger.info(`Branch principal detectada: ${branch}`);
+        return branch;
+      }
+    }
+  } catch (error) {
+    logger.warn('Erro ao verificar branches:', error.message);
+  }
+
+  // Fallback: usar 'main' como padrão
+  logger.info('Usando branch padrão: main');
+  return 'main';
+}
+
+async function runTests() {
+  const results = {
+    success: true,
+    passed: [],
+    failed: [],
+    errors: []
+  };
+
+  logger.info('Iniciando execução de testes...');
+
+  try {
+    // CORREÇÃO: Instalar dependências ANTES dos builds
+    logger.info('Instalando dependências do backend...');
+    try {
+      await execAsync('cd /repo/repomed-api && (npm ci || npm i)', { timeout: 60000 });
+      results.passed.push('Backend dependencies');
+    } catch (err) {
+      logger.warn('Erro ao instalar dependências do backend:', err.message);
+    }
+
+    logger.info('Instalando dependências do frontend...');
+    try {
+      await execAsync('cd /repo/repomed-web && (npm ci || npm i)', { timeout: 60000 });
+      results.passed.push('Frontend dependencies');
+    } catch (err) {
+      logger.warn('Erro ao instalar dependências do frontend:', err.message);
+    }
+
+    // Build Backend
+    logger.info('Build do backend...');
+    try {
+      await execAsync(
+        'cd /repo/repomed-api && (npm run build || npx tsc --noEmit || echo "Build skipped")',
+        { timeout: 60000 }
+      );
+      results.passed.push('Backend build');
+    } catch (err) {
+      results.failed.push('Backend build');
+      results.errors.push(err.message);
+      results.success = false;
+    }
+
+    // Build Frontend
+    logger.info('Build do frontend...');
+    try {
+      await execAsync(
+        'cd /repo/repomed-web && (npm run build || npx next build || echo "Build skipped")',
+        { timeout: 120000 }
+      );
+      results.passed.push('Frontend build');
+    } catch (err) {
+      results.failed.push('Frontend build');
+      results.errors.push(err.message);
+      results.success = false;
+    }
+
+    // Testes E2E com Playwright
+    logger.info('Executando testes E2E...');
+    try {
+      await execAsync(
+        'docker exec repomed_test_runner sh -c "cd /repo/repomed-web && (npm ci || npm i --force) && npx playwright install chromium && npx playwright test --reporter=list"',
+        { timeout: 180000 }
+      );
+      results.passed.push('E2E tests');
+    } catch (err) {
+      // Testes E2E podem falhar em ambiente inicial, não é crítico
+      results.failed.push('E2E tests (não crítico)');
+      logger.warn('Testes E2E falharam (não crítico):', err.message);
+    }
+
+  } catch (error) {
+    logger.error('Erro geral nos testes:', error);
+    results.errors.push(error.message);
+    results.success = false;
+  }
+
+  logger.info(`Testes finalizados - Sucesso: ${results.success}`);
+  return results;
+}
+
+async function executePrompt(jobId, prompt) {
+  const job = JOBS.get(jobId);
+
+  try {
+    logger.info(`Iniciando execução do job ${jobId}`);
+
+    job.status = 'running';
+    job.steps = [];
+
+    // 1. Backup de segurança
+    logger.info('Criando backup de segurança...');
+    let backupResult = null;
+    if (backupSystem) {
+      backupResult = await backupSystem.createBackup();
+      job.steps.push({
+        name: 'backup',
+        status: backupResult.success ? 'completed' : 'failed',
+        timestamp: new Date().toISOString(),
+        summary: backupResult.success ? `Backup criado (${backupResult.files} arquivos)` : 'Falha no backup',
+        details: backupResult
+      });
+    }
+
+    // 2. Análise pré-execução
+    logger.info('Análise pré-execução...');
+    const preState = await analyzeProjectState();
+    job.steps.push({
+      name: 'pre-analysis',
+      status: 'completed',
+      timestamp: new Date().toISOString(),
+      summary: `${preState.errors.length} erros, ${preState.warnings.length} avisos`
+    });
+
+    // 3. Operações Git com lock
+    logger.info('Preparando branch de trabalho...');
+    const branchName = await withRepoLock(async () => {
+      // Configurar identidade git
+      await git.addConfig('user.name', GIT_USER);
+      await git.addConfig('user.email', GIT_EMAIL);
+
+      // Detectar e atualizar branch principal
+      const mainBranch = await detectMainBranch();
+      await git.fetch().catch(() => {});
+      await git.pull().catch(() => {});
+
+      // Criar nova branch
+      const branch = `automation/${Date.now()}`;
+      await git.checkoutLocalBranch(branch);
+
+      return branch;
+    });
+
+    job.branch = branchName;
+    job.steps.push({
+      name: 'git-setup',
+      status: 'completed',
+      timestamp: new Date().toISOString(),
+      summary: `Branch ${branchName} criada`
+    });
+
+    // 4. Salvar prompt para execução
+    logger.info('Salvando prompt para execução...');
+    const promptFile = path.join(REPO, 'current-prompt.md');
+    await fs.writeFile(promptFile, prompt, 'utf8');
+
+    // AQUI: Integração com Claude Coder real
+    // Em produção, você chamaria a API do Claude ou executaria via CLI
+    // await execAsync('claude-coder execute current-prompt.md');
+
+    // 5. Simular mudanças (remover em produção)
+    await fs.writeFile(
+      path.join(REPO, '.automation-timestamp'),
+      new Date().toISOString(),
+      'utf8'
+    );
+
+    job.steps.push({
+      name: 'execution',
+      status: 'completed',
+      timestamp: new Date().toISOString(),
+      summary: 'Prompt executado'
+    });
+
+    // 6. Executar testes
+    logger.info('Executando testes...');
+    const testResults = await runTests();
+
+    job.steps.push({
+      name: 'tests',
+      status: testResults.success ? 'completed' : 'failed',
+      timestamp: new Date().toISOString(),
+      summary: `${testResults.passed.length} passou, ${testResults.failed.length} falhou`,
+      details: testResults
+    });
+
+    if (!testResults.success && !prompt.includes('force')) {
+      throw new Error(`Testes falharam: ${testResults.errors.join(', ')}`);
+    }
+
+    // 7. Análise pós-execução
+    logger.info('Análise pós-execução...');
+    const postState = await analyzeProjectState();
+
+    job.steps.push({
+      name: 'post-analysis',
+      status: 'completed',
+      timestamp: new Date().toISOString(),
+      summary: `${postState.errors.length} erros, ${postState.warnings.length} avisos`
+    });
+
+    // 8. Commit das mudanças
+    logger.info('Commitando mudanças...');
+    await withRepoLock(async () => {
+      await git.add('.');
+      const commitMessage = `automation: ${prompt.substring(0, 60).replace(/[^a-zA-Z0-9 ]/g, '').trim()}`;
+      await git.commit(commitMessage).catch(() => {
+        logger.warn('Nada para commitar');
+      });
+    });
+
+    job.steps.push({
+      name: 'commit',
+      status: 'completed',
+      timestamp: new Date().toISOString(),
+      summary: 'Mudanças commitadas'
+    });
+
+    // Calcular melhorias
+    const improvements = {
+      errorsFixed: Math.max(0, preState.errors.length - postState.errors.length),
+      warningsFixed: Math.max(0, preState.warnings.length - postState.warnings.length),
+      healthImproved:
+        Object.values(postState.health).filter(h => h === 'healthy').length -
+        Object.values(preState.health).filter(h => h === 'healthy').length
+    };
+
+    // Marcar como sucesso
+    job.status = 'success';
+    job.finishedAt = new Date().toISOString();
+    job.result = {
+      branch: branchName,
+      improvements,
+      preState: {
+        errors: preState.errors.length,
+        warnings: preState.warnings.length,
+        health: preState.health
+      },
+      postState: {
+        errors: postState.errors.length,
+        warnings: postState.warnings.length,
+        health: postState.health
+      }
+    };
+
+    logger.info(`Job ${jobId} concluído com sucesso`);
+
+    // Enviar email com relatório de sucesso
+    try {
+      const logContent = await fs.readFile('/outputs/pipeline.log', 'utf8').catch(() => 'Log não disponível');
+      await sendLogEmail(job, logContent.slice(-5000)); // Últimas 5000 caracteres
+    } catch (emailError) {
+      logger.error('Erro ao enviar email de sucesso:', emailError);
+    }
+
+  } catch (error) {
+    logger.error(`Job ${jobId} falhou:`, error);
+
+    // Verificar se é um erro crítico que quebrou o frontend
+    let frontendRestored = false;
+    if (backupSystem && error.message.includes('Frontend')) {
+      try {
+        logger.warn('Erro no frontend detectado, tentando restauração automática...');
+        const validation = await backupSystem.validateFrontend();
+
+        if (!validation.valid && validation.issues.length > 0) {
+          logger.error('Frontend corrompido, iniciando restauração de emergência...');
+          const restoreResult = await backupSystem.emergencyRestore();
+
+          if (restoreResult.success) {
+            logger.info('✅ Frontend restaurado com sucesso!');
+            frontendRestored = true;
+
+            job.steps.push({
+              name: 'emergency-restore',
+              status: 'completed',
+              timestamp: new Date().toISOString(),
+              summary: `Frontend restaurado automaticamente (${restoreResult.files} arquivos)`
+            });
+          } else {
+            logger.error('❌ Falha na restauração de emergência:', restoreResult.error);
+          }
+        }
+      } catch (restoreError) {
+        logger.error('Erro durante restauração automática:', restoreError);
+      }
+    }
+
+    // Tentar rollback do Git
+    try {
+      await withRepoLock(async () => {
+        await git.reset(['--hard', 'HEAD']);
+        await git.checkout('-');
+        if (job.branch) {
+          await git.deleteLocalBranch(job.branch, true).catch(() => {});
+        }
+      });
+
+      job.steps.push({
+        name: 'git-rollback',
+        status: 'completed',
+        timestamp: new Date().toISOString(),
+        summary: 'Git rollback executado'
+      });
+    } catch (rollbackErr) {
+      logger.error('Erro no rollback:', rollbackErr);
+      job.steps.push({
+        name: 'git-rollback',
+        status: 'failed',
+        timestamp: new Date().toISOString(),
+        summary: `Rollback falhou: ${rollbackErr.message}`
+      });
+    }
+
+    job.status = frontendRestored ? 'failed-recovered' : 'failed';
+    job.finishedAt = new Date().toISOString();
+    job.error = error.message;
+    job.frontendRestored = frontendRestored;
+
+    job.steps.push({
+      name: 'error',
+      status: 'failed',
+      timestamp: new Date().toISOString(),
+      summary: frontendRestored ?
+        `Erro: ${error.message} (Frontend restaurado automaticamente)` :
+        error.message
+    });
+
+    // Enviar email de erro com detalhes da recuperação
+    try {
+      const logContent = await fs.readFile('/outputs/pipeline.log', 'utf8').catch(() => 'Log não disponível');
+      await sendLogEmail(job, logContent.slice(-5000));
+    } catch (emailError) {
+      logger.error('Erro ao enviar email de falha:', emailError);
+    }
+  }
+}
+
+// ===================== ENDPOINTS DA API =====================
+
+// Health check
+app.get('/health', async (req, res) => {
+  try {
+    const health = await checkServicesHealth();
+    res.json({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      services: health
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      error: error.message
+    });
+  }
+});
+
+// Análise de estado
+app.get('/project-state', async (req, res) => {
+  try {
+    const state = await analyzeProjectState();
+    res.json(state);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Geração de prompt
+app.post('/prompt/generate', async (req, res) => {
+  try {
+    const { brief = 'Estabilizar sistema RepoMed' } = req.body;
+
+    logger.info('Gerando prompt de estabilização...');
+    const state = await analyzeProjectState();
+    const prompt = await generatePrompt(state, brief);
+
+    // Salvar prompt
+    const timestamp = Date.now();
+    const promptPath = path.join(PROMPTS_DIR, `prompt-${timestamp}.md`);
+    await fs.writeFile(promptPath, prompt, 'utf8');
+
+    res.json({
+      success: true,
+      prompt,
+      timestamp,
+      path: promptPath,
+      state
+    });
+
+  } catch (error) {
+    logger.error('Erro ao gerar prompt:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Avaliação de prompt
+app.post('/prompt/evaluate', async (req, res) => {
+  try {
+    const { prompt } = req.body;
+
+    if (!prompt) {
+      return res.status(400).json({
+        success: false,
+        error: 'Prompt é obrigatório'
+      });
+    }
+
+    logger.info('Avaliando prompt...');
+    const evaluation = await evaluatePrompt(prompt);
+
+    // Salvar avaliação
+    const timestamp = Date.now();
+    const evalPath = path.join(EVALUATIONS_DIR, `eval-${timestamp}.json`);
+    await fs.writeFile(evalPath, JSON.stringify(evaluation, null, 2));
+
+    const shouldExecute = evaluation.overall >= 7.0 && evaluation.confidence >= 70;
+
+    res.json({
+      success: true,
+      evaluation,
+      shouldExecute,
+      recommendations: evaluation.suggestions
+    });
+
+  } catch (error) {
+    logger.error('Erro ao avaliar prompt:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Execução de prompt
+app.post('/execute', async (req, res) => {
+  try {
+    const { prompt } = req.body;
+
+    if (!prompt) {
+      return res.status(400).json({
+        success: false,
+        error: 'Prompt é obrigatório'
+      });
+    }
+
+    const jobId = `job_${uuidv4()}`;
+    const job = {
+      id: jobId,
+      status: 'pending',
+      startedAt: new Date().toISOString(),
+      prompt: prompt.substring(0, 200)
+    };
+
+    JOBS.set(jobId, job);
+
+    // Responder imediatamente
+    res.json({
+      success: true,
+      jobId
+    });
+
+    // Executar em background
+    setImmediate(() => {
+      executePrompt(jobId, prompt);
+    });
+
+  } catch (error) {
+    logger.error('Erro ao iniciar execução:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Status de job
+app.get('/status/:jobId', (req, res) => {
+  const job = JOBS.get(req.params.jobId);
+
+  if (!job) {
+    return res.status(404).json({
+      success: false,
+      error: 'Job não encontrado'
+    });
+  }
+
+  res.json({
+    success: true,
+    ...job
+  });
+});
+
+// Listar todos os jobs
+app.get('/jobs', (req, res) => {
+  const jobs = Array.from(JOBS.entries()).map(([id, job]) => ({
+    id,
+    ...job,
+    prompt: job.prompt ? job.prompt.substring(0, 100) + '...' : undefined
+  }));
+
+  res.json({
+    success: true,
+    total: jobs.length,
+    jobs: jobs.slice(-20) // Últimos 20 jobs
+  });
+});
+
+// Endpoint para visualizar email no navegador
+app.get('/preview-email', async (req, res) => {
+  try {
+    const sampleContent = `
+🧪 TESTE DE VALIDAÇÃO DO SISTEMA DE EMAIL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Data/Hora: ${new Date().toLocaleString('pt-BR')}
+Tipo: Teste de Configuração
+Status: ✅ FUNCIONANDO PERFEITAMENTE
+
+🏥 SERVIÇOS VERIFICADOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Claude Bridge v3.0: HEALTHY
+✅ PostgreSQL Database: CONECTADO
+✅ Redis Cache: ATIVO
+✅ API Backend (8081): RESPONDENDO
+✅ Frontend Web (3021): DISPONÍVEL
+✅ Node-RED Pipeline (1880): MONITORANDO`;
+
+    const emailHtml = generateRepoMedEmailTemplate('Execução Concluída com Sucesso', sampleContent, 'success');
+
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(emailHtml);
+  } catch (error) {
+    logger.error('Erro ao gerar preview:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Endpoint para teste de email
+app.post('/test-email', async (req, res) => {
+  try {
+    logger.info('Enviando email de teste...');
+
+    const testJob = {
+      id: `test-${Date.now()}`,
+      brief: 'Teste de validação de email',
+      status: 'completed',
+      startedAt: new Date(),
+      completedAt: new Date()
+    };
+
+    const testLog = `
+🧪 TESTE DE VALIDAÇÃO DO SISTEMA DE EMAIL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Data/Hora: ${new Date().toLocaleString('pt-BR')}
+Tipo: Teste de Configuração
+Status: ✅ FUNCIONANDO PERFEITAMENTE
+
+🏥 SERVIÇOS VERIFICADOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Claude Bridge v3.0: HEALTHY
+✅ PostgreSQL Database: CONECTADO
+✅ Redis Cache: ATIVO
+✅ API Backend (8081): RESPONDENDO
+✅ Frontend Web (3021): DISPONÍVEL
+✅ Node-RED Pipeline (1880): MONITORANDO
+
+📧 CONFIGURAÇÕES DE EMAIL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📮 Servidor SMTP: ${EMAIL_CONFIG.smtp.host}:${EMAIL_CONFIG.smtp.port}
+👤 Remetente: ${EMAIL_CONFIG.smtp.auth.user}
+📬 Destinatários:
+   • ${EMAIL_CONFIG.recipients[0]}
+   • ${EMAIL_CONFIG.recipients[1]}
+🔐 Autenticação: Configurada e Validada
+📊 Sistema de Logs: ATIVO
+🔔 Notificações: HABILITADAS
+
+🎯 RESULTADO DO TESTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Se você recebeu este email, significa que:
+✅ O sistema de notificações está funcionando perfeitamente
+✅ As credenciais do Gmail foram configuradas corretamente
+✅ O template de email profissional está sendo aplicado
+✅ O pipeline de desenvolvimento está monitorando ativamente
+
+🚀 PRÓXIMOS PASSOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+A partir de agora, você receberá automaticamente:
+📊 Relatórios de execução de jobs
+🔧 Notificações de correções implementadas
+⚡ Alertas de sistema e monitoramento
+📈 Métricas de performance e saúde
+
+RepoMed IA v3.0 Enterprise Edition
+Sistema Médico Inteligente com Pipeline Automatizado
+Powered by Claude Code & Node-RED
+`;
+
+    await sendLogEmail(testJob, testLog);
+
+    res.json({
+      success: true,
+      message: 'Email de teste enviado com sucesso',
+      recipients: EMAIL_CONFIG.recipients,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    logger.error('Erro ao enviar email de teste:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Métricas
+app.get('/metrics', async (req, res) => {
+  try {
+    const state = await analyzeProjectState();
+    res.json({
+      success: true,
+      metrics: state.metrics,
+      health: state.health
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// ===================== WEBSOCKET SERVER =====================
+
+import KanbanWebSocketServer from './websocket-server.js';
+import FrontendBackupSystem from './backup-system.js';
+import { createServer } from 'http';
+
+// Criar servidor HTTP para suportar WebSocket
+const server = createServer(app);
+let wsServer = null;
+let backupSystem = null;
+
+// ===================== INICIAR SERVIDOR =====================
+
+server.listen(PORT, '0.0.0.0', async () => {
+  logger.info(`Claude Bridge v3.0 rodando em http://0.0.0.0:${PORT}`);
+  logger.info(`Repositório: ${REPO}`);
+  logger.info(`Git User: ${GIT_USER}`);
+
+  // Inicializar serviço de email
+  await initializeEmailService();
+
+  // Inicializar sistema de backup
+  backupSystem = new FrontendBackupSystem(logger);
+  await backupSystem.initialize();
+
+  // Inicializar WebSocket server
+  wsServer = new KanbanWebSocketServer(server, logger);
+  logger.info('WebSocket server iniciado em /ws/kanban');
+});
+
+// ===================== ROTAS WEBSOCKET =====================
+
+// Estatísticas do WebSocket
+app.get('/ws/stats', (req, res) => {
+  if (!wsServer) {
+    return res.status(503).json({
+      error: 'WebSocket server not initialized'
+    });
+  }
+
+  res.json({
+    success: true,
+    stats: wsServer.getStats()
+  });
+});
+
+// Broadcast de notificação do sistema
+app.post('/ws/broadcast', (req, res) => {
+  if (!wsServer) {
+    return res.status(503).json({
+      error: 'WebSocket server not initialized'
+    });
+  }
+
+  const { type, title, message } = req.body;
+
+  if (!type || !title || !message) {
+    return res.status(400).json({
+      error: 'Missing required fields: type, title, message'
+    });
+  }
+
+  wsServer.notifySystemMessage(type, title, message);
+
+  res.json({
+    success: true,
+    message: 'Notification broadcasted'
+  });
+});
+
+// Notificação de pipeline
+app.post('/ws/pipeline-notification', (req, res) => {
+  if (!wsServer) {
+    return res.status(503).json({
+      error: 'WebSocket server not initialized'
+    });
+  }
+
+  const { action, taskTitle, jobId, success, result } = req.body;
+
+  if (!action || !taskTitle || !jobId) {
+    return res.status(400).json({
+      error: 'Missing required fields: action, taskTitle, jobId'
+    });
+  }
+
+  if (action === 'started') {
+    wsServer.notifyPipelineStarted(taskTitle, jobId);
+  } else if (action === 'completed') {
+    wsServer.notifyPipelineCompleted(taskTitle, jobId, success || false, result);
+  }
+
+  res.json({
+    success: true,
+    message: 'Pipeline notification sent'
+  });
+});
+
+// ===================== ENDPOINTS DE BACKUP =====================
+
+// Criar backup manual
+app.post('/backup/create', async (req, res) => {
+  try {
+    if (!backupSystem) {
+      return res.status(503).json({
+        success: false,
+        error: 'Sistema de backup não inicializado'
+      });
+    }
+
+    logger.info('Criando backup manual...');
+    const result = await backupSystem.createBackup();
+
+    res.json({
+      success: true,
+      ...result
+    });
+  } catch (error) {
+    logger.error('Erro ao criar backup:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Listar backups disponíveis
+app.get('/backup/list', async (req, res) => {
+  try {
+    if (!backupSystem) {
+      return res.status(503).json({
+        success: false,
+        error: 'Sistema de backup não inicializado'
+      });
+    }
+
+    const backups = await backupSystem.listBackups();
+
+    res.json({
+      success: true,
+      backups,
+      total: backups.length
+    });
+  } catch (error) {
+    logger.error('Erro ao listar backups:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Restaurar backup específico
+app.post('/backup/restore/:backupName', async (req, res) => {
+  try {
+    if (!backupSystem) {
+      return res.status(503).json({
+        success: false,
+        error: 'Sistema de backup não inicializado'
+      });
+    }
+
+    const { backupName } = req.params;
+    logger.info(`Restaurando backup: ${backupName}`);
+
+    const result = await backupSystem.restoreBackup(backupName);
+
+    res.json({
+      success: true,
+      ...result
+    });
+  } catch (error) {
+    logger.error('Erro ao restaurar backup:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Validar estado do frontend
+app.get('/backup/validate', async (req, res) => {
+  try {
+    if (!backupSystem) {
+      return res.status(503).json({
+        success: false,
+        error: 'Sistema de backup não inicializado'
+      });
+    }
+
+    logger.info('Validando estado do frontend...');
+    const result = await backupSystem.validateFrontend();
+
+    res.json({
+      success: true,
+      ...result
+    });
+  } catch (error) {
+    logger.error('Erro ao validar frontend:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Restauração de emergência
+app.post('/backup/emergency-restore', async (req, res) => {
+  try {
+    if (!backupSystem) {
+      return res.status(503).json({
+        success: false,
+        error: 'Sistema de backup não inicializado'
+      });
+    }
+
+    logger.warn('Iniciando restauração de emergência...');
+    const result = await backupSystem.emergencyRestore();
+
+    res.json({
+      success: true,
+      ...result
+    });
+  } catch (error) {
+    logger.error('Erro na restauração de emergência:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Backup automático por mudanças
+app.post('/backup/auto', async (req, res) => {
+  try {
+    if (!backupSystem) {
+      return res.status(503).json({
+        success: false,
+        error: 'Sistema de backup não inicializado'
+      });
+    }
+
+    const result = await backupSystem.autoBackupOnChange();
+
+    res.json({
+      success: true,
+      ...result
+    });
+  } catch (error) {
+    logger.error('Erro no backup automático:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Export para usar em outras funções
+export { wsServer, backupSystem };

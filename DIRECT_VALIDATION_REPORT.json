@@ -1,0 +1,179 @@
+{
+  "timestamp": "2025-09-21T18:31:54.170Z",
+  "tests": [
+    {
+      "name": "Home Page",
+      "url": "http://localhost:3023/",
+      "timestamp": "2025-09-21T18:31:54.172Z",
+      "status": "PASSED",
+      "responseTime": 71,
+      "httpStatus": 200
+    },
+    {
+      "name": "Login Page",
+      "url": "http://localhost:3023/login",
+      "timestamp": "2025-09-21T18:31:54.243Z",
+      "status": "FAILED",
+      "error": "HTTP 404",
+      "responseTime": 65
+    },
+    {
+      "name": "Dashboard",
+      "url": "http://localhost:3023/dashboard",
+      "timestamp": "2025-09-21T18:31:54.309Z",
+      "status": "FAILED",
+      "error": "HTTP 404",
+      "responseTime": 59
+    },
+    {
+      "name": "Pacientes",
+      "url": "http://localhost:3023/pacientes",
+      "timestamp": "2025-09-21T18:31:54.368Z",
+      "status": "PASSED",
+      "responseTime": 76,
+      "httpStatus": 200
+    },
+    {
+      "name": "Prescrições",
+      "url": "http://localhost:3023/prescricoes",
+      "timestamp": "2025-09-21T18:31:54.444Z",
+      "status": "PASSED",
+      "responseTime": 692,
+      "httpStatus": 200
+    },
+    {
+      "name": "Agenda",
+      "url": "http://localhost:3023/agenda",
+      "timestamp": "2025-09-21T18:31:55.136Z",
+      "status": "FAILED",
+      "error": "HTTP 404",
+      "responseTime": 65
+    },
+    {
+      "name": "Relatórios",
+      "url": "http://localhost:3023/relatorios",
+      "timestamp": "2025-09-21T18:31:55.201Z",
+      "status": "PASSED",
+      "responseTime": 556,
+      "httpStatus": 200
+    },
+    {
+      "name": "Configurações",
+      "url": "http://localhost:3023/configuracoes",
+      "timestamp": "2025-09-21T18:31:55.757Z",
+      "status": "PASSED",
+      "responseTime": 279,
+      "httpStatus": 200
+    },
+    {
+      "name": "Backend Main",
+      "url": "http://localhost:8081",
+      "timestamp": "2025-09-21T18:31:56.037Z",
+      "status": "PASSED",
+      "responseTime": 5,
+      "httpStatus": 200
+    },
+    {
+      "name": "API Health Check",
+      "url": "http://localhost:8081/health",
+      "timestamp": "2025-09-21T18:31:56.042Z",
+      "status": "PASSED",
+      "responseTime": 3,
+      "httpStatus": 200
+    },
+    {
+      "name": "API Status",
+      "url": "http://localhost:8081/",
+      "timestamp": "2025-09-21T18:31:56.045Z",
+      "status": "PASSED",
+      "responseTime": 1,
+      "httpStatus": 200
+    },
+    {
+      "name": "API Info",
+      "url": "http://localhost:8081/api",
+      "timestamp": "2025-09-21T18:31:56.046Z",
+      "status": "PASSED",
+      "responseTime": 0,
+      "httpStatus": 200
+    },
+    {
+      "name": "Nova Prescrição",
+      "url": "http://localhost:3023/prescricoes/nova",
+      "timestamp": "2025-09-21T18:31:56.047Z",
+      "status": "PASSED",
+      "responseTime": 82,
+      "httpStatus": 200
+    },
+    {
+      "name": "Novo Paciente",
+      "url": "http://localhost:3023/pacientes/novo",
+      "timestamp": "2025-09-21T18:31:56.129Z",
+      "status": "PASSED",
+      "responseTime": 516,
+      "httpStatus": 200
+    },
+    {
+      "name": "Templates Médicos",
+      "url": "http://localhost:3023/templates",
+      "timestamp": "2025-09-21T18:31:56.645Z",
+      "status": "PASSED",
+      "responseTime": 263,
+      "httpStatus": 200
+    },
+    {
+      "name": "Assinatura Digital",
+      "url": "http://localhost:3023/assinatura",
+      "timestamp": "2025-09-21T18:31:56.908Z",
+      "status": "PASSED",
+      "responseTime": 255,
+      "httpStatus": 200
+    },
+    {
+      "name": "Receituário",
+      "url": "http://localhost:3023/receituario",
+      "timestamp": "2025-09-21T18:31:57.163Z",
+      "status": "FAILED",
+      "error": "HTTP 404",
+      "responseTime": 72
+    },
+    {
+      "name": "Atestados",
+      "url": "http://localhost:3023/atestados",
+      "timestamp": "2025-09-21T18:31:57.235Z",
+      "status": "FAILED",
+      "error": "HTTP 404",
+      "responseTime": 62
+    },
+    {
+      "name": "Exames",
+      "url": "http://localhost:3023/exames",
+      "timestamp": "2025-09-21T18:31:57.297Z",
+      "status": "PASSED",
+      "responseTime": 393,
+      "httpStatus": 200
+    },
+    {
+      "name": "Histórico Médico",
+      "url": "http://localhost:3023/historico",
+      "timestamp": "2025-09-21T18:31:57.690Z",
+      "status": "PASSED",
+      "responseTime": 276,
+      "httpStatus": 200
+    },
+    {
+      "name": "Autoclick Elimination Check",
+      "status": "PASSED",
+      "timestamp": "2025-09-21T18:31:58.104Z",
+      "responseTime": 48,
+      "note": "Aplicação carrega sem loops ou timeouts suspeitos"
+    }
+  ],
+  "summary": {
+    "total": 21,
+    "passed": 16,
+    "failed": 5,
+    "successRate": "76.19%"
+  },
+  "finalStatus": "NECESSITA AJUSTES"
+}

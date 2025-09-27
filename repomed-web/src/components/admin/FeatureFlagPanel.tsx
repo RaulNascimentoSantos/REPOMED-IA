@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { Toggle, Settings, RefreshCw, Info } from 'lucide-react';
+import { ToggleLeft, Settings, RefreshCw, Info } from 'lucide-react';
 import {
   getFeatureFlags,
   setFeatureFlag,
@@ -39,7 +39,7 @@ export const FeatureFlagPanel: React.FC<FeatureFlagPanelProps> = ({ className })
 
   const renderCategory = (categoryName: string, categoryFlags: (keyof FeatureFlags)[]) => (
     <div key={categoryName} className="space-y-2">
-      <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 capitalize">
+      <h4 className="text-base font-medium text-slate-700 dark:text-slate-300 capitalize">
         {categoryName}
       </h4>
       {categoryFlags.map(flag => (
@@ -49,7 +49,7 @@ export const FeatureFlagPanel: React.FC<FeatureFlagPanelProps> = ({ className })
         >
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <code className="text-xs text-slate-600 dark:text-slate-400 font-mono">
+              <code className="text-base text-slate-600 dark:text-slate-400 font-mono">
                 {flag}
               </code>
               {showDescriptions && (
@@ -62,7 +62,7 @@ export const FeatureFlagPanel: React.FC<FeatureFlagPanelProps> = ({ className })
               )}
             </div>
             {showDescriptions && (
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              <p className="text-base text-slate-500 dark:text-slate-400 mt-1">
                 {FeatureFlagDescriptions[flag]}
               </p>
             )}
@@ -135,7 +135,7 @@ export const FeatureFlagPanel: React.FC<FeatureFlagPanelProps> = ({ className })
       </div>
 
       <div className="pt-4 border-t border-slate-200 dark:border-slate-600">
-        <p className="text-xs text-slate-500 dark:text-slate-400">
+        <p className="text-base text-slate-500 dark:text-slate-400">
           Feature flags controlam funcionalidades experimentais. Use com cuidado em produção.
         </p>
       </div>

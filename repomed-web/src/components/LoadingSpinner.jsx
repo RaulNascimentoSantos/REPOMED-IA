@@ -23,8 +23,8 @@ export const LoadingSpinner = ({
     justifyContent: 'center',
     gap: '12px',
     padding: overlay ? '20px' : '0',
-    fontSize: '14px',
-    color: '#6b7280'
+    fontSize: 'var(--semantic-text-base)',
+    color: 'var(--text-aaa-secondary)'
   }
 
   const overlayStyles = {
@@ -63,8 +63,8 @@ export const InlineLoadingSpinner = ({ message = 'Carregando...', color = '#6366
     display: 'inline-flex', 
     alignItems: 'center', 
     gap: '6px',
-    fontSize: '14px',
-    color: '#6b7280'
+    fontSize: 'var(--semantic-text-base)',
+    color: 'var(--text-aaa-secondary)'
   }}>
     <RefreshCw size={14} className="animate-spin" color={color} />
     {message}

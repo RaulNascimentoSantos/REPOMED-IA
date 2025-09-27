@@ -1,7 +1,5 @@
 'use client';
 
-
-import BackButton from '@/app/components/BackButton';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -79,27 +77,31 @@ export default function PrescricoesPage() {
     fetchPrescriptions();
   }, []);
 
-  const handleNewPrescription = (e?: React.MouseEvent) => {
-    e?.preventDefault();
-    console.log('🔥 handleNewPrescription clicked!');
-    console.log('🚀 Navigating to /prescricoes/nova');
-
-    // Try multiple navigation approaches
+  const handleNewPrescription = () => {
     try {
       router.push('/prescricoes/nova');
     } catch (error) {
-      console.error('Router push failed:', error);
-      // Fallback to window.location
+      console.error('Navigation error:', error);
       window.location.href = '/prescricoes/nova';
     }
   };
 
   const handleViewPrescription = (id: string) => {
-    router.push(`/prescricoes/${id}`);
+    try {
+      router.push(`/prescricoes/${id}`);
+    } catch (error) {
+      console.error('Navigation error:', error);
+      window.location.href = `/prescricoes/${id}`;
+    }
   };
 
   const handleEditPrescription = (id: string) => {
-    router.push(`/prescricoes/${id}/edit`);
+    try {
+      router.push(`/prescricoes/${id}/edit`);
+    } catch (error) {
+      console.error('Navigation error:', error);
+      window.location.href = `/prescricoes/${id}/edit`;
+    }
   };
 
   const handlePrintPrescription = (id: string) => {
@@ -166,18 +168,18 @@ export default function PrescricoesPage() {
   };
 
   const stats = {
-    total: prescricoes.length,
-    ativas: prescricoes.filter(p => p.status === 'Ativa').length,
-    expiradas: prescricoes.filter(p => p.status === 'Expirada').length,
-    esteMes: prescricoes.filter(p => {
+    total: Array.isArray(prescricoes) ? prescricoes.length : 0,
+    ativas: Array.isArray(prescricoes) ? prescricoes.filter(p => p.status === 'Ativa').length : 0,
+    expiradas: Array.isArray(prescricoes) ? prescricoes.filter(p => p.status === 'Expirada').length : 0,
+    esteMes: Array.isArray(prescricoes) ? prescricoes.filter(p => {
       const currentMonth = new Date().getMonth();
       const currentYear = new Date().getFullYear();
       const createdDate = new Date(p.createdAt);
       return createdDate.getMonth() === currentMonth && createdDate.getFullYear() === currentYear;
-    }).length
+    }).length : 0
   };
 
-  const filteredPrescricoes = prescricoes.filter(prescricao => {
+  const filteredPrescricoes = Array.isArray(prescricoes) ? prescricoes.filter(prescricao => {
     const matchesSearch = prescricao.paciente.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          prescricao.numeroReceita.toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -186,235 +188,715 @@ export default function PrescricoesPage() {
     if (filterStatus === 'expiradas') return matchesSearch && prescricao.status === 'Expirada';
 
     return matchesSearch;
-  });
+  }) : [];
 
   return (
     <>
-      <BackButton href="/" />
-      <div className="p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <style jsx>{`
+        .prescriptions-page {
+          min-height: 100vh;
+          padding: 2rem;
+          background: var(--bg-primary);
+          color: var(--text-primary);
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          background-image:
+            radial-gradient(circle at 25% 25%, rgba(16, 185, 129, 0.03) 0%, transparent 50%),
+            radial-gradient(circle at 75% 75%, rgba(59, 130, 246, 0.03) 0%, transparent 50%);
+        }
+
+        .page-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 2rem;
+          padding-bottom: 1.5rem;
+          border-bottom: 1px solid var(--border-color);
+        }
+
+        .back-btn {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.75rem 1rem;
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-color);
+          border-radius: 0.75rem;
+          color: var(--text-secondary);
+          font-weight: 500;
+          transition: all 0.2s ease;
+          cursor: pointer;
+          text-decoration: none;
+          margin-right: 1rem;
+        }
+
+        .back-btn:hover {
+          background: var(--hover-bg);
+          color: var(--text-primary);
+        }
+
+        .header-content h1 {
+          font-size: 2.5rem;
+          font-weight: bold;
+          color: var(--text-primary);
+          margin: 0 0 0.5rem 0;
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+        }
+
+        .header-content p {
+          color: var(--text-secondary);
+          font-size: 1.125rem;
+          margin: 0;
+        }
+
+        .new-prescription-btn {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.875rem 1.5rem;
+          background: linear-gradient(135deg, #3b82f6, #2563eb);
+          color: white;
+          border: none;
+          border-radius: 0.75rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+          text-decoration: none;
+          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .new-prescription-btn:hover {
+          background: linear-gradient(135deg, #2563eb, #1d4ed8);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+        }
+
+        .stats-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 1.25rem;
+          margin-bottom: 2rem;
+        }
+
+        .stat-card {
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-color);
+          border-radius: 1rem;
+          padding: 1.5rem;
+          transition: all 0.3s ease;
+          cursor: pointer;
+        }
+
+        .stat-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-content {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .stat-info h3 {
+          color: var(--text-secondary);
+          font-size: 0.875rem;
+          font-weight: 500;
+          margin: 0 0 0.5rem 0;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+
+        .stat-info p {
+          color: var(--text-primary);
+          font-size: 2rem;
+          font-weight: bold;
+          margin: 0;
+        }
+
+        .controls-section {
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-color);
+          border-radius: 1rem;
+          padding: 1.5rem;
+          margin-bottom: 2rem;
+        }
+
+        .controls-content {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1rem;
+          flex-wrap: wrap;
+        }
+
+        .search-filters {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          flex: 1;
+        }
+
+        .search-box {
+          position: relative;
+          flex: 1;
+          max-width: 400px;
+        }
+
+        .search-input {
+          width: 100%;
+          padding: 0.75rem 1rem 0.75rem 3rem;
+          background: var(--bg-tertiary);
+          border: 1px solid var(--border-color);
+          border-radius: 0.75rem;
+          color: var(--text-primary);
+          font-size: 0.875rem;
+          transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+          outline: none;
+          border-color: var(--accent-primary);
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-icon {
+          position: absolute;
+          left: 1rem;
+          top: 50%;
+          transform: translateY(-50%);
+          color: var(--text-muted);
+        }
+
+        .filter-select {
+          padding: 0.75rem 1rem;
+          background: var(--bg-tertiary);
+          border: 1px solid var(--border-color);
+          border-radius: 0.75rem;
+          color: var(--text-primary);
+          font-size: 0.875rem;
+          cursor: pointer;
+        }
+
+        .prescription-card {
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-color);
+          border-radius: 1.5rem;
+          padding: 0;
+          margin-bottom: 1rem;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          overflow: hidden;
+          position: relative;
+        }
+
+        .prescription-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 4px;
+          background: linear-gradient(90deg, #16a34a, #059669);
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+
+        .prescription-card:hover {
+          transform: translateY(-6px);
+          box-shadow:
+            0 20px 40px rgba(0, 0, 0, 0.08),
+            0 8px 16px rgba(0, 0, 0, 0.04),
+            0 0 0 1px rgba(16, 185, 129, 0.1);
+        }
+
+        .prescription-card:hover::before {
+          opacity: 1;
+        }
+
+        .prescription-header {
+          display: flex;
+          align-items: flex-start;
+          gap: 1rem;
+          padding: 1.5rem;
+          border-bottom: 1px solid var(--border-color);
+        }
+
+        .prescription-icon {
+          width: 3.5rem;
+          height: 3.5rem;
+          background: linear-gradient(135deg, #16a34a, #059669);
+          border-radius: 1rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25);
+          flex-shrink: 0;
+        }
+
+        .prescription-info {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .prescription-title {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 0.75rem;
+        }
+
+        .prescription-number {
+          font-size: 1.125rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          margin: 0;
+        }
+
+        .prescription-crm {
+          font-size: 0.8125rem;
+          color: var(--text-muted);
+          background: var(--bg-tertiary);
+          padding: 0.25rem 0.625rem;
+          border-radius: 0.375rem;
+          border: 1px solid var(--border-color);
+        }
+
+        .prescription-meta {
+          display: flex;
+          align-items: center;
+          gap: 1.5rem;
+          color: var(--text-secondary);
+          font-size: 0.8125rem;
+          margin-bottom: 0.75rem;
+          flex-wrap: wrap;
+        }
+
+        .meta-item {
+          display: flex;
+          align-items: center;
+          gap: 0.375rem;
+        }
+
+        .prescription-content {
+          padding: 1rem 1.5rem;
+          border-bottom: 1px solid var(--border-color);
+        }
+
+        .medications-section h4 {
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          margin: 0 0 0.75rem 0;
+        }
+
+        .medications-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 0.75rem;
+          margin-bottom: 1rem;
+        }
+
+        .medication-item {
+          background: var(--bg-tertiary);
+          border: 1px solid var(--border-color);
+          border-left: 4px solid #16a34a;
+          border-radius: 0.5rem;
+          padding: 0.75rem;
+          transition: all 0.2s ease;
+        }
+
+        .medication-item:hover {
+          background: rgba(16, 185, 129, 0.05);
+          border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .medication-name {
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: var(--text-primary);
+          margin: 0;
+        }
+
+        .observations-section {
+          margin-top: 1rem;
+        }
+
+        .observations-section h4 {
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          margin: 0 0 0.5rem 0;
+        }
+
+        .observations-text {
+          font-size: 0.8125rem;
+          color: var(--text-secondary);
+          line-height: 1.5;
+          margin: 0;
+        }
+
+        .prescription-actions {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 1rem 1.5rem;
+        }
+
+        .action-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 2.5rem;
+          height: 2.5rem;
+          border: 1px solid var(--border-color);
+          border-radius: 0.5rem;
+          background: var(--bg-tertiary);
+          color: var(--text-secondary);
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+          background: var(--hover-bg);
+          color: var(--text-primary);
+          border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .action-btn.primary {
+          background: linear-gradient(135deg, #3b82f6, #2563eb);
+          border-color: #3b82f6;
+          color: white;
+        }
+
+        .action-btn.primary:hover {
+          background: linear-gradient(135deg, #2563eb, #1d4ed8);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .action-btn.success {
+          background: linear-gradient(135deg, #16a34a, #059669);
+          border-color: #16a34a;
+          color: white;
+        }
+
+        .action-btn.success:hover {
+          background: linear-gradient(135deg, #059669, #047857);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .action-btn.danger {
+          background: linear-gradient(135deg, #dc2626, #b91c1c);
+          border-color: #dc2626;
+          color: white;
+        }
+
+        .action-btn.danger:hover {
+          background: linear-gradient(135deg, #b91c1c, #991b1b);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+        }
+
+        .pagination {
+          display: flex;
+          align-items: center;
+          justify-content: between;
+          margin-top: 2rem;
+          padding-top: 1.5rem;
+          border-top: 1px solid var(--border-color);
+        }
+
+        .pagination-info {
+          color: var(--text-secondary);
+          font-size: 0.875rem;
+        }
+
+        .pagination-controls {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-left: auto;
+        }
+
+        .pagination-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 2.5rem;
+          height: 2.5rem;
+          padding: 0 0.75rem;
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-color);
+          border-radius: 0.5rem;
+          color: var(--text-secondary);
+          font-size: 0.875rem;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .pagination-btn:hover {
+          background: var(--hover-bg);
+          color: var(--text-primary);
+        }
+
+        .pagination-btn.active {
+          background: var(--accent-primary);
+          border-color: var(--accent-primary);
+          color: white;
+        }
+
+        @media (max-width: 768px) {
+          .prescriptions-page {
+            padding: 1rem;
+          }
+
+          .page-header {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 1rem;
+          }
+
+          .controls-content {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 1rem;
+          }
+
+          .search-filters {
+            flex-direction: column;
+          }
+
+          .stats-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .prescription-meta {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.5rem;
+          }
+
+          .medications-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+      `}</style>
+
+      <div className="prescriptions-page">
+        <div className="page-header">
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <button
+              onClick={() => router.push('/home')}
+              className="back-btn"
+            >
+              ← Voltar
+            </button>
+            <div className="header-content">
+              <h1>💊 Prescrições Médicas</h1>
+              <p>Gestão completa de receitas e prescrições digitais</p>
+            </div>
+          </div>
+          <button
+            onClick={handleNewPrescription}
+            className="new-prescription-btn"
+          >
+            <Plus size={16} />
+            Nova Prescrição
+          </button>
+        </div>
+        {/* Estatísticas */}
+        <div className="stats-grid">
+          <div className="stat-card">
+            <div className="stat-content">
+              <div className="stat-info">
+                <h3>Total</h3>
+                <p>{stats.total}</p>
+              </div>
+              <FileText size={32} style={{ color: '#3b82f6' }} />
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-content">
+              <div className="stat-info">
+                <h3>Ativas</h3>
+                <p>{stats.ativas}</p>
+              </div>
+              <CheckCircle size={32} style={{ color: '#16a34a' }} />
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-content">
+              <div className="stat-info">
+                <h3>Expiradas</h3>
+                <p>{stats.expiradas}</p>
+              </div>
+              <AlertTriangle size={32} style={{ color: '#f59e0b' }} />
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-content">
+              <div className="stat-info">
+                <h3>Este Mês</h3>
+                <p>{stats.esteMes}</p>
+              </div>
+              <Activity size={32} style={{ color: '#a855f7' }} />
+            </div>
+          </div>
+        </div>
+
+        {/* Controles */}
+        <div className="controls-section">
+          <div className="controls-content">
+            <div className="search-filters">
+              <div className="search-box">
+                <Search size={16} className="search-icon" />
+                <input
+                  type="text"
+                  placeholder="Buscar prescrições..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="search-input"
+                />
+              </div>
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="filter-select"
+              >
+                <option value="todas">Todas</option>
+                <option value="ativas">Ativas</option>
+                <option value="expiradas">Expiradas</option>
+              </select>
+            </div>
+
+            <button className="action-btn">
+              <Filter size={16} />
+            </button>
+          </div>
+        </div>
+
+        {/* Lista de Prescrições */}
         <div>
-          <h1 className="text-2xl font-bold mb-2" style={{color: 'var(--text-primary)'}}>Prescrições Médicas</h1>
-          <p style={{color: 'var(--text-muted)'}}>Gerenciar receitas e prescrições</p>
-        </div>
-
-        <Link
-          href="/prescricoes/nova"
-          className="btn-primary flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors"
-          style={{ cursor: 'pointer', minHeight: '40px', textDecoration: 'none' }}
-          data-testid="nova-prescricao-link"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Nova Prescrição</span>
-        </Link>
-      </div>
-
-      {/* Estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <div className="card-primary rounded-xl p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm" style={{color: 'var(--text-muted)'}}>Total</p>
-              <p className="text-2xl font-bold" style={{color: 'var(--text-primary)'}}>{stats.total}</p>
-            </div>
-            <FileText className="w-8 h-8" style={{color: 'var(--accent-primary)'}} />
-          </div>
-        </div>
-
-        <div className="card-primary rounded-xl p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm" style={{color: 'var(--text-muted)'}}>Ativas</p>
-              <p className="text-2xl font-bold" style={{color: 'var(--text-primary)'}}>{stats.ativas}</p>
-            </div>
-            <CheckCircle className="w-8 h-8" style={{color: 'var(--success)'}} />
-          </div>
-        </div>
-
-        <div className="card-primary rounded-xl p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm" style={{color: 'var(--text-muted)'}}>Expiradas</p>
-              <p className="text-2xl font-bold" style={{color: 'var(--text-primary)'}}>{stats.expiradas}</p>
-            </div>
-            <AlertTriangle className="w-8 h-8" style={{color: 'var(--error)'}} />
-          </div>
-        </div>
-
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-slate-400 text-sm">Este Mês</p>
-              <p className="text-2xl font-bold text-white">{stats.esteMes}</p>
-            </div>
-            <Activity className="w-8 h-8 text-purple-500" />
-          </div>
-        </div>
-      </div>
-
-      {/* Filtros */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Buscar prescrições..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-slate-800 border border-slate-600 rounded-lg pl-10 pr-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 w-80"
-            />
-          </div>
-
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="todas">Todas</option>
-            <option value="ativas">Ativas</option>
-            <option value="expiradas">Expiradas</option>
-          </select>
-        </div>
-
-        <button className="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors">
-          <Filter className="w-4 h-4 text-slate-400" />
-        </button>
-      </div>
-
-      {/* Lista de Prescrições */}
-      <div className="space-y-4">
-        {filteredPrescricoes.map((prescricao) => (
-          <div
-            key={prescricao.id}
-            className="bg-slate-800 rounded-xl p-6 border border-slate-700 hover:border-slate-600 transition-all"
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex items-start space-x-4 flex-1">
-                <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <Pill className="w-6 h-6 text-white" />
+          {filteredPrescricoes.map((prescricao) => (
+            <div key={prescricao.id} className="prescription-card">
+              <div className="prescription-header">
+                <div className="prescription-icon">
+                  <Pill size={20} />
                 </div>
-
-                <div className="flex-1">
-                  {/* Header da prescrição */}
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-3">
-                      <h3 className="text-white font-semibold">{prescricao.numeroReceita}</h3>
-                      <StatusBadge
-                        {...getStatusBadgeProps(prescricao.status)}
-                        className="text-xs"
-                        aria-live="polite"
-                      />
-                    </div>
-                    <div className="text-slate-400 text-sm">
-                      {prescricao.crm}
-                    </div>
+                <div className="prescription-info">
+                  <div className="prescription-title">
+                    <h3 className="prescription-number">{prescricao.numeroReceita}</h3>
+                    <div className="prescription-crm">{prescricao.crm}</div>
                   </div>
-
-                  {/* Informações do paciente */}
-                  <div className="flex items-center space-x-6 mb-4 text-slate-400 text-sm">
-                    <div className="flex items-center space-x-1">
-                      <User className="w-4 h-4" />
+                  <div className="prescription-meta">
+                    <div className="meta-item">
+                      <User size={14} />
                       <span>{prescricao.paciente}</span>
                     </div>
-                    <div className="flex items-center space-x-1">
-                      <Calendar className="w-4 h-4" />
+                    <div className="meta-item">
+                      <Calendar size={14} />
                       <span>Emitida: {new Date(prescricao.dataEmissao).toLocaleDateString('pt-BR')}</span>
                     </div>
-                    <div className="flex items-center space-x-1">
-                      <Clock className="w-4 h-4" />
+                    <div className="meta-item">
+                      <Clock size={14} />
                       <span>Válida até: {new Date(prescricao.dataValidade).toLocaleDateString('pt-BR')}</span>
                     </div>
                   </div>
-
-                  {/* Medicamentos */}
-                  <div className="mb-4">
-                    <h4 className="text-white font-medium mb-2">Medicamentos Prescritos:</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                      {prescricao.medicamentos.map((medicamento, index) => (
-                        <div
-                          key={index}
-                          className="bg-slate-700 rounded-lg p-3 border-l-4 border-blue-500"
-                        >
-                          <p className="text-white text-sm font-medium">{medicamento}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Observações */}
-                  {prescricao.observacoes && (
-                    <div className="mb-4">
-                      <h4 className="text-white font-medium mb-1">Observações:</h4>
-                      <p className="text-slate-400 text-sm">{prescricao.observacoes}</p>
-                    </div>
-                  )}
+                  <StatusBadge
+                    {...getStatusBadgeProps(prescricao.status)}
+                    aria-live="polite"
+                  />
                 </div>
               </div>
 
-              {/* Ações */}
-              <div className="flex items-center space-x-2 ml-4">
+              <div className="prescription-content">
+                <div className="medications-section">
+                  <h4>Medicamentos Prescritos ({prescricao.medicamentos.length})</h4>
+                  <div className="medications-grid">
+                    {prescricao.medicamentos.map((medicamento, index) => (
+                      <div key={index} className="medication-item">
+                        <p className="medication-name">{medicamento}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {prescricao.observacoes && (
+                  <div className="observations-section">
+                    <h4>Observações Médicas</h4>
+                    <p className="observations-text">{prescricao.observacoes}</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="prescription-actions">
                 <button
                   onClick={() => handleViewPrescription(prescricao.id)}
-                  className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors group"
-                  aria-label={`Visualizar prescrição ${prescricao.numeroReceita}`}
+                  className="action-btn"
+                  title="Visualizar prescrição"
                 >
-                  <Eye className="w-4 h-4" />
+                  <Eye size={16} />
                 </button>
                 <button
                   onClick={() => handleEditPrescription(prescricao.id)}
-                  className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors group"
-                  aria-label={`Editar prescrição ${prescricao.numeroReceita}`}
+                  className="action-btn"
+                  title="Editar prescrição"
                 >
-                  <Edit className="w-4 h-4" />
+                  <Edit size={16} />
                 </button>
                 <button
                   onClick={() => handlePrintPrescription(prescricao.id)}
-                  className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors group"
-                  aria-label={`Imprimir prescrição ${prescricao.numeroReceita}`}
+                  className="action-btn"
+                  title="Imprimir prescrição"
                 >
-                  <Printer className="w-4 h-4" />
+                  <Printer size={16} />
                 </button>
                 <button
                   onClick={() => handleDownloadPrescription(prescricao.id)}
-                  className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors group"
-                  aria-label={`Baixar prescrição ${prescricao.numeroReceita}`}
+                  className="action-btn success"
+                  title="Baixar em PDF"
                 >
-                  <Download className="w-4 h-4" />
+                  <Download size={16} />
                 </button>
                 <button
                   onClick={() => handleDeletePrescription(prescricao.id)}
-                  className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors group"
-                  aria-label={`Excluir prescrição ${prescricao.numeroReceita}`}
+                  className="action-btn danger"
+                  title="Excluir prescrição"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 size={16} />
                 </button>
               </div>
             </div>
+          ))}
+        </div>
+
+        {/* Paginação */}
+        <div className="pagination">
+          <div className="pagination-info">
+            Mostrando {filteredPrescricoes.length} de {prescricoes.length} prescrições
           </div>
-        ))}
-      </div>
 
-      {/* Paginação */}
-      <div className="flex items-center justify-between mt-8">
-        <p className="text-slate-400 text-sm">
-          Mostrando {filteredPrescricoes.length} de {prescricoes.length} prescrições
-        </p>
-
-        <div className="flex items-center space-x-2">
-          <button className="px-3 py-2 bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 transition-colors">
-            Anterior
-          </button>
-          <button className="px-3 py-2 bg-blue-600 text-white rounded-lg">
-            1
-          </button>
-          <button className="px-3 py-2 bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 transition-colors">
-            Próximo
-          </button>
+          <div className="pagination-controls">
+            <button className="pagination-btn">
+              Anterior
+            </button>
+            <button className="pagination-btn active">
+              1
+            </button>
+            <button className="pagination-btn">
+              Próximo
+            </button>
+          </div>
         </div>
       </div>
-      </div>
+      </>
+    );
 
       {/* Confirm Dialog */}
       <ConfirmDialog
@@ -428,6 +910,4 @@ export default function PrescricoesPage() {
         confirmText={confirmDialog.variant === 'destructive' ? 'Sim, Excluir' : 'Confirmar'}
         cancelText="Cancelar"
       />
-    </>
-  );
 }

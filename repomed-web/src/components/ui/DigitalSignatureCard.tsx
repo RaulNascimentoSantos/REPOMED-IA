@@ -31,7 +31,7 @@ export default function DigitalSignatureCard({
   onClick
 }: DigitalSignatureCardProps) {
   return (
-    <div onClick={onClick} className="card-primary rounded-xl p-6 hover:border-opacity-80 hover:shadow-lg transform hover:scale-105 transition-all duration-300 cursor-pointer group relative overflow-hidden">
+    <div onClick={onClick} className="semantic-card hover:border-opacity-80 hover:shadow-lg transform hover:scale-105 transition-all duration-300 cursor-pointer group relative overflow-hidden">
       {/* Background glow effect */}
       <div className="absolute inset-0 bg-green-600 opacity-5 group-hover:opacity-10 transition-opacity duration-300" />
 

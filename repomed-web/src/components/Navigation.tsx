@@ -177,14 +177,14 @@ export function Navigation() {
               <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 RepoMed IA
               </h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400">v3.0 Enterprise</p>
+              <p className="text-base" style={{ color: 'var(--text-aaa-secondary)' }}>v3.0 Enterprise</p>
             </div>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 lg:hidden"
           >
-            <X className="h-5 w-5 text-gray-500" />
+            <X className="h-5 w-5" style={{ color: 'var(--text-aaa-secondary)' }} />
           </button>
         </div>
 
@@ -196,10 +196,10 @@ export function Navigation() {
             </div>
             <div className="flex-1">
               <p className="text-sm font-semibold text-gray-900 dark:text-white">Dr. João Silva</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">CRM-SP 123456</p>
+              <p className="text-base " style={{ color: 'var(--text-aaa-secondary)' }}>CRM-SP 123456</p>
             </div>
             <button className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
-              <MoreVertical className="h-4 w-4 text-gray-500" />
+              <MoreVertical className="h-4 w-4" style={{ color: 'var(--text-aaa-secondary)' }} />
             </button>
           </div>
         </div>
@@ -208,22 +208,22 @@ export function Navigation() {
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="grid grid-cols-4 gap-2">
             <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 group">
-              <Bell className="h-5 w-5 text-gray-500 group-hover:text-blue-600" />
+              <Bell className="h-5 w-5 group-hover:text-blue-600" style={{ color: 'var(--text-aaa-secondary)' }} />
             </button>
             <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 group">
-              <Search className="h-5 w-5 text-gray-500 group-hover:text-blue-600" />
+              <Search className="h-5 w-5 group-hover:text-blue-600" style={{ color: 'var(--text-aaa-secondary)' }} />
             </button>
             <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 group">
-              <MessageSquare className="h-5 w-5 text-gray-500 group-hover:text-blue-600" />
+              <MessageSquare className="h-5 w-5 group-hover:text-blue-600" style={{ color: 'var(--text-aaa-secondary)' }} />
             </button>
             <button 
               onClick={toggleDarkMode}
               className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 group"
             >
               {darkMode ? (
-                <Sun className="h-5 w-5 text-gray-500 group-hover:text-yellow-500" />
+                <Sun className="h-5 w-5 group-hover:text-yellow-500" style={{ color: 'var(--text-aaa-secondary)' }} />
               ) : (
-                <Moon className="h-5 w-5 text-gray-500 group-hover:text-blue-600" />
+                <Moon className="h-5 w-5 group-hover:text-blue-600" style={{ color: 'var(--text-aaa-secondary)' }} />
               )}
             </button>
           </div>
@@ -265,8 +265,9 @@ export function Navigation() {
                                 "flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200",
                                 isActive(child.href)
                                   ? "bg-gradient-to-r from-blue-500/10 to-purple-500/10 text-blue-600 dark:text-blue-400"
-                                  : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400"
+                                  : "hover:bg-gray-100 dark:hover:bg-gray-800 "
                               )}
+                              style={!isActive(child.href) ? { color: 'var(--text-aaa-secondary)' } : undefined}
                             >
                               <child.icon className="h-4 w-4" />
                               <span className="text-sm">{child.name}</span>
@@ -292,7 +293,7 @@ export function Navigation() {
                       <span className="font-medium">{item.name}</span>
                     </div>
                     {item.badge && (
-                      <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+                      <span className="px-2 py-0.5 text-base font-semibold rounded-full bg-gradient-to-r from-blue-500 to-purple-500 text-white">
                         {item.badge}
                       </span>
                     )}

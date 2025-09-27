@@ -3,6 +3,7 @@
 
 import BackButton from '@/app/components/BackButton';
 import React, { useState } from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
 import {
   Bell,
   AlertTriangle,
@@ -28,6 +29,7 @@ import {
 } from 'lucide-react';
 
 export default function NotificacoesPage() {
+  const { theme, isDarkMode, isMedicalTheme } = useTheme();
   const [filter, setFilter] = useState('todas');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -138,18 +140,21 @@ export default function NotificacoesPage() {
     return matchesSearch;
   });
 
-  const handleMarkAsRead = (id) => {
+  const handleMarkAsRead = (id: number) => {
     // Aqui marcaria como lida
     console.log('Marcar como lida:', id);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = (id: number) => {
     // Aqui deletaria a notificação
     console.log('Deletar:', id);
   };
 
   return (
-    <>
+    <div className={`min-h-screen ${
+      isMedicalTheme ? 'bg-slate-900 text-white' :
+      isDarkMode ? 'bg-slate-900 text-white' : 'bg-gray-50 text-gray-900'
+    }`}>
       <BackButton href="/" />
       <div className="p-6">
       {/* Header */}
@@ -384,6 +389,6 @@ export default function NotificacoesPage() {
         </div>
       </div>
       </div>
-    </>
+    </div>
   );
 }

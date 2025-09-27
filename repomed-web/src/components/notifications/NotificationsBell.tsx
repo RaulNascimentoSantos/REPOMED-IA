@@ -58,12 +58,9 @@ export function NotificationsBell() {
     }
   }, []);
   
-  // Carregar notificações ao montar
+  // Carregar notificações apenas ao montar (sem auto-refresh)
   React.useEffect(() => {
     fetchNotifications();
-    // Atualizar a cada 60 segundos
-    const interval = setInterval(fetchNotifications, 60000);
-    return () => clearInterval(interval);
   }, [fetchNotifications]);
   
   // Fechar ao clicar fora
@@ -162,7 +159,7 @@ export function NotificationsBell() {
       >
         <Bell className="h-5 w-5 text-slate-600 dark:text-slate-400" />
         {unreadCount > 0 && (
-          <span className="absolute top-0 right-0 h-5 w-5 bg-red-500 text-white text-xs 
+          <span className="absolute top-0 right-0 h-5 w-5 bg-red-500 text-white text-base
                          rounded-full flex items-center justify-center font-bold">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
@@ -227,14 +224,14 @@ export function NotificationsBell() {
                           {notification.message}
                         </p>
                         <div className="flex items-center mt-2 space-x-4">
-                          <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center">
+                          <span className="text-base text-slate-500 dark:text-slate-400 flex items-center">
                             <Clock className="h-3 w-3 mr-1" />
                             {formatTime(notification.createdAt)}
                           </span>
                           {!notification.read && (
                             <button
                               onClick={() => markAsRead(notification.id)}
-                              className="text-xs text-blue-600 hover:text-blue-700 
+                              className="text-base text-blue-600 hover:text-blue-700
                                        dark:text-blue-400 dark:hover:text-blue-300"
                             >
                               Marcar como lida

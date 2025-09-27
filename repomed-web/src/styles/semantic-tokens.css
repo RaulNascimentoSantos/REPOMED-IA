@@ -1,0 +1,283 @@
+/**
+ * RepoMed IA v5.1 - Sistema de Tokens Semânticos
+ *
+ * Tokens semânticos baseados na pesquisa UX médica:
+ * - Contraste médico WCAG 2.1 AA (≥ 4.5:1)
+ * - Cores calmas e redução de fadiga visual
+ * - Hierarquia visual clara para ambientes clínicos
+ */
+
+:root {
+  /* ===== TOKENS DE COR SEMÂNTICA ===== */
+
+  /* Background Hierarchy - Hierarquia de fundos médicos */
+  --semantic-bg-primary: var(--bg-primary);           /* Fundo principal */
+  --semantic-bg-secondary: var(--bg-secondary);       /* Cards e containers */
+  --semantic-bg-tertiary: var(--bg-tertiary);         /* Elementos de apoio */
+  --semantic-bg-elevated: var(--bg-elevated);         /* Modals e overlays */
+
+  /* Text Hierarchy - Hierarquia de texto médico */
+  --semantic-text-primary: var(--text-primary);       /* Texto principal */
+  --semantic-text-secondary: var(--text-muted);       /* Texto de apoio */
+  --semantic-text-tertiary: var(--text-disabled);     /* Texto desabilitado */
+  --semantic-text-inverse: var(--text-inverse);       /* Texto em backgrounds escuros */
+
+  /* Medical Status Colors - Estados médicos semânticos */
+  --semantic-status-normal: var(--success);           /* Estado normal/saudável */
+  --semantic-status-warning: var(--warning);          /* Atenção/cuidado */
+  --semantic-status-critical: var(--error);           /* Crítico/urgente */
+  --semantic-status-info: var(--info);                /* Informativo */
+
+  /* Interactive Elements - Elementos interativos médicos */
+  --semantic-action-primary: var(--accent-primary);   /* Ação principal */
+  --semantic-action-secondary: var(--accent-secondary); /* Ação secundária */
+  --semantic-action-destructive: var(--error);        /* Ações destrutivas */
+  --semantic-action-disabled: var(--text-disabled);   /* Ações desabilitadas */
+
+  /* Medical Context Colors - Cores por contexto médico */
+  --semantic-prescription: #3b82f6;                   /* Prescrições */
+  --semantic-patient: #10b981;                        /* Pacientes */
+  --semantic-appointment: #8b5cf6;                    /* Consultas */
+  --semantic-document: #f59e0b;                       /* Documentos */
+  --semantic-emergency: #ef4444;                      /* Emergência */
+
+  /* Border & Outline - Bordas e contornos semânticos */
+  --semantic-border-default: var(--border-color);     /* Borda padrão */
+  --semantic-border-focus: var(--accent-primary);     /* Borda em foco */
+  --semantic-border-error: var(--error);              /* Borda de erro */
+  --semantic-border-success: var(--success);          /* Borda de sucesso */
+
+  /* ===== TOKENS DE ESPAÇAMENTO ===== */
+
+  /* Medical Spacing Scale - Escala de espaçamento médico */
+  --semantic-space-xs: 0.25rem;     /* 4px - Espaçamento mínimo */
+  --semantic-space-sm: 0.5rem;      /* 8px - Elementos próximos */
+  --semantic-space-md: 1rem;        /* 16px - Espaçamento padrão */
+  --semantic-space-lg: 1.5rem;      /* 24px - Seções relacionadas */
+  --semantic-space-xl: 2rem;        /* 32px - Seções distintas */
+  --semantic-space-2xl: 3rem;       /* 48px - Grandes separações */
+
+  /* Component Spacing - Espaçamento por componente */
+  --semantic-space-card: var(--semantic-space-lg);    /* Padding interno de cards */
+  --semantic-space-section: var(--semantic-space-xl); /* Espaçamento entre seções */
+  --semantic-space-form: var(--semantic-space-md);    /* Elementos de formulário */
+
+  /* ===== TOKENS DE TIPOGRAFIA ===== */
+
+  /* Medical Typography Scale - Escala tipográfica médica */
+  --semantic-text-xs: 1rem;         /* 16px - Labels acessíveis */
+  --semantic-text-sm: 1.125rem;     /* 18px - Texto médico mínimo */
+  --semantic-text-base: 1rem;       /* 16px - Texto padrão */
+  --semantic-text-lg: 1.125rem;     /* 18px - Texto destacado */
+  --semantic-text-xl: 1.25rem;      /* 20px - Subtítulos */
+  --semantic-text-2xl: 1.5rem;      /* 24px - Títulos de seção */
+  --semantic-text-3xl: 1.875rem;    /* 30px - Títulos principais */
+
+  /* Font Weights - Pesos tipográficos semânticos */
+  --semantic-font-light: 300;       /* Texto leve */
+  --semantic-font-normal: 400;      /* Texto normal */
+  --semantic-font-medium: 500;      /* Texto médio */
+  --semantic-font-semibold: 600;    /* Texto semi-negrito */
+  --semantic-font-bold: 700;        /* Texto negrito */
+
+  /* Line Heights - Alturas de linha otimizadas */
+  --semantic-leading-tight: 1.25;   /* Títulos */
+  --semantic-leading-normal: 1.5;   /* Texto padrão */
+  --semantic-leading-loose: 1.75;   /* Texto extenso */
+
+  /* ===== TOKENS DE SOMBRA ===== */
+
+  /* Medical Shadow Scale - Sombras para interface médica */
+  --semantic-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);     /* Sombra sutil */
+  --semantic-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);     /* Sombra padrão */
+  --semantic-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);    /* Cards elevados */
+  --semantic-shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);   /* Modals */
+
+  /* Context Shadows - Sombras por contexto */
+  --semantic-shadow-card: var(--semantic-shadow-md);       /* Cards médicos */
+  --semantic-shadow-modal: var(--semantic-shadow-xl);      /* Modals e dialogs */
+  --semantic-shadow-focus: 0 0 0 3px rgba(59, 130, 246, 0.1); /* Estado de foco */
+
+  /* ===== TOKENS DE BORDER RADIUS ===== */
+
+  /* Medical Border Radius - Raios de borda médicos */
+  --semantic-radius-none: 0;         /* Sem arredondamento */
+  --semantic-radius-sm: 0.25rem;     /* 4px - Elementos pequenos */
+  --semantic-radius-md: 0.375rem;    /* 6px - Padrão */
+  --semantic-radius-lg: 0.5rem;      /* 8px - Cards */
+  --semantic-radius-xl: 0.75rem;     /* 12px - Containers grandes */
+  --semantic-radius-full: 9999px;    /* Completamente arredondado */
+
+  /* ===== TOKENS DE TRANSIÇÃO ===== */
+
+  /* Medical Transitions - Transições suaves para UX médica */
+  --semantic-transition-fast: 150ms ease-in-out;    /* Transições rápidas */
+  --semantic-transition-normal: 250ms ease-in-out;  /* Transições normais */
+  --semantic-transition-slow: 350ms ease-in-out;    /* Transições lentas */
+
+  /* ===== TOKENS DE Z-INDEX ===== */
+
+  /* Medical Z-Index Scale - Camadas de interface médica */
+  --semantic-z-dropdown: 1000;      /* Dropdowns */
+  --semantic-z-sticky: 1020;        /* Headers fixos */
+  --semantic-z-overlay: 1030;       /* Overlays */
+  --semantic-z-modal: 1040;         /* Modals */
+  --semantic-z-popover: 1050;       /* Popovers */
+  --semantic-z-tooltip: 1060;       /* Tooltips */
+  --semantic-z-toast: 1070;         /* Notificações */
+}
+
+/* ===== CLASSES UTILITÁRIAS SEMÂNTICAS ===== */
+
+/* Medical Status Classes - Classes para estados médicos */
+.semantic-status-normal {
+  color: var(--semantic-status-normal);
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+.semantic-status-warning {
+  color: var(--semantic-status-warning);
+  background-color: rgba(245, 158, 11, 0.1);
+}
+
+.semantic-status-critical {
+  color: var(--semantic-status-critical);
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+.semantic-status-info {
+  color: var(--semantic-status-info);
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* Medical Interactive Classes - Classes para elementos interativos */
+.semantic-action-primary {
+  background-color: var(--semantic-action-primary);
+  color: white;
+  border: none;
+  padding: var(--semantic-space-sm) var(--semantic-space-md);
+  border-radius: var(--semantic-radius-md);
+  font-weight: var(--semantic-font-medium);
+  transition: var(--semantic-transition-fast);
+  cursor: pointer;
+}
+
+.semantic-action-primary:hover {
+  filter: brightness(1.1);
+  box-shadow: var(--semantic-shadow-focus);
+}
+
+.semantic-action-primary:disabled {
+  background-color: var(--semantic-action-disabled);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Medical Card Classes - Classes para cards médicos */
+.semantic-card {
+  background-color: var(--semantic-bg-secondary);
+  border: 1px solid var(--semantic-border-default);
+  border-radius: var(--semantic-radius-lg);
+  padding: var(--semantic-space-card);
+  box-shadow: var(--semantic-shadow-card);
+  transition: var(--semantic-transition-normal);
+}
+
+.semantic-card:hover {
+  box-shadow: var(--semantic-shadow-lg);
+  border-color: var(--semantic-border-focus);
+}
+
+/* Medical Text Classes - Classes para texto médico */
+.semantic-text-primary {
+  color: var(--semantic-text-primary);
+  font-size: var(--semantic-text-base);
+  line-height: var(--semantic-leading-normal);
+}
+
+.semantic-text-secondary {
+  color: var(--semantic-text-secondary);
+  font-size: var(--semantic-text-sm);
+  line-height: var(--semantic-leading-normal);
+}
+
+.semantic-heading {
+  color: var(--semantic-text-primary);
+  font-weight: var(--semantic-font-semibold);
+  line-height: var(--semantic-leading-tight);
+  margin-bottom: var(--semantic-space-md);
+}
+
+/* Medical Focus Classes - Classes para estados de foco */
+.semantic-focus {
+  outline: none;
+  box-shadow: var(--semantic-shadow-focus);
+  border-color: var(--semantic-border-focus);
+}
+
+/* Medical Layout Classes - Classes para layout médico */
+.semantic-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--semantic-space-md);
+}
+
+.semantic-grid {
+  display: grid;
+  gap: var(--semantic-space-lg);
+}
+
+.semantic-flex {
+  display: flex;
+  gap: var(--semantic-space-md);
+  align-items: center;
+}
+
+.semantic-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--semantic-space-md);
+}
+
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+
+/* Medical Responsive Design - Design responsivo médico */
+@media (max-width: 640px) {
+  :root {
+    --semantic-space-card: var(--semantic-space-md);
+    --semantic-space-section: var(--semantic-space-lg);
+    --semantic-text-3xl: 1.5rem;
+    --semantic-text-2xl: 1.25rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .semantic-container {
+    padding: 0 var(--semantic-space-sm);
+  }
+
+  .semantic-grid {
+    gap: var(--semantic-space-md);
+  }
+}
+
+/* ===== ACCESSIBILITY ENHANCEMENTS ===== */
+
+/* Reduced Motion Support - Suporte para movimento reduzido */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --semantic-transition-fast: none;
+    --semantic-transition-normal: none;
+    --semantic-transition-slow: none;
+  }
+}
+
+/* High Contrast Support - Suporte para alto contraste */
+@media (prefers-contrast: high) {
+  :root {
+    --semantic-border-default: #000;
+    --semantic-shadow-sm: none;
+    --semantic-shadow-md: 0 0 0 2px #000;
+    --semantic-shadow-lg: 0 0 0 3px #000;
+  }
+}

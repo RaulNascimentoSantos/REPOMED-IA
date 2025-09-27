@@ -3,6 +3,7 @@
 
 import BackButton from '@/app/components/BackButton';
 import React, { useState } from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
 import {
   Calendar,
   Clock,
@@ -24,6 +25,7 @@ import {
 } from 'lucide-react';
 
 export default function AgendamentoPage() {
+  const { theme, isDarkMode, isMedicalTheme } = useTheme();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState('');
@@ -76,7 +78,7 @@ export default function AgendamentoPage() {
     'Procedimento'
   ];
 
-  const getDaysInMonth = (date) => {
+  const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
     const firstDay = new Date(year, month, 1);
@@ -99,23 +101,23 @@ export default function AgendamentoPage() {
     return days;
   };
 
-  const isToday = (date) => {
+  const isToday = (date: Date | null) => {
     if (!date) return false;
     const today = new Date();
     return date.toDateString() === today.toDateString();
   };
 
-  const isSelected = (date) => {
+  const isSelected = (date: Date | null) => {
     if (!date) return false;
     return date.toDateString() === selectedDate.toDateString();
   };
 
-  const handleTimeSelect = (time) => {
+  const handleTimeSelect = (time: string) => {
     setSelectedTime(time);
     setShowForm(true);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
@@ -174,15 +176,24 @@ export default function AgendamentoPage() {
   const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
   return (
-    <div className="p-6">
+    <div className={`min-h-screen p-6 ${
+      isMedicalTheme ? 'bg-slate-900 text-white' :
+      isDarkMode ? 'bg-slate-900 text-white' : 'bg-gray-50 text-gray-900'
+    }`}>
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <BackButton href="/" inline />
             <div>
-              <h1 className="text-2xl font-bold text-white mb-2">Agendamento de Consultas</h1>
-              <p className="text-slate-400">Gerencie agendamentos e horários</p>
+              <h1 className={`text-2xl font-bold mb-2 ${
+                isMedicalTheme ? 'text-white' :
+                isDarkMode ? 'text-white' : 'text-slate-800'
+              }`}>Agendamento de Consultas</h1>
+              <p className={`${
+                isMedicalTheme ? 'text-slate-400' :
+                isDarkMode ? 'text-slate-400' : 'text-slate-600'
+              }`}>Gerencie agendamentos e horários</p>
             </div>
           </div>
           <div>
@@ -200,7 +211,11 @@ export default function AgendamentoPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Calendário */}
         <div className="lg:col-span-2">
-          <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300">
+          <div className={`rounded-xl p-6 transition-all duration-300 ${
+            isMedicalTheme ? 'bg-slate-800 border-slate-700 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/10' :
+            isDarkMode ? 'bg-slate-800 border-slate-700 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/10' :
+            'bg-white border-slate-200 hover:border-blue-300 hover:shadow-lg shadow-sm'
+          }`}>
             {/* Header do Calendário */}
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-white">

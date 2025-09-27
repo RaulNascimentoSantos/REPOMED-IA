@@ -32,7 +32,7 @@ interface VitalSignsMonitorProps {
   compact?: boolean;
 }
 
-export default function VitalSignsMonitor({
+const VitalSignsMonitor = React.memo(function VitalSignsMonitor({
   patientId,
   realTime = false,
   compact = false
@@ -149,7 +149,7 @@ export default function VitalSignsMonitor({
                   <span className="text-white text-sm font-medium">
                     {vital.value.toFixed(1)} {vital.unit}
                   </span>
-                  <p className="text-xs text-slate-400">{vital.name}</p>
+                  <p className="text-xs" style={{ color: 'var(--text-aaa-secondary)' }}>{vital.name}</p>
                 </div>
               </div>
             );
@@ -169,7 +169,7 @@ export default function VitalSignsMonitor({
           </div>
           <div>
             <h3 className="text-white font-semibold">Monitor de Sinais Vitais</h3>
-            <p className="text-slate-400 text-sm">
+            <p className="text-sm" style={{ color: 'var(--text-aaa-secondary)' }}>
               {patientId ? `Paciente: ${patientId}` : 'Monitoramento em tempo real'}
             </p>
           </div>
@@ -233,12 +233,12 @@ export default function VitalSignsMonitor({
                 <span className={`text-3xl font-bold ${status.color} group-hover:text-white transition-colors`}>
                   {vital.value.toFixed(1)}
                 </span>
-                <span className="text-slate-400 ml-1">{vital.unit}</span>
+                <span className="ml-1" style={{ color: 'var(--text-aaa-secondary)' }}>{vital.unit}</span>
               </div>
 
               {/* Normal Range */}
               <div className="mb-3">
-                <div className="flex justify-between text-xs text-slate-400 mb-1">
+                <div className="flex justify-between text-xs mb-1" style={{ color: 'var(--text-aaa-secondary)' }}>
                   <span>Normal: {vital.normal.min} - {vital.normal.max} {vital.unit}</span>
                   <span className={status.color}>{status.status === 'normal' ? 'Normal' : 'Alterado'}</span>
                 </div>
@@ -305,4 +305,6 @@ export default function VitalSignsMonitor({
       )}
     </div>
   );
-}
+});
+
+export default VitalSignsMonitor;

@@ -1,9 +1,8 @@
 'use client';
 
-
-import BackButton from '@/app/components/BackButton';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTheme } from '@/contexts/ThemeContext';
 import {
   FileText,
   Pill,
@@ -25,6 +24,7 @@ import {
   Star,
   Copy,
   Settings,
+  ChevronLeft,
   ChevronRight,
   Calendar,
   User,
@@ -34,6 +34,7 @@ import {
 
 export default function DocumentosPage() {
   const router = useRouter();
+  const { theme, isDarkMode, isMedicalTheme } = useTheme();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('todos');
   const [viewMode, setViewMode] = useState('cards');
@@ -282,195 +283,377 @@ CRM: [CRM_NUMERO]`
     return matchesSearch && matchesCategory;
   });
 
-  const handleCreateDocument = (template) => {
-    router.push(`/documentos/criar/${template.category}`);
+  const handleCreateDocument = (template: any) => {
+    try {
+      console.log('[DocumentosPage] Criando documento:', template.category);
+      router.push(`/documentos/criar/${template.category}`);
+    } catch (error) {
+      console.error('[DocumentosPage] Erro na criação de documento:', error);
+      try {
+        window.location.href = `/documentos/criar/${template.category}`;
+      } catch (fallbackError) {
+        console.error('[DocumentosPage] Fallback de criação falhou:', fallbackError);
+      }
+    }
   };
 
   return (
-    <div className="p-6 bg-slate-900 min-h-screen">
-      {/* Header */}
+    <div className={`min-h-screen p-6 ${
+      isMedicalTheme ? 'bg-slate-900 text-white' :
+      isDarkMode ? 'bg-slate-900 text-white' : 'bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 text-gray-900'
+    }`}>
+      {/* Header Premium */}
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <BackButton href="/" inline />
+            <button
+              onClick={() => router.push('/')}
+              className={`flex items-center gap-2 px-4 py-2 backdrop-blur-sm rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow-md ${
+                isMedicalTheme ? 'bg-slate-800/80 border-slate-600 text-slate-200 hover:bg-slate-700 hover:text-white' :
+                isDarkMode ? 'bg-slate-800/80 border-slate-600 text-slate-200 hover:bg-slate-700 hover:text-white' :
+                'bg-white/80 border-slate-200 text-slate-600 hover:bg-white hover:text-slate-800'
+              }`}
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Voltar
+            </button>
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
-                📄 Criar Documentos Médicos
-                <span className="text-lg bg-green-600 text-white px-3 py-1 rounded-full">
-                  {templates.length} Templates
+              <h1 className={`text-4xl font-bold mb-2 flex items-center gap-3 ${
+                isMedicalTheme ? 'text-white' :
+                isDarkMode ? 'text-white' : 'text-slate-800'
+              }`}>
+                📋 Documentos Médicos Inteligentes
+                <span className="text-sm bg-green-500 text-white px-3 py-1 rounded-full font-medium shadow-sm">
+                  {templates.length} Templates Pro
                 </span>
               </h1>
-              <p className="text-slate-400 text-lg">
-                Templates inteligentes com IA para criar documentos médicos rapidamente
+              <p className={`text-lg ${
+                isMedicalTheme ? 'text-slate-300' :
+                isDarkMode ? 'text-slate-300' : 'text-slate-600'
+              }`}>
+                Sistema avançado de documentação médica com IA • Validação automática CFM/CRM
               </p>
+              <div className="flex items-center gap-2 mt-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-sm text-green-400 font-medium">Sistema de assinatura digital ativo</span>
+              </div>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
-            <button className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl transition-all transform hover:scale-105">
+            <button className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105">
               <Plus className="w-5 h-5" />
-              Novo Template
+              Novo Template Personalizado
             </button>
 
-            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all transform hover:scale-105">
+            <button className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105">
               <Brain className="w-5 h-5" />
-              IA Assistente
+              Assistente IA Médica
+            </button>
+
+            <button className={`flex items-center gap-2 px-4 py-2 backdrop-blur-sm rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow-md ${
+              isMedicalTheme ? 'bg-slate-800/80 border-slate-600 text-slate-200 hover:bg-slate-700 hover:text-white' :
+              isDarkMode ? 'bg-slate-800/80 border-slate-600 text-slate-200 hover:bg-slate-700 hover:text-white' :
+              'bg-white/80 border-slate-200 text-slate-700 hover:bg-white hover:text-slate-800'
+            }`}>
+              <Shield className="w-5 h-5" />
+              Validação CFM
             </button>
           </div>
         </div>
       </div>
 
-      {/* Estatísticas Rápidas */}
+      {/* Estatísticas Médicas Premium */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 hover:border-green-500 hover:shadow-lg hover:shadow-green-500/20 transition-all">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-slate-400 text-sm">Documentos Hoje</p>
-              <p className="text-3xl font-bold text-white">23</p>
+        <div className={`backdrop-blur-lg rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 ${
+          isMedicalTheme ? 'bg-slate-800/80 border-slate-600' :
+          isDarkMode ? 'bg-slate-800/80 border-slate-600' :
+          'bg-white/80 border-white/20'
+        }`}>
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+              <FileText className="w-6 h-6 text-white" />
             </div>
-            <FileText className="w-12 h-12 text-green-400" />
+            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">Hoje</span>
+          </div>
+          <div className={`text-3xl font-bold mb-1 ${
+            isMedicalTheme ? 'text-white' :
+            isDarkMode ? 'text-white' : 'text-slate-800'
+          }`}>45</div>
+          <div className={`text-sm mb-2 ${
+            isMedicalTheme ? 'text-slate-300' :
+            isDarkMode ? 'text-slate-300' : 'text-slate-600'
+          }`}>Documentos Gerados</div>
+          <div className="flex items-center text-xs text-green-600 font-medium">
+            <Zap className="w-3 h-3 mr-1" />
+            +23% vs ontem
           </div>
         </div>
 
-        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/20 transition-all">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-slate-400 text-sm">Tempo Médio</p>
-              <p className="text-3xl font-bold text-white">2.3min</p>
+        <div className={`backdrop-blur-lg rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 ${
+          isMedicalTheme ? 'bg-slate-800/80 border-slate-600' :
+          isDarkMode ? 'bg-slate-800/80 border-slate-600' :
+          'bg-white/80 border-white/20'
+        }`}>
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center shadow-lg">
+              <Clock className="w-6 h-6 text-white" />
             </div>
-            <Clock className="w-12 h-12 text-blue-400" />
+            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">Eficiência</span>
+          </div>
+          <div className={`text-3xl font-bold mb-1 ${
+            isMedicalTheme ? 'text-white' :
+            isDarkMode ? 'text-white' : 'text-slate-800'
+          }`}>1.8min</div>
+          <div className={`text-sm mb-2 ${
+            isMedicalTheme ? 'text-slate-300' :
+            isDarkMode ? 'text-slate-300' : 'text-slate-600'
+          }`}>Tempo Médio/Doc</div>
+          <div className="flex items-center text-xs text-blue-600 font-medium">
+            <Brain className="w-3 h-3 mr-1" />
+            60% mais rápido com IA
           </div>
         </div>
 
-        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 hover:border-purple-500 hover:shadow-lg hover:shadow-purple-500/20 transition-all">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-slate-400 text-sm">Templates Favoritos</p>
-              <p className="text-3xl font-bold text-white">4</p>
+        <div className={`backdrop-blur-lg rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 ${
+          isMedicalTheme ? 'bg-slate-800/80 border-slate-600' :
+          isDarkMode ? 'bg-slate-800/80 border-slate-600' :
+          'bg-white/80 border-white/20'
+        }`}>
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
+              <Star className="w-6 h-6 text-white" />
             </div>
-            <Star className="w-12 h-12 text-purple-400" />
+            <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-medium">Favoritos</span>
+          </div>
+          <div className={`text-3xl font-bold mb-1 ${
+            isMedicalTheme ? 'text-white' :
+            isDarkMode ? 'text-white' : 'text-slate-800'
+          }`}>8</div>
+          <div className={`text-sm mb-2 ${
+            isMedicalTheme ? 'text-slate-300' :
+            isDarkMode ? 'text-slate-300' : 'text-slate-600'
+          }`}>Templates Preferidos</div>
+          <div className="flex items-center text-xs text-purple-600 font-medium">
+            <User className="w-3 h-3 mr-1" />
+            Personalização médica
           </div>
         </div>
 
-        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 hover:border-orange-500 hover:shadow-lg hover:shadow-orange-500/20 transition-all">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-slate-400 text-sm">IA Economia</p>
-              <p className="text-3xl font-bold text-white">40%</p>
+        <div className={`backdrop-blur-lg rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 ${
+          isMedicalTheme ? 'bg-slate-800/80 border-slate-600' :
+          isDarkMode ? 'bg-slate-800/80 border-slate-600' :
+          'bg-white/80 border-white/20'
+        }`}>
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
+              <Shield className="w-6 h-6 text-white" />
             </div>
-            <Zap className="w-12 h-12 text-orange-400" />
+            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">CFM</span>
+          </div>
+          <div className={`text-3xl font-bold mb-1 ${
+            isMedicalTheme ? 'text-white' :
+            isDarkMode ? 'text-white' : 'text-slate-800'
+          }`}>100%</div>
+          <div className={`text-sm mb-2 ${
+            isMedicalTheme ? 'text-slate-300' :
+            isDarkMode ? 'text-slate-300' : 'text-slate-600'
+          }`}>Conformidade Legal</div>
+          <div className="flex items-center text-xs text-green-600 font-medium">
+            <Stethoscope className="w-3 h-3 mr-1" />
+            Validação automática
           </div>
         </div>
       </div>
 
-      {/* Filtros e Busca */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Buscar templates..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent w-80"
-            />
+      {/* Controles Avançados de Busca Premium */}
+      <div className={`backdrop-blur-lg rounded-2xl p-6 shadow-xl mb-8 ${
+        isMedicalTheme ? 'bg-slate-800/80 border-slate-600' :
+        isDarkMode ? 'bg-slate-800/80 border-slate-600' :
+        'bg-white/80 border-white/20'
+      }`}>
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+          <div className="flex items-center gap-4 flex-1">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="🔍 Buscar templates médicos..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className={`w-full pl-12 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                  isMedicalTheme ? 'bg-slate-700/50 border-slate-600 text-white placeholder-slate-400' :
+                  isDarkMode ? 'bg-slate-700/50 border-slate-600 text-white placeholder-slate-400' :
+                  'bg-white/50 border-slate-200 text-slate-700 placeholder-slate-400'
+                }`}
+              />
+            </div>
+            <div className="text-sm bg-blue-100 text-blue-700 px-3 py-2 rounded-full font-medium">
+              {filteredTemplates.length} encontrados
+            </div>
           </div>
-        </div>
 
-        <div className="flex items-center gap-3">
-          <Filter className="w-5 h-5 text-slate-400" />
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-          >
-            {categories.map(category => (
-              <option key={category.id} value={category.id}>
-                {category.name} ({category.count})
-              </option>
-            ))}
-          </select>
+          <div className="flex items-center gap-3">
+            <Filter className="w-5 h-5 text-slate-400" />
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className={`px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
+                isMedicalTheme ? 'bg-slate-700/50 border-slate-600 text-white' :
+                isDarkMode ? 'bg-slate-700/50 border-slate-600 text-white' :
+                'bg-white/50 border-slate-200 text-slate-700'
+              }`}
+            >
+              {categories.map(category => (
+                <option key={category.id} value={category.id}>
+                  {category.name} ({category.count})
+                </option>
+              ))}
+            </select>
+            <button className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
+              isMedicalTheme ? 'bg-slate-700/50 border-slate-600 text-slate-200 hover:bg-slate-600 hover:text-white' :
+              isDarkMode ? 'bg-slate-700/50 border-slate-600 text-slate-200 hover:bg-slate-600 hover:text-white' :
+              'bg-white/50 border-slate-200 text-slate-600 hover:bg-white hover:text-slate-800'
+            }`}>
+              <Settings className="w-4 h-4" />
+              Filtros Avançados
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Templates Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      {/* Templates Grid Premium */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredTemplates.map((template) => (
           <div
             key={template.id}
-            className="bg-slate-800 rounded-xl p-6 border border-slate-700 hover:border-green-500 hover:shadow-lg hover:shadow-green-500/20 transform hover:scale-105 transition-all duration-300 cursor-pointer group relative overflow-hidden"
+            className={`backdrop-blur-lg rounded-2xl p-6 shadow-xl hover:shadow-2xl cursor-pointer group hover:scale-105 transition-all duration-300 relative overflow-hidden ${
+              isMedicalTheme ? 'bg-slate-800/80 border-slate-600' :
+              isDarkMode ? 'bg-slate-800/80 border-slate-600' :
+              'bg-white/80 border-white/20'
+            }`}
             onClick={() => handleCreateDocument(template)}
           >
-            {/* Background glow effect */}
-            <div className="absolute inset-0 bg-green-600 opacity-5 group-hover:opacity-10 transition-opacity duration-300" />
+            {/* Premium gradient background */}
+            <div className={`absolute inset-0 transition-all duration-300 ${
+              isMedicalTheme ? 'bg-gradient-to-br from-slate-800/30 to-slate-700/30 group-hover:from-slate-700/40 group-hover:to-slate-600/40' :
+              isDarkMode ? 'bg-gradient-to-br from-slate-800/30 to-slate-700/30 group-hover:from-slate-700/40 group-hover:to-slate-600/40' :
+              'bg-gradient-to-br from-blue-50/50 to-indigo-50/50 group-hover:from-blue-100/50 group-hover:to-indigo-100/50'
+            }`} />
 
             {/* Header */}
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <template.icon className="w-6 h-6 text-white" />
+                <div className={`w-14 h-14 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg ${
+                  template.category === 'receita' ? 'bg-gradient-to-r from-emerald-500 to-green-600' :
+                  template.category === 'atestado' ? 'bg-gradient-to-r from-blue-500 to-cyan-600' :
+                  template.category === 'laudo' ? 'bg-gradient-to-r from-purple-500 to-pink-600' :
+                  template.category === 'relatorio' ? 'bg-gradient-to-r from-orange-500 to-red-600' :
+                  template.category === 'encaminhamento' ? 'bg-gradient-to-r from-indigo-500 to-purple-600' :
+                  'bg-gradient-to-r from-slate-500 to-slate-600'
+                }`}>
+                  <template.icon className="w-7 h-7 text-white" />
                 </div>
 
                 <div className="flex flex-col items-end gap-2">
                   {template.aiAssisted && (
-                    <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full font-medium">
-                      IA Assistida
+                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
+                      🤖 IA Pro
                     </span>
                   )}
                   {template.legalCompliant && (
-                    <span className="bg-green-600 text-white text-xs px-2 py-1 rounded-full font-medium">
-                      CFM Validado
+                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
+                      ✅ CFM Valid
                     </span>
                   )}
                 </div>
               </div>
 
               {/* Content */}
-              <div className="space-y-3">
-                <h3 className="font-semibold text-green-400 group-hover:text-white transition-colors text-lg">
+              <div className="flex flex-col gap-3">
+                <h3 className={`text-lg font-semibold transition-colors ${
+                  isMedicalTheme ? 'text-white group-hover:text-slate-100' :
+                  isDarkMode ? 'text-white group-hover:text-slate-100' :
+                  'text-slate-800 group-hover:text-slate-900'
+                }`}>
                   {template.title}
                 </h3>
 
-                <p className="text-slate-300 text-sm group-hover:text-white transition-colors">
+                <p className={`text-sm transition-colors ${
+                  isMedicalTheme ? 'text-slate-300 group-hover:text-slate-200' :
+                  isDarkMode ? 'text-slate-300 group-hover:text-slate-200' :
+                  'text-slate-600 group-hover:text-slate-700'
+                }`}>
                   {template.description}
                 </p>
 
                 {/* Fields Preview */}
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-2">
                   {template.fields.slice(0, 3).map((field, index) => (
-                    <span key={index} className="text-xs px-2 py-1 bg-slate-700 text-slate-300 rounded-full">
+                    <span key={index} className={`text-xs px-2 py-1 rounded-md font-medium ${
+                      isMedicalTheme ? 'bg-slate-600 text-slate-200' :
+                      isDarkMode ? 'bg-slate-600 text-slate-200' :
+                      'bg-slate-100 text-slate-600'
+                    }`}>
                       {field}
                     </span>
                   ))}
                   {template.fields.length > 3 && (
-                    <span className="text-xs px-2 py-1 bg-slate-700 text-slate-300 rounded-full">
-                      +{template.fields.length - 3}
+                    <span className={`text-xs px-2 py-1 rounded-md font-medium ${
+                      isMedicalTheme ? 'bg-slate-600 text-slate-200' :
+                      isDarkMode ? 'bg-slate-600 text-slate-200' :
+                      'bg-slate-100 text-slate-600'
+                    }`}>
+                      +{template.fields.length - 3} campos
                     </span>
                   )}
                 </div>
 
                 {/* Stats */}
-                <div className="flex items-center justify-between pt-3 border-t border-slate-700">
-                  <div className="text-slate-400 text-xs">
-                    <span>Usado {template.usageCount}x</span>
-                    <span className="ml-2">• {template.lastUsed}</span>
+                <div className={`flex items-center justify-between pt-3 ${
+                  isMedicalTheme ? 'border-t border-slate-600' :
+                  isDarkMode ? 'border-t border-slate-600' : 'border-t border-slate-200'
+                }`}>
+                  <div className={`text-xs ${
+                    isMedicalTheme ? 'text-slate-400' :
+                    isDarkMode ? 'text-slate-400' : 'text-slate-500'
+                  }`}>
+                    <div className="flex items-center gap-1 mb-1">
+                      <Eye className="w-3 h-3" />
+                      {template.usageCount} usos
+                    </div>
+                    <span className="text-green-400 font-medium">• {template.lastUsed}</span>
                   </div>
 
-                  <div className="text-slate-400 text-xs">
+                  <div className={`text-xs flex items-center gap-1 ${
+                    isMedicalTheme ? 'text-slate-400' :
+                    isDarkMode ? 'text-slate-400' : 'text-slate-500'
+                  }`}>
+                    <Clock className="w-3 h-3" />
                     ~{template.estimatedTime}
                   </div>
                 </div>
 
                 {/* Action */}
                 <div className="flex items-center justify-between">
-                  <span className="text-xs px-3 py-1 rounded-full bg-green-600 text-white font-medium">
+                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                    template.category === 'receita' ? 'bg-green-100 text-green-700' :
+                    template.category === 'atestado' ? 'bg-blue-100 text-blue-700' :
+                    template.category === 'laudo' ? 'bg-purple-100 text-purple-700' :
+                    template.category === 'relatorio' ? 'bg-orange-100 text-orange-700' :
+                    template.category === 'encaminhamento' ? 'bg-indigo-100 text-indigo-700' :
+                    'bg-slate-100 text-slate-700'
+                  }`}>
                     {template.category.charAt(0).toUpperCase() + template.category.slice(1)}
                   </span>
 
-                  <div className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm">
-                    <span>Criar Documento</span>
-                    <ChevronRight className="w-4 h-4" />
+                  <div className={`flex items-center text-sm transition-colors gap-2 ${
+                    isMedicalTheme ? 'text-slate-400 hover:text-slate-200 group-hover:text-green-400' :
+                    isDarkMode ? 'text-slate-400 hover:text-slate-200 group-hover:text-green-400' :
+                    'text-slate-500 hover:text-slate-700 group-hover:text-green-600'
+                  }`}>
+                    <span>Criar Agora</span>
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
               </div>
@@ -479,15 +662,38 @@ CRM: [CRM_NUMERO]`
         ))}
       </div>
 
-      {/* Empty State */}
+      {/* Empty State Premium */}
       {filteredTemplates.length === 0 && (
-        <div className="text-center py-12">
-          <FileText className="w-16 h-16 text-slate-500 mx-auto mb-4" />
-          <h3 className="text-white font-medium mb-2">Nenhum template encontrado</h3>
-          <p className="text-slate-400 mb-4">Tente ajustar sua busca ou filtros</p>
-          <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors">
-            Limpar Filtros
-          </button>
+        <div className="text-center py-16">
+          <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
+            <FileText className="w-12 h-12 text-white" />
+          </div>
+          <h3 className={`text-xl font-semibold mb-3 ${
+            isMedicalTheme ? 'text-white' :
+            isDarkMode ? 'text-white' : 'text-slate-800'
+          }`}>Nenhum template encontrado</h3>
+          <p className={`mb-6 max-w-md mx-auto ${
+            isMedicalTheme ? 'text-slate-300' :
+            isDarkMode ? 'text-slate-300' : 'text-slate-600'
+          }`}>
+            Tente ajustar sua busca ou filtros, ou crie um novo template personalizado para suas necessidades médicas.
+          </p>
+          <div className="flex items-center justify-center gap-4">
+            <button
+              onClick={() => setSearchTerm('')}
+              className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
+                isMedicalTheme ? 'bg-slate-700/80 border-slate-600 text-slate-200 hover:bg-slate-600 hover:text-white' :
+                isDarkMode ? 'bg-slate-700/80 border-slate-600 text-slate-200 hover:bg-slate-600 hover:text-white' :
+                'bg-white/80 border-slate-200 text-slate-700 hover:bg-white hover:text-slate-800'
+              }`}
+            >
+              Limpar Busca
+            </button>
+            <button className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-medium transition-all duration-200">
+              <Plus className="w-4 h-4" />
+              Criar Template Personalizado
+            </button>
+          </div>
         </div>
       )}
     </div>

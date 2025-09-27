@@ -33,7 +33,7 @@ export function TemplateSelector({ onSelect, selectedTemplate }) {
             <h3 className="text-lg font-medium text-gray-900 mb-1">
               Carregando Templates
             </h3>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-black dark:text-white">
               Buscando templates médicos disponíveis...
             </p>
           </div>
@@ -75,11 +75,11 @@ export function TemplateSelector({ onSelect, selectedTemplate }) {
     return (
       <div className="card">
         <div className="text-center py-12">
-          <FileText className="h-8 w-8 text-gray-400 mx-auto mb-3" />
+          <FileText className="h-8 w-8 text-black dark:text-white mx-auto mb-3" />
           <h3 className="text-lg font-medium text-gray-900 mb-1">
             Nenhum Template Encontrado
           </h3>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-black dark:text-white">
             Não há templates médicos disponíveis no momento.
           </p>
         </div>
@@ -94,7 +94,7 @@ export function TemplateSelector({ onSelect, selectedTemplate }) {
         <h2 className="text-lg font-semibold text-gray-900">
           Selecionar Template
         </h2>
-        <div className="text-sm text-gray-500">
+        <div className="text-sm text-black dark:text-white">
           {templates.total} template{templates.total !== 1 ? 's' : ''} disponível{templates.total !== 1 ? 'eis' : ''}
         </div>
       </div>
@@ -118,7 +118,7 @@ export function TemplateSelector({ onSelect, selectedTemplate }) {
                 <p className="text-sm text-gray-600 mb-2">
                   {template.specialty} • v{template.version}
                 </p>
-                <div className="flex items-center space-x-4 text-xs text-gray-500">
+                <div className="flex items-center space-x-4 text-xs text-black dark:text-white">
                   <span>{template.fields?.length || 0} campos</span>
                   {template.compliance?.cfm && (
                     <span className="bg-green-100 text-green-800 px-2 py-1 rounded">

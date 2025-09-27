@@ -130,7 +130,7 @@ export default function CriarReceitaPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="col-span-full">
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                  <label className="block text-lg font-medium text-slate-300 mb-2">
                     Nome Completo do Paciente *
                   </label>
                   <input
@@ -145,7 +145,7 @@ export default function CriarReceitaPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                  <label className="block text-lg font-medium text-slate-300 mb-2">
                     CPF *
                   </label>
                   <input
@@ -160,7 +160,7 @@ export default function CriarReceitaPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                  <label className="block text-lg font-medium text-slate-300 mb-2">
                     Data de Nascimento *
                   </label>
                   <input
@@ -174,7 +174,7 @@ export default function CriarReceitaPage() {
                 </div>
 
                 <div className="col-span-full">
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                  <label className="block text-lg font-medium text-slate-300 mb-2">
                     Endereço
                   </label>
                   <input
@@ -224,7 +224,7 @@ export default function CriarReceitaPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       <div className="col-span-full md:col-span-2">
-                        <label className="block text-sm font-medium text-slate-300 mb-2">
+                        <label className="block text-lg font-medium text-slate-300 mb-2">
                           Nome do Medicamento *
                         </label>
                         <input
@@ -238,7 +238,7 @@ export default function CriarReceitaPage() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">
+                        <label className="block text-lg font-medium text-slate-300 mb-2">
                           Dosagem *
                         </label>
                         <input
@@ -252,7 +252,7 @@ export default function CriarReceitaPage() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">
+                        <label className="block text-lg font-medium text-slate-300 mb-2">
                           Frequência *
                         </label>
                         <input
@@ -266,7 +266,7 @@ export default function CriarReceitaPage() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">
+                        <label className="block text-lg font-medium text-slate-300 mb-2">
                           Duração
                         </label>
                         <input
@@ -279,7 +279,7 @@ export default function CriarReceitaPage() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">
+                        <label className="block text-lg font-medium text-slate-300 mb-2">
                           Quantidade
                         </label>
                         <input
@@ -292,7 +292,7 @@ export default function CriarReceitaPage() {
                       </div>
 
                       <div className="col-span-full">
-                        <label className="block text-sm font-medium text-slate-300 mb-2">
+                        <label className="block text-lg font-medium text-slate-300 mb-2">
                           Orientações Específicas
                         </label>
                         <textarea

@@ -1,0 +1,381 @@
+/**
+ * 🏥 RepoMed IA v6.0 - Home Enterprise 2025
+ * Ultra-safe CSS with .home-pro namespace isolation
+ * 100% additive approach - ZERO breaking changes
+ * Feature flag: data-home-pro="true"
+ */
+
+/* ========== NAMESPACE ISOLATION ========== */
+/* Container setup apenas - nunca conflita com existente */
+.home-pro {
+  position: relative;
+  isolation: isolate;
+  /* CSS containment para performance */
+  contain: layout style paint;
+}
+
+/* Feature flag conditional loading */
+[data-home-pro="false"] .home-pro,
+[data-home-pro="false"] .home-pro * {
+  /* Disable all enterprise styles when flag is off */
+  background: revert !important;
+  border: revert !important;
+  box-shadow: revert !important;
+  backdrop-filter: none !important;
+}
+
+/* ========== CUSTOM PROPERTIES TEMA-AWARE ========== */
+
+/* Light Theme Variables */
+:root[data-theme="light"] .home-pro {
+  --hx-primary: #ffffff;
+  --hx-secondary: #f8fafc;
+  --hx-tertiary: #f1f5f9;
+  --hx-accent: #3b82f6;
+  --hx-accent-light: #60a5fa;
+  --hx-text: #1e293b;
+  --hx-text-secondary: #475569;
+  --hx-text-muted: #64748b;
+  --hx-border: rgba(226, 232, 240, 0.8);
+  --hx-border-focus: #3b82f6;
+  --hx-shadow: rgba(0, 0, 0, 0.08);
+  --hx-shadow-hover: rgba(0, 0, 0, 0.12);
+  --hx-backdrop: rgba(255, 255, 255, 0.8);
+  --hx-gradient: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  --hx-glass-bg: rgba(255, 255, 255, 0.9);
+  --hx-glass-border: rgba(255, 255, 255, 0.3);
+}
+
+/* Dark Theme Variables */
+:root[data-theme="dark"] .home-pro {
+  --hx-primary: #0f172a;
+  --hx-secondary: #1e293b;
+  --hx-tertiary: #334155;
+  --hx-accent: #3b82f6;
+  --hx-accent-light: #60a5fa;
+  --hx-text: #ffffff;
+  --hx-text-secondary: #cbd5e1;
+  --hx-text-muted: #94a3b8;
+  --hx-border: rgba(71, 85, 105, 0.8);
+  --hx-border-focus: #60a5fa;
+  --hx-shadow: rgba(0, 0, 0, 0.3);
+  --hx-shadow-hover: rgba(0, 0, 0, 0.4);
+  --hx-backdrop: rgba(15, 23, 42, 0.9);
+  --hx-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  --hx-glass-bg: rgba(30, 41, 59, 0.9);
+  --hx-glass-border: rgba(255, 255, 255, 0.1);
+}
+
+/* Medical Theme Variables */
+:root[data-theme="medical"] .home-pro {
+  --hx-primary: var(--medical-neutral-50);
+  --hx-secondary: var(--medical-neutral-100);
+  --hx-tertiary: var(--medical-neutral-200);
+  --hx-accent: var(--medical-primary);
+  --hx-accent-light: var(--medical-primary-light);
+  --hx-text: var(--medical-neutral-800);
+  --hx-text-secondary: var(--medical-neutral-600);
+  --hx-text-muted: var(--medical-neutral-500);
+  --hx-border: var(--medical-neutral-300);
+  --hx-border-focus: var(--medical-primary);
+  --hx-shadow: rgba(30, 64, 175, 0.08);
+  --hx-shadow-hover: rgba(30, 64, 175, 0.15);
+  --hx-backdrop: rgba(248, 250, 252, 0.95);
+  --hx-gradient: linear-gradient(135deg, var(--medical-neutral-50) 0%, var(--medical-neutral-100) 100%);
+  --hx-glass-bg: rgba(248, 250, 252, 0.9);
+  --hx-glass-border: rgba(30, 64, 175, 0.1);
+}
+
+/* Clinical Theme Variables */
+:root[data-theme="clinical"] .home-pro {
+  --hx-primary: var(--bg-primary);
+  --hx-secondary: var(--bg-secondary);
+  --hx-tertiary: var(--bg-tertiary);
+  --hx-accent: var(--accent-primary);
+  --hx-accent-light: #60a5fa;
+  --hx-text: var(--text-primary);
+  --hx-text-secondary: var(--text-secondary);
+  --hx-text-muted: var(--text-aaa-secondary);
+  --hx-border: var(--border-color);
+  --hx-border-focus: var(--border-focus);
+  --hx-shadow: rgba(0, 102, 204, 0.08);
+  --hx-shadow-hover: rgba(0, 102, 204, 0.15);
+  --hx-backdrop: rgba(254, 255, 254, 0.95);
+  --hx-gradient: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  --hx-glass-bg: rgba(254, 255, 254, 0.9);
+  --hx-glass-border: rgba(0, 102, 204, 0.1);
+}
+
+/* ========== ENTERPRISE CARD ENHANCEMENTS ========== */
+
+/* Base card styling - additive to existing classes */
+.home-pro .hx-card {
+  background: var(--hx-glass-bg);
+  border: 1px solid var(--hx-glass-border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.home-pro .hx-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--hx-accent) 0%, var(--hx-accent-light) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.home-pro .hx-card:hover {
+  background: var(--hx-glass-bg);
+  border-color: var(--hx-border-focus);
+  box-shadow:
+    0 20px 25px -5px var(--hx-shadow-hover),
+    0 0 0 1px var(--hx-border-focus);
+  transform: translateY(-2px);
+}
+
+.home-pro .hx-card:hover::before {
+  opacity: 1;
+}
+
+/* ========== BACKGROUND ENHANCEMENTS ========== */
+
+.home-pro .hx-bg {
+  background: var(--hx-gradient);
+  position: relative;
+}
+
+.home-pro .hx-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ========== BUTTON ENHANCEMENTS ========== */
+
+.home-pro .hx-btn {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.home-pro .hx-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 50%, transparent 100%);
+  transition: left 0.5s ease;
+}
+
+.home-pro .hx-btn:hover::before {
+  left: 100%;
+}
+
+/* ========== STATS CARDS ENHANCEMENTS ========== */
+
+.home-pro .hx-stat {
+  background: var(--hx-glass-bg);
+  border: 1px solid var(--hx-glass-border);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  position: relative;
+  overflow: hidden;
+}
+
+.home-pro .hx-stat::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--hx-accent) 0%, var(--hx-accent-light) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.home-pro .hx-stat:hover::after {
+  opacity: 1;
+}
+
+/* ========== ALERT ENHANCEMENTS ========== */
+
+.home-pro .hx-alert {
+  background: var(--hx-glass-bg);
+  border: 1px solid var(--hx-glass-border);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  position: relative;
+}
+
+.home-pro .hx-alert::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--hx-accent);
+}
+
+/* ========== NAVIGATION ENHANCEMENTS ========== */
+
+.home-pro .hx-nav-item {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.home-pro .hx-nav-item:hover {
+  background: var(--hx-glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* ========== TEXT ENHANCEMENTS ========== */
+
+.home-pro .hx-title {
+  background: linear-gradient(135deg, var(--hx-text) 0%, var(--hx-accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+  text-shadow: none;
+}
+
+.home-pro .hx-text {
+  color: var(--hx-text-secondary);
+}
+
+.home-pro .hx-text-muted {
+  color: var(--hx-text-muted);
+}
+
+/* ========== RESPONSIVE ENTERPRISE BREAKPOINTS ========== */
+
+@media (max-width: 768px) {
+  .home-pro .hx-card {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .home-pro .hx-bg::before {
+    opacity: 0.5;
+  }
+}
+
+@media (max-width: 640px) {
+  .home-pro .hx-card:hover {
+    transform: none;
+  }
+
+  .home-pro .hx-btn::before {
+    display: none;
+  }
+}
+
+/* ========== ACCESSIBILITY ENHANCEMENTS ========== */
+
+@media (prefers-reduced-motion: reduce) {
+  .home-pro * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .home-pro .hx-card:hover {
+    transform: none;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .home-pro {
+    --hx-border: currentColor;
+    --hx-border-focus: currentColor;
+  }
+
+  .home-pro .hx-card {
+    border-width: 2px;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+/* ========== PERFORMANCE OPTIMIZATIONS ========== */
+
+.home-pro {
+  /* GPU acceleration for smooth animations */
+  will-change: auto;
+  transform: translateZ(0);
+}
+
+.home-pro .hx-card {
+  /* Isolate animations */
+  isolation: isolate;
+  contain: layout style paint;
+}
+
+/* ========== FALLBACKS ========== */
+
+/* Browsers without backdrop-filter support */
+@supports not (backdrop-filter: blur(20px)) {
+  .home-pro .hx-card {
+    background: var(--hx-secondary);
+    border: 1px solid var(--hx-border);
+  }
+
+  .home-pro .hx-stat {
+    background: var(--hx-secondary);
+    border: 1px solid var(--hx-border);
+  }
+
+  .home-pro .hx-alert {
+    background: var(--hx-secondary);
+    border: 1px solid var(--hx-border);
+  }
+}
+
+/* Print styles */
+@media print {
+  .home-pro .hx-card {
+    background: white !important;
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .home-pro .hx-card::before,
+  .home-pro .hx-card::after {
+    display: none !important;
+  }
+}
+
+/* ========== DEBUGGING HELPERS (remove in production) ========== */
+
+/* Visual indicator when home-pro is active */
+[data-debug="true"] .home-pro {
+  outline: 2px dashed var(--hx-accent);
+  outline-offset: 4px;
+}
+
+[data-debug="true"] .home-pro .hx-card {
+  outline: 1px dotted var(--hx-accent);
+  outline-offset: 2px;
+}

@@ -133,7 +133,7 @@ export default function HistoricoPage() {
     return matchesSearch;
   });
 
-  const getTypeIcon = (tipo) => {
+  const getTypeIcon = (tipo: string) => {
     switch (tipo) {
       case 'Consulta': return Stethoscope;
       case 'Exame': return Activity;
@@ -142,7 +142,7 @@ export default function HistoricoPage() {
     }
   };
 
-  const getTypeColor = (tipo) => {
+  const getTypeColor = (tipo: string) => {
     switch (tipo) {
       case 'Consulta': return 'text-blue-400';
       case 'Exame': return 'text-green-400';
@@ -151,7 +151,7 @@ export default function HistoricoPage() {
     }
   };
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'Normal': return 'text-green-400';
       case 'Alterado': return 'text-yellow-400';
@@ -200,11 +200,11 @@ export default function HistoricoPage() {
                 }`}
               >
                 <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <span className="text-white font-semibold text-sm">{paciente.avatar}</span>
+                  <span className="text-white font-semibold text-base">{paciente.avatar}</span>
                 </div>
                 <div className="flex-1">
                   <h3 className="font-medium group-hover:text-blue-200 transition-colors">{paciente.nome}</h3>
-                  <p className="text-xs opacity-75">Última: {new Date(paciente.ultimaConsulta).toLocaleDateString('pt-BR')}</p>
+                  <p className="text-base opacity-75">Última: {new Date(paciente.ultimaConsulta).toLocaleDateString('pt-BR')}</p>
                 </div>
               </button>
             ))}
@@ -284,7 +284,7 @@ export default function HistoricoPage() {
                             <div>
                               <div className="flex items-center space-x-3 mb-2">
                                 <h3 className="text-white font-semibold group-hover:text-blue-200 transition-colors">{record.titulo}</h3>
-                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                <span className={`px-2 py-1 rounded-full text-base font-medium ${
                                   record.tipo === 'Consulta' ? 'bg-blue-600/20 text-blue-400' :
                                   record.tipo === 'Exame' ? 'bg-green-600/20 text-green-400' :
                                   'bg-purple-600/20 text-purple-400'
@@ -293,7 +293,7 @@ export default function HistoricoPage() {
                                 </span>
                               </div>
 
-                              <div className="flex items-center space-x-4 text-slate-400 text-sm mb-2">
+                              <div className="flex items-center space-x-4 text-slate-400 text-base mb-2">
                                 <div className="flex items-center space-x-1">
                                   <Calendar className="w-4 h-4" />
                                   <span>{new Date(record.data).toLocaleDateString('pt-BR')}</span>
@@ -305,11 +305,11 @@ export default function HistoricoPage() {
                                 <span className="text-slate-500">{record.especialidade}</span>
                               </div>
 
-                              <p className="text-slate-300 text-sm group-hover:text-slate-200 transition-colors">{record.descricao}</p>
+                              <p className="text-slate-300 text-base group-hover:text-slate-200 transition-colors">{record.descricao}</p>
                             </div>
 
                             <div className="flex items-center space-x-2">
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              <span className={`px-2 py-1 rounded-full text-base font-medium ${
                                 getStatusColor(record.status) === 'text-green-400' ? 'bg-green-600/20 text-green-400' :
                                 getStatusColor(record.status) === 'text-yellow-400' ? 'bg-yellow-600/20 text-yellow-400' :
                                 getStatusColor(record.status) === 'text-red-400' ? 'bg-red-600/20 text-red-400' :
@@ -340,7 +340,7 @@ export default function HistoricoPage() {
                                   <h4 className="text-white font-medium mb-2">Diagnósticos:</h4>
                                   <div className="flex flex-wrap gap-2">
                                     {record.diagnosticos.map((diag, index) => (
-                                      <span key={index} className="px-3 py-1 bg-red-600/20 text-red-400 rounded-full text-sm">
+                                      <span key={index} className="px-3 py-1 bg-red-600/20 text-red-400 rounded-full text-base">
                                         {diag}
                                       </span>
                                     ))}
@@ -354,7 +354,7 @@ export default function HistoricoPage() {
                                   <h4 className="text-white font-medium mb-2">Medicamentos:</h4>
                                   <div className="flex flex-wrap gap-2">
                                     {record.medicamentos.map((med, index) => (
-                                      <span key={index} className="px-3 py-1 bg-green-600/20 text-green-400 rounded-full text-sm">
+                                      <span key={index} className="px-3 py-1 bg-green-600/20 text-green-400 rounded-full text-base">
                                         {med}
                                       </span>
                                     ))}
@@ -368,19 +368,19 @@ export default function HistoricoPage() {
                                   <h4 className="text-white font-medium mb-2">Sinais Vitais:</h4>
                                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                     <div className="bg-slate-600 rounded-lg p-3">
-                                      <p className="text-slate-400 text-xs">Pressão</p>
+                                      <p className="text-slate-400 text-base">Pressão</p>
                                       <p className="text-white font-medium">{record.sinaisVitais.pressao}</p>
                                     </div>
                                     <div className="bg-slate-600 rounded-lg p-3">
-                                      <p className="text-slate-400 text-xs">Temperatura</p>
+                                      <p className="text-slate-400 text-base">Temperatura</p>
                                       <p className="text-white font-medium">{record.sinaisVitais.temperatura}</p>
                                     </div>
                                     <div className="bg-slate-600 rounded-lg p-3">
-                                      <p className="text-slate-400 text-xs">Freq. Cardíaca</p>
+                                      <p className="text-slate-400 text-base">Freq. Cardíaca</p>
                                       <p className="text-white font-medium">{record.sinaisVitais.frequenciaCardiaca}</p>
                                     </div>
                                     <div className="bg-slate-600 rounded-lg p-3">
-                                      <p className="text-slate-400 text-xs">Peso</p>
+                                      <p className="text-slate-400 text-base">Peso</p>
                                       <p className="text-white font-medium">{record.sinaisVitais.peso}</p>
                                     </div>
                                   </div>
@@ -394,7 +394,7 @@ export default function HistoricoPage() {
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {Object.entries(record.resultados).map(([key, value]) => (
                                       <div key={key} className="bg-slate-600 rounded-lg p-3">
-                                        <p className="text-slate-400 text-xs capitalize">{key.replace(/([A-Z])/g, ' $1')}</p>
+                                        <p className="text-slate-400 text-base capitalize">{key.replace(/([A-Z])/g, ' $1')}</p>
                                         <p className="text-white font-medium">{value}</p>
                                       </div>
                                     ))}

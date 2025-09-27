@@ -85,7 +85,7 @@ export default function TelemedicinaPage() {
     agendadas: 2
   };
 
-  const handleStartCall = (consulta) => {
+  const handleStartCall = (consulta: any) => {
     setSelectedConsulta(consulta);
     setIsInCall(true);
   };

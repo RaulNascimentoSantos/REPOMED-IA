@@ -66,7 +66,7 @@ export const CommandPalette = ({ open, onClose }: CommandPaletteProps) => {
           {aiMode && (
             <div className="flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-purple-100 to-blue-100 rounded-full">
               <Sparkles className="w-4 h-4 text-purple-600" />
-              <span className="text-xs font-medium text-purple-600">IA Mode</span>
+              <span className="text-base font-medium text-purple-600">IA Mode</span>
             </div>
           )}
         </div>
@@ -76,17 +76,17 @@ export const CommandPalette = ({ open, onClose }: CommandPaletteProps) => {
           {!aiMode ? (
             <>
               {/* Recent Items */}
-              <Command.Group heading="Recentes" className="text-xs text-neutral-500 px-2 py-1.5">
+              <Command.Group heading="Recentes" className="text-base text-neutral-500 px-2 py-1.5">
                 <Command.Item className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-neutral-100 cursor-pointer">
                   <Clock className="w-4 h-4 text-neutral-400" />
                   <span className="flex-1">Maria Silva - Receita</span>
-                  <span className="text-xs text-neutral-400">2 min atrás</span>
+                  <span className="text-base text-neutral-400">2 min atrás</span>
                 </Command.Item>
               </Command.Group>
               
               {/* Actions */}
               {actions.map((group) => (
-                <Command.Group key={group.category} heading={group.category} className="text-xs text-neutral-500 px-2 py-1.5 mt-3">
+                <Command.Group key={group.category} heading={group.category} className="text-base text-neutral-500 px-2 py-1.5 mt-3">
                   {group.items.map((item) => (
                     <Command.Item
                       key={item.label}
@@ -97,7 +97,7 @@ export const CommandPalette = ({ open, onClose }: CommandPaletteProps) => {
                         <item.icon className="w-4 h-4 text-neutral-600 group-hover:text-primary-600" />
                       </div>
                       <span className="flex-1">{item.label}</span>
-                      <kbd className="px-2 py-0.5 text-xs bg-neutral-100 border border-neutral-200 rounded">
+                      <kbd className="px-2 py-0.5 text-base bg-neutral-100 border border-neutral-200 rounded">
                         {item.shortcut}
                       </kbd>
                     </Command.Item>
@@ -111,8 +111,8 @@ export const CommandPalette = ({ open, onClose }: CommandPaletteProps) => {
               <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg">
                 <Brain className="w-5 h-5 text-purple-600" />
                 <div className="flex-1">
-                  <p className="text-sm font-medium">Sugestão de IA</p>
-                  <p className="text-xs text-neutral-600">Baseado no histórico do paciente</p>
+                  <p className="text-lg font-medium">Sugestão de IA</p>
+                  <p className="text-base text-neutral-600">Baseado no histórico do paciente</p>
                 </div>
               </div>
               
@@ -123,7 +123,7 @@ export const CommandPalette = ({ open, onClose }: CommandPaletteProps) => {
         
         {/* Footer */}
         <div className="border-t border-neutral-200 px-4 py-2 flex items-center justify-between">
-          <div className="flex items-center gap-4 text-xs text-neutral-500">
+          <div className="flex items-center gap-4 text-base text-neutral-500">
             <span className="flex items-center gap-1">
               <kbd className="px-1.5 py-0.5 bg-neutral-100 border border-neutral-200 rounded">↑↓</kbd>
               Navegar
@@ -143,7 +143,7 @@ export const CommandPalette = ({ open, onClose }: CommandPaletteProps) => {
             className="flex items-center gap-2 px-3 py-1 hover:bg-neutral-100 rounded-lg transition-colors"
           >
             <Sparkles className="w-4 h-4 text-purple-600" />
-            <span className="text-xs font-medium">IA Mode</span>
+            <span className="text-base font-medium">IA Mode</span>
           </button>
         </div>
       </div>

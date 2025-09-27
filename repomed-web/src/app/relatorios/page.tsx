@@ -3,6 +3,7 @@
 
 import BackButton from '@/app/components/BackButton';
 import React, { useState } from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
 import {
   BarChart3,
   TrendingUp,
@@ -26,6 +27,7 @@ import {
 } from 'lucide-react';
 
 export default function RelatoriosPage() {
+  const { theme, isDarkMode, isMedicalTheme } = useTheme();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [dateRange, setDateRange] = useState('30');
   const [reportType, setReportType] = useState('geral');
@@ -107,7 +109,7 @@ export default function RelatoriosPage() {
     ]
   };
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'Atualizado': return 'text-green-400';
       case 'Pendente': return 'text-yellow-400';
@@ -116,7 +118,7 @@ export default function RelatoriosPage() {
     }
   };
 
-  const getStatusBadgeColor = (status) => {
+  const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case 'Atualizado': return 'bg-green-600';
       case 'Pendente': return 'bg-yellow-600';
@@ -126,14 +128,23 @@ export default function RelatoriosPage() {
   };
 
   return (
-    <>
+    <div className={`min-h-screen ${
+      isMedicalTheme ? 'bg-slate-900 text-white' :
+      isDarkMode ? 'bg-slate-900 text-white' : 'bg-gray-50 text-gray-900'
+    }`}>
       <BackButton href="/" />
       <div className="p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white mb-2">Relatórios e Analytics</h1>
-          <p className="text-slate-400">Análise de dados e indicadores</p>
+          <h1 className={`text-2xl font-bold mb-2 ${
+            isMedicalTheme ? 'text-white' :
+            isDarkMode ? 'text-white' : 'text-slate-800'
+          }`}>Relatórios e Analytics</h1>
+          <p className={`${
+            isMedicalTheme ? 'text-slate-400' :
+            isDarkMode ? 'text-slate-400' : 'text-slate-600'
+          }`}>Análise de dados e indicadores</p>
         </div>
 
         <div className="flex items-center space-x-2">
@@ -149,13 +160,19 @@ export default function RelatoriosPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex space-x-1 mb-6 bg-slate-800 p-1 rounded-lg">
+      <div className={`flex space-x-1 mb-6 p-1 rounded-lg ${
+        isMedicalTheme ? 'bg-slate-800' :
+        isDarkMode ? 'bg-slate-800' :
+        'bg-white border border-slate-200'
+      }`}>
         <button
           onClick={() => setActiveTab('dashboard')}
           className={`px-4 py-2 rounded-lg transition-colors ${
             activeTab === 'dashboard'
               ? 'bg-blue-600 text-white'
-              : 'text-slate-400 hover:text-white'
+              : (isMedicalTheme ? 'text-slate-400 hover:text-white' :
+                isDarkMode ? 'text-slate-400 hover:text-white' :
+                'text-slate-600 hover:text-slate-800')
           }`}
         >
           Dashboard
@@ -187,18 +204,32 @@ export default function RelatoriosPage() {
         <div className="space-y-6">
           {/* Métricas Principais */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+            <div className={`rounded-xl p-6 ${
+              isMedicalTheme ? 'bg-slate-800 border-slate-700' :
+              isDarkMode ? 'bg-slate-800 border-slate-700' :
+              'bg-white border-slate-200 shadow-sm'
+            }`}>
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
                   <Users className="w-6 h-6 text-white" />
                 </div>
                 <span className="text-green-400 text-sm">↗ +{dashboardMetrics.crescimentoPacientes}%</span>
               </div>
-              <h3 className="text-slate-400 text-sm font-medium mb-1">Pacientes Ativos</h3>
-              <h2 className="text-3xl font-bold text-white">{dashboardMetrics.pacientesTotal.toLocaleString()}</h2>
+              <h3 className={`text-sm font-medium mb-1 ${
+                isMedicalTheme ? 'text-slate-400' :
+                isDarkMode ? 'text-slate-400' : 'text-slate-600'
+              }`}>Pacientes Ativos</h3>
+              <h2 className={`text-3xl font-bold ${
+                isMedicalTheme ? 'text-white' :
+                isDarkMode ? 'text-white' : 'text-slate-800'
+              }`}>{dashboardMetrics.pacientesTotal.toLocaleString()}</h2>
             </div>
 
-            <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+            <div className={`rounded-xl p-6 ${
+              isMedicalTheme ? 'bg-slate-800 border-slate-700' :
+              isDarkMode ? 'bg-slate-800 border-slate-700' :
+              'bg-white border-slate-200 shadow-sm'
+            }`}>
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center">
                   <Calendar className="w-6 h-6 text-white" />
@@ -209,7 +240,11 @@ export default function RelatoriosPage() {
               <h2 className="text-3xl font-bold text-white">{dashboardMetrics.consultasHoje}</h2>
             </div>
 
-            <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+            <div className={`rounded-xl p-6 ${
+              isMedicalTheme ? 'bg-slate-800 border-slate-700' :
+              isDarkMode ? 'bg-slate-800 border-slate-700' :
+              'bg-white border-slate-200 shadow-sm'
+            }`}>
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center">
                   <FileText className="w-6 h-6 text-white" />
@@ -220,7 +255,11 @@ export default function RelatoriosPage() {
               <h2 className="text-3xl font-bold text-white">{dashboardMetrics.documentosGerados.toLocaleString()}</h2>
             </div>
 
-            <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+            <div className={`rounded-xl p-6 ${
+              isMedicalTheme ? 'bg-slate-800 border-slate-700' :
+              isDarkMode ? 'bg-slate-800 border-slate-700' :
+              'bg-white border-slate-200 shadow-sm'
+            }`}>
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center">
                   <DollarSign className="w-6 h-6 text-white" />
@@ -235,7 +274,11 @@ export default function RelatoriosPage() {
           {/* Gráficos */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Gráfico de Pacientes */}
-            <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+            <div className={`rounded-xl p-6 ${
+              isMedicalTheme ? 'bg-slate-800 border-slate-700' :
+              isDarkMode ? 'bg-slate-800 border-slate-700' :
+              'bg-white border-slate-200 shadow-sm'
+            }`}>
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-semibold text-white">Crescimento de Pacientes</h3>
                 <BarChart3 className="w-5 h-5 text-blue-500" />
@@ -254,7 +297,11 @@ export default function RelatoriosPage() {
             </div>
 
             {/* Gráfico de Consultas */}
-            <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+            <div className={`rounded-xl p-6 ${
+              isMedicalTheme ? 'bg-slate-800 border-slate-700' :
+              isDarkMode ? 'bg-slate-800 border-slate-700' :
+              'bg-white border-slate-200 shadow-sm'
+            }`}>
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-semibold text-white">Consultas Mensais</h3>
                 <TrendingUp className="w-5 h-5 text-green-500" />
@@ -385,7 +432,11 @@ export default function RelatoriosPage() {
             </div>
 
             {/* Ações Rápidas */}
-            <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+            <div className={`rounded-xl p-6 ${
+              isMedicalTheme ? 'bg-slate-800 border-slate-700' :
+              isDarkMode ? 'bg-slate-800 border-slate-700' :
+              'bg-white border-slate-200 shadow-sm'
+            }`}>
               <h3 className="text-lg font-semibold text-white mb-4">Ações Rápidas</h3>
               <div className="space-y-3">
                 <button className="w-full flex items-center space-x-3 p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors text-left">
@@ -406,6 +457,6 @@ export default function RelatoriosPage() {
         </div>
       )}
       </div>
-    </>
+    </div>
   );
 }

@@ -3,6 +3,7 @@
 
 import BackButton from '@/app/components/BackButton';
 import React, { useState } from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
 import {
   DollarSign,
   TrendingUp,
@@ -27,6 +28,7 @@ import {
 } from 'lucide-react';
 
 export default function FinanceiroPage() {
+  const { theme, isDarkMode, isMedicalTheme } = useTheme();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [dateRange, setDateRange] = useState('30');
   const [searchTerm, setSearchTerm] = useState('');
@@ -107,7 +109,7 @@ export default function FinanceiroPage() {
     { nome: 'Outros', valor: 2680, cor: 'bg-orange-500', porcentagem: 7 }
   ];
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'Pago': return 'text-green-400';
       case 'Pendente': return 'text-yellow-400';
@@ -116,7 +118,7 @@ export default function FinanceiroPage() {
     }
   };
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (status: string) => {
     switch (status) {
       case 'Pago': return 'bg-green-600';
       case 'Pendente': return 'bg-yellow-600';
@@ -125,7 +127,7 @@ export default function FinanceiroPage() {
     }
   };
 
-  const getStatusIcon = (status) => {
+  const getStatusIcon = (status: string) => {
     switch (status) {
       case 'Pago': return CheckCircle;
       case 'Pendente': return Clock;
@@ -141,7 +143,10 @@ export default function FinanceiroPage() {
   );
 
   return (
-    <div className="p-6">
+    <div className={`min-h-screen p-6 ${
+      isMedicalTheme ? 'bg-slate-900 text-white' :
+      isDarkMode ? 'bg-slate-900 text-white' : 'bg-gray-50 text-gray-900'
+    }`}>
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between">
@@ -394,7 +399,7 @@ export default function FinanceiroPage() {
                       <div>
                         <div className="flex items-center space-x-3 mb-1">
                           <h3 className="text-white font-semibold">{transacao.descricao}</h3>
-                          <span className={`px-2 py-1 ${getStatusBadge(transacao.status)} text-white text-xs rounded-full`}>
+                          <span className={`px-2 py-1 ${getStatusBadge(transacao.status)} text-white text-base rounded-full`}>
                             {transacao.status}
                           </span>
                         </div>

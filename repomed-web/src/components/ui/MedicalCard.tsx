@@ -17,7 +17,7 @@ interface MedicalCardProps {
   trend?: Array<number>;
 }
 
-export default function MedicalCard({
+const MedicalCard = React.memo(function MedicalCard({
   title,
   value,
   change,
@@ -30,62 +30,63 @@ export default function MedicalCard({
   subtitle,
   trend
 }: MedicalCardProps) {
+  // Theme-aware semantic color mapping
   const colorClasses = {
     blue: {
-      bg: 'bg-blue-600',
-      text: 'text-blue-400',
-      border: 'border-blue-500',
-      shadow: 'shadow-blue-500/20'
+      bg: 'semantic-action-primary',
+      text: 'semantic-action-primary',
+      border: 'semantic-border-focus',
+      contextVar: '--semantic-prescription'
     },
     green: {
-      bg: 'bg-green-600',
-      text: 'text-green-400',
-      border: 'border-green-500',
-      shadow: 'shadow-green-500/20'
+      bg: 'semantic-status-normal',
+      text: 'semantic-status-normal',
+      border: 'semantic-border-success',
+      contextVar: '--semantic-patient'
     },
     purple: {
-      bg: 'bg-purple-600',
-      text: 'text-purple-400',
-      border: 'border-purple-500',
-      shadow: 'shadow-purple-500/20'
+      bg: 'semantic-action-secondary',
+      text: 'semantic-action-secondary',
+      border: 'semantic-border-focus',
+      contextVar: '--semantic-appointment'
     },
     orange: {
-      bg: 'bg-orange-600',
-      text: 'text-orange-400',
-      border: 'border-orange-500',
-      shadow: 'shadow-orange-500/20'
+      bg: 'semantic-status-warning',
+      text: 'semantic-status-warning',
+      border: 'semantic-border-error',
+      contextVar: '--semantic-document'
     },
     red: {
-      bg: 'bg-red-600',
-      text: 'text-red-400',
-      border: 'border-red-500',
-      shadow: 'shadow-red-500/20'
+      bg: 'semantic-status-critical',
+      text: 'semantic-status-critical',
+      border: 'semantic-border-error',
+      contextVar: '--semantic-emergency'
     },
     emerald: {
-      bg: 'bg-emerald-600',
-      text: 'text-emerald-400',
-      border: 'border-emerald-500',
-      shadow: 'shadow-emerald-500/20'
+      bg: 'semantic-status-normal',
+      text: 'semantic-status-normal',
+      border: 'semantic-border-success',
+      contextVar: '--clinical-vitals'
     },
     indigo: {
-      bg: 'bg-indigo-600',
-      text: 'text-indigo-400',
-      border: 'border-indigo-500',
-      shadow: 'shadow-indigo-500/20'
+      bg: 'semantic-action-primary',
+      text: 'semantic-action-primary',
+      border: 'semantic-border-focus',
+      contextVar: '--clinical-lab'
     }
   };
 
   const urgencyClasses = {
-    low: 'border-l-4 border-l-green-500',
-    medium: 'border-l-4 border-l-yellow-500',
-    high: 'border-l-4 border-l-orange-500',
-    critical: 'border-l-4 border-l-red-500 animate-pulse'
+    low: 'border-l-4',
+    medium: 'border-l-4',
+    high: 'border-l-4',
+    critical: 'border-l-4 animate-pulse'
   };
 
   const changeTypeClasses = {
-    positive: 'text-green-400',
-    negative: 'text-red-400',
-    neutral: 'text-slate-400'
+    positive: 'semantic-status-normal',
+    negative: 'semantic-status-critical',
+    neutral: 'semantic-text-secondary'
   };
 
   const classes = colorClasses[color];
@@ -93,7 +94,7 @@ export default function MedicalCard({
   return (
     <div
       className={`
-        card-primary rounded-xl p-6
+        semantic-card
         hover:border-opacity-80 hover:shadow-lg
         transform hover:scale-105 transition-all duration-300
         ${onClick ? 'cursor-pointer' : ''}
@@ -103,46 +104,63 @@ export default function MedicalCard({
       onClick={onClick}
     >
       {/* Background gradient effect */}
-      <div className={`absolute inset-0 ${classes.bg} opacity-5 group-hover:opacity-10 transition-opacity duration-300`} />
+      <div
+        className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-300"
+        style={{ backgroundColor: `var(${classes.contextVar})` }}
+      />
 
       {/* Loading overlay */}
       {loading && (
-        <div className="absolute inset-0 backdrop-blur-sm flex items-center justify-center" style={{backgroundColor: 'var(--bg-secondary)'}}>
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{borderColor: 'var(--accent-primary)'}} />
+        <div className="absolute inset-0 backdrop-blur-sm flex items-center justify-center" style={{backgroundColor: 'var(--semantic-bg-secondary)'}}>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{borderColor: 'var(--semantic-action-primary)'}} />
         </div>
       )}
 
       <div className="relative z-10">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <div className={`w-12 h-12 ${classes.bg} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+          <div
+            className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300"
+            style={{ backgroundColor: `var(${classes.contextVar})` }}
+          >
             <Icon className="w-6 h-6 text-white" />
           </div>
 
           {urgency && (
-            <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-              urgency === 'critical' ? 'bg-red-600 text-white' :
-              urgency === 'high' ? 'bg-orange-600 text-white' :
-              urgency === 'medium' ? 'bg-yellow-600 text-black' :
-              'bg-green-600 text-white'
-            }`}>
+            <div
+              className={`px-2 py-1 rounded-full text-xs font-medium text-white ${urgency === 'critical' ? 'animate-pulse' : ''}`}
+              style={{
+                backgroundColor: urgency === 'critical' ? 'var(--semantic-status-critical)' :
+                               urgency === 'high' ? 'var(--semantic-status-warning)' :
+                               urgency === 'medium' ? 'var(--semantic-status-warning)' :
+                               'var(--semantic-status-normal)'
+              }}
+            >
               {urgency.toUpperCase()}
             </div>
           )}
         </div>
 
         {/* Content */}
-        <div className="space-y-2">
-          <h3 className="text-sm font-medium transition-colors" style={{color: 'var(--text-muted)'}}>
+        <div
+          className={`space-y-2 ${urgency ? urgencyClasses[urgency] : ''}`}
+          style={{
+            borderLeftColor: urgency === 'critical' ? 'var(--semantic-status-critical)' :
+                           urgency === 'high' ? 'var(--semantic-status-warning)' :
+                           urgency === 'medium' ? 'var(--semantic-status-warning)' :
+                           urgency === 'low' ? 'var(--semantic-status-normal)' : undefined
+          }}
+        >
+          <h3 className="text-sm font-medium transition-colors" style={{color: 'var(--semantic-text-secondary)'}}>
             {title}
           </h3>
 
-          <p className="text-3xl font-bold transition-colors" style={{color: 'var(--text-primary)'}}>
+          <p className="text-3xl font-bold transition-colors" style={{color: 'var(--semantic-text-primary)'}}>
             {value}
           </p>
 
           {subtitle && (
-            <p className="text-xs transition-colors" style={{color: 'var(--text-muted)'}}>
+            <p className="text-xs transition-colors" style={{color: 'var(--semantic-text-secondary)'}}>
               {subtitle}
             </p>
           )}
@@ -150,7 +168,14 @@ export default function MedicalCard({
           {/* Change indicator */}
           {change && (
             <div className="flex items-center gap-1">
-              <span className={`text-sm font-medium ${changeTypeClasses[changeType]}`}>
+              <span
+                className="text-sm font-medium"
+                style={{
+                  color: changeType === 'positive' ? 'var(--semantic-status-normal)' :
+                         changeType === 'negative' ? 'var(--semantic-status-critical)' :
+                         'var(--semantic-text-secondary)'
+                }}
+              >
                 {changeType === 'positive' ? '↗' : changeType === 'negative' ? '↘' : '→'} {change}
               </span>
             </div>
@@ -162,8 +187,11 @@ export default function MedicalCard({
               {trend.map((value, index) => (
                 <div
                   key={index}
-                  className={`w-1 ${classes.bg} rounded-t-sm opacity-60 group-hover:opacity-100 transition-opacity`}
-                  style={{ height: `${(value / Math.max(...trend)) * 100}%` }}
+                  className="w-1 rounded-t-sm opacity-60 group-hover:opacity-100 transition-opacity"
+                  style={{
+                    height: `${(value / Math.max(...trend)) * 100}%`,
+                    backgroundColor: `var(${classes.contextVar})`
+                  }}
                 />
               ))}
             </div>
@@ -172,4 +200,6 @@ export default function MedicalCard({
       </div>
     </div>
   );
-}
+});
+
+export default MedicalCard;

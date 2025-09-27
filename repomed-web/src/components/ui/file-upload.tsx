@@ -193,11 +193,11 @@ export function FileUpload({
       >
         {children || (
           <div className="text-center">
-            <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <Upload className="h-12 w-12 mx-auto mb-4" style={{ color: 'var(--text-aaa-secondary)' }} />
             <p className="text-lg font-medium text-gray-900 dark:text-white mb-2">
               Clique para selecionar ou arraste arquivos aqui
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm" style={{ color: 'var(--text-aaa-secondary)' }}>
               {accept !== '*/*' && `Tipos aceitos: ${accept}`}
               {maxSize && ` • Tamanho máximo: ${formatFileSize(maxSize)}`}
               {maxFiles > 1 && ` • Máximo ${maxFiles} arquivos`}
@@ -225,7 +225,7 @@ export function FileUpload({
               className="text-red-600 hover:text-red-700"
             >
               Limpar todos
-            </button>
+            </Button>
           </div>
           
           <div className="space-y-2">
@@ -240,14 +240,14 @@ export function FileUpload({
                       className="h-10 w-10 object-cover rounded"
                     />
                   ) : (
-                    <IconComponent className="h-10 w-10 text-gray-400" />
+                    <IconComponent className="h-10 w-10" style={{ color: 'var(--text-aaa-secondary)' }} />
                   )}
                   
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">
                       {fileItem.file.name}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs" style={{ color: 'var(--text-aaa-secondary)' }}>
                       {formatFileSize(fileItem.file.size)}
                     </p>
                   </div>
@@ -262,7 +262,7 @@ export function FileUpload({
                     className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
                   >
                     <X className="h-4 w-4" />
-                  </button>
+                  </Button>
                 </div>
               );
             })}

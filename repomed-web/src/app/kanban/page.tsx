@@ -380,7 +380,7 @@ export default function KanbanBoard() {
   // Get job status icon
   const getJobStatusIcon = (status: PipelineJob['status']) => {
     switch (status) {
-      case 'pending': return <Clock className="h-4 w-4 text-gray-500" />;
+      case 'pending': return <Clock className="h-4 w-4" style={{ color: 'var(--text-aaa-secondary)' }} />;
       case 'running': return <Activity className="h-4 w-4 text-blue-500 animate-pulse" />;
       case 'completed': return <CheckCircle className="h-4 w-4 text-green-500" />;
       case 'failed': return <AlertCircle className="h-4 w-4 text-red-500" />;
@@ -651,7 +651,7 @@ export default function KanbanBoard() {
                 <h3 className="text-2xl font-bold text-gray-900">{selectedTask.title}</h3>
                 <button
                   onClick={() => setShowTaskModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-black dark:text-white hover:text-gray-600"
                 >
                   ×
                 </button>
